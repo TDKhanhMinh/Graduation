@@ -12,6 +12,12 @@
 
 # testing
 /coverage
+/playwright-report/
+/test-results/
+
+# local Supabase runtime state and generated secrets
+/supabase/.branches/
+/supabase/.temp/
 
 # next.js
 /.next/
@@ -43,3 +49,4 @@ next-env.d.ts
 
 .agents/
 .task/
+.docs/

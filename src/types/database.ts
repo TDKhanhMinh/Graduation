@@ -7,13 +7,129 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   public: {
     Tables: {
+      events: {
+        Row: {
+          allow_ai: boolean
+          allow_audio: boolean
+          allow_images: boolean
+          archived_at: string | null
+          cover_path: string | null
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          event_date: string | null
+          id: string
+          max_wish_length: number
+          owner_id: string
+          settings: Json
+          slug: string
+          submission_mode: string
+          theme_key: string
+          title: string
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          allow_ai?: boolean
+          allow_audio?: boolean
+          allow_images?: boolean
+          archived_at?: string | null
+          cover_path?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          event_date?: string | null
+          id?: string
+          max_wish_length?: number
+          owner_id: string
+          settings?: Json
+          slug: string
+          submission_mode?: string
+          theme_key?: string
+          title: string
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          allow_ai?: boolean
+          allow_audio?: boolean
+          allow_images?: boolean
+          archived_at?: string | null
+          cover_path?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          event_date?: string | null
+          id?: string
+          max_wish_length?: number
+          owner_id?: string
+          settings?: Json
+          slug?: string
+          submission_mode?: string
+          theme_key?: string
+          title?: string
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: []
+      }
+      moderation_audit_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          event_id: string
+          id: number
+          new_value: Json | null
+          old_value: Json | null
+          wish_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          event_id: string
+          id?: never
+          new_value?: Json | null
+          old_value?: Json | null
+          wish_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          event_id?: string
+          id?: never
+          new_value?: Json | null
+          old_value?: Json | null
+          wish_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_audit_logs_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_audit_logs_wish_id_fkey"
+            columns: ["wish_id"]
+            isOneToOne: false
+            referencedRelation: "public_wishes_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_audit_logs_wish_id_fkey"
+            columns: ["wish_id"]
+            isOneToOne: false
+            referencedRelation: "wishes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -38,9 +154,195 @@ export type Database = {
         }
         Relationships: []
       }
+      wish_media: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          height: number | null
+          id: string
+          media_type: string
+          mime_type: string
+          processing_status: string
+          size_bytes: number
+          storage_bucket: string
+          storage_path: string
+          width: number | null
+          wish_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          height?: number | null
+          id?: string
+          media_type: string
+          mime_type: string
+          processing_status?: string
+          size_bytes: number
+          storage_bucket: string
+          storage_path: string
+          width?: number | null
+          wish_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          height?: number | null
+          id?: string
+          media_type?: string
+          mime_type?: string
+          processing_status?: string
+          size_bytes?: number
+          storage_bucket?: string
+          storage_path?: string
+          width?: number | null
+          wish_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wish_media_wish_id_fkey"
+            columns: ["wish_id"]
+            isOneToOne: false
+            referencedRelation: "public_wishes_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wish_media_wish_id_fkey"
+            columns: ["wish_id"]
+            isOneToOne: false
+            referencedRelation: "wishes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wish_reactions: {
+        Row: {
+          actor_id: string | null
+          actor_key_hash: string | null
+          created_at: string
+          emoji: string
+          id: string
+          wish_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_key_hash?: string | null
+          created_at?: string
+          emoji: string
+          id?: string
+          wish_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          actor_key_hash?: string | null
+          created_at?: string
+          emoji?: string
+          id?: string
+          wish_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wish_reactions_wish_id_fkey"
+            columns: ["wish_id"]
+            isOneToOne: false
+            referencedRelation: "public_wishes_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wish_reactions_wish_id_fkey"
+            columns: ["wish_id"]
+            isOneToOne: false
+            referencedRelation: "wishes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wishes: {
+        Row: {
+          approved_at: string | null
+          author_id: string | null
+          client_request_id: string
+          content: string | null
+          created_at: string
+          deleted_at: string | null
+          event_id: string
+          id: string
+          is_pinned: boolean
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_reason: string | null
+          moderation_status: string
+          sender_avatar_path: string | null
+          sender_name: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          author_id?: string | null
+          client_request_id: string
+          content?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          event_id: string
+          id?: string
+          is_pinned?: boolean
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_reason?: string | null
+          moderation_status?: string
+          sender_avatar_path?: string | null
+          sender_name: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          author_id?: string | null
+          client_request_id?: string
+          content?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          event_id?: string
+          id?: string
+          is_pinned?: boolean
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_reason?: string | null
+          moderation_status?: string
+          sender_avatar_path?: string | null
+          sender_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishes_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      public_wishes_view: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          event_id: string | null
+          id: string | null
+          is_pinned: boolean | null
+          sender_avatar_path: string | null
+          sender_name: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishes_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never

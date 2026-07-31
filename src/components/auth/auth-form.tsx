@@ -12,16 +12,19 @@ type AuthAction = (
 type AuthFormProps = {
   action: AuthAction
   mode: "sign-in" | "sign-up"
+  nextPath?: string
 }
 
 const initialState: AuthActionState = {}
 
-export function AuthForm({ action, mode }: AuthFormProps) {
+export function AuthForm({ action, mode, nextPath }: AuthFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState)
   const isSignUp = mode === "sign-up"
 
   return (
     <form action={formAction} className="space-y-5">
+      {nextPath ? <input name="next" type="hidden" value={nextPath} /> : null}
+
       {isSignUp ? (
         <div className="space-y-2">
           <label

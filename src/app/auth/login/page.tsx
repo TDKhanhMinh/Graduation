@@ -2,13 +2,14 @@ import Link from "next/link"
 
 import { signIn } from "@/app/auth/actions"
 import { AuthForm } from "@/components/auth/auth-form"
+import { getSafeNextPath } from "@/utils/url"
 
 type LoginPageProps = {
-  searchParams: Promise<{ error?: string }>
+  searchParams: Promise<{ error?: string; next?: string }>
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { error } = await searchParams
+  const { error, next } = await searchParams
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 py-12">
@@ -34,7 +35,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </p>
         ) : null}
 
-        <AuthForm action={signIn} mode="sign-in" />
+        <AuthForm
+          action={signIn}
+          mode="sign-in"
+          nextPath={getSafeNextPath(next ?? null)}
+        />
 
         <p className="mt-6 text-center text-sm text-zinc-600">
           Chưa có tài khoản?{" "}

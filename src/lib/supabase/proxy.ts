@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server"
 
 import { getSupabaseEnv } from "@/lib/supabase/env"
 import type { Database } from "@/types/database"
+import { getSafeNextPath } from "@/utils/url"
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request })
@@ -33,7 +34,20 @@ export async function updateSession(request: NextRequest) {
 
   // Keep this call directly after client creation. It verifies the JWT and
   // refreshes expired credentials before Server Components read the cookies.
-  await supabase.auth.getClaims()
+  const { data } = await supabase.auth.getClaims()
+
+  if (request.nextUrl.pathname.startsWith("/dashboard") && !data?.claims) {
+    const loginUrl = request.nextUrl.clone()
+    const nextPath = getSafeNextPath(
+      `${request.nextUrl.pathname}${request.nextUrl.search}`
+    )
+
+    loginUrl.pathname = "/auth/login"
+    loginUrl.search = ""
+    loginUrl.searchParams.set("next", nextPath)
+
+    return NextResponse.redirect(loginUrl)
+  }
 
   return response
 }
