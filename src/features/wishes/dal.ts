@@ -9,6 +9,7 @@ export type PublicWish = Pick<
   | 'id'
   | 'event_id'
   | 'sender_name'
+  | 'sender_avatar_path'
   | 'content'
   | 'is_pinned'
   | 'created_at'
@@ -29,7 +30,7 @@ export const getApprovedWishesPage = cache(async (
   
   let query = supabase
     .from('public_wishes_view')
-    .select('id,event_id,sender_name,content,is_pinned,created_at')
+    .select('id,event_id,sender_name,sender_avatar_path,content,is_pinned,created_at')
     .eq('event_id', eventId)
     .order('is_pinned', { ascending: false })
     .order('created_at', { ascending: false })

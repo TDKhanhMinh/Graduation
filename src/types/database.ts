@@ -345,7 +345,45 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      moderate_wishes: {
+        Args: {
+          p_action: string
+          p_expected_versions?: Json
+          p_reason?: string
+          p_wish_ids: string[]
+        }
+        Returns: {
+          audit_id: number
+          deleted_at: string
+          is_pinned: boolean
+          moderation_status: string
+          updated_at: string
+          wish_id: string
+        }[]
+      }
+      submit_wish_transaction: {
+        Args: {
+          p_client_request_id: string
+          p_content: string
+          p_device_hash: string
+          p_device_limit?: number
+          p_event_id: string
+          p_event_limit?: number
+          p_ip_hash: string
+          p_ip_limit?: number
+          p_sender_name: string
+          p_window_seconds?: number
+        }
+        Returns: {
+          created_at: string
+          max_wish_length: number
+          moderation_status: string
+          result_code: string
+          retry_after_seconds: number
+          was_duplicate: boolean
+          wish_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

@@ -3,7 +3,8 @@ import { Metadata } from "next"
 
 import { getPublicEventBySlug } from "@/features/events/dal"
 import { getApprovedWishesPage } from "@/features/wishes/dal"
-import { WishCard } from "@/components/event-wall/WishCard"
+import { RealtimeWall } from "@/components/event-wall/RealtimeWall"
+import { WishComposer } from "@/components/wish-composer/WishComposer"
 import { Button, buttonVariants } from "@/components/ui/button"
 import Link from "next/link"
 import { Share2 } from "lucide-react"
@@ -94,22 +95,32 @@ export default async function PublicEventPage({ params }: Props) {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {wishes.length === 0 ? (
-          <div className="text-center py-20 bg-card rounded-lg border shadow-sm">
-            <h3 className="text-lg font-semibold mb-2">Chưa có lời chúc nào</h3>
-            <p className="text-muted-foreground mb-6">
-              {event.submission_mode === 'closed' 
-                ? "Sự kiện này đã đóng nhận lời chúc." 
-                : "Hãy là người đầu tiên gửi lời chúc!"}
+        <section className="mb-8 flex flex-col items-center gap-3 rounded-2xl border bg-card px-5 py-6 text-center shadow-sm">
+          <div>
+            <h2 className="text-xl font-semibold">Gửi một lời chúc</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Nội dung của bạn sẽ được lưu nháp trên thiết bị cho đến khi gửi thành công.
             </p>
           </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 masonry-like">
-            {wishes.map((wish) => (
-              <WishCard key={wish.id} wish={wish} />
-            ))}
-          </div>
-        )}
+          <WishComposer
+            eventId={event.id}
+            eventTitle={event.title}
+            maxLength={event.max_wish_length}
+            submissionMode={event.submission_mode as "open" | "approval_required" | "closed"}
+            turnstileSiteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""}
+          />
+        </section>
+
+        <RealtimeWall 
+          eventId={event.id}
+          initialWishes={wishes}
+          fetchWishesAction={async (eventId: string, limit: number) => {
+            "use server"
+            // Re-import internally to satisfy Next.js Server Action boundary rules if needed,
+            // but the outer import works.
+            return getApprovedWishesPage(eventId, limit)
+          }}
+        />
       </main>
     </div>
   )

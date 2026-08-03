@@ -40,6 +40,11 @@ export default async function EventLayout({
             Tổng quan
           </Button>
         </Link>
+        <Link href={`/dashboard/events/${event.id}/moderation`}>
+          <Button variant="ghost" className="rounded-none border-b-2 border-transparent hover:border-muted data-[active=true]:border-primary data-[active=true]:bg-transparent">
+            Kiểm duyệt
+          </Button>
+        </Link>
         <Link href={`/dashboard/events/${event.id}/settings`}>
           <Button variant="ghost" className="rounded-none border-b-2 border-transparent hover:border-muted data-[active=true]:border-primary data-[active=true]:bg-transparent">
             Cài đặt

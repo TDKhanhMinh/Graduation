@@ -18,7 +18,8 @@ INSERT INTO public.events (id, owner_id, slug, title, description, visibility, s
 VALUES
 ('e1eebc99-9c0b-4ef8-bb6d-6bb9bd380e01', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'public-event-1', 'Public Event', 'Test public event', 'public', 'approval_required'),
 ('e2eebc99-9c0b-4ef8-bb6d-6bb9bd380e02', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'unlisted-event-1', 'Unlisted Event', 'Test unlisted event', 'unlisted', 'open'),
-('e3eebc99-9c0b-4ef8-bb6d-6bb9bd380e03', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'private-event-1', 'Private Event', 'Test private event', 'private', 'closed')
+('e3eebc99-9c0b-4ef8-bb6d-6bb9bd380e03', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'private-event-1', 'Private Event', 'Test private event', 'private', 'closed'),
+('e4eebc99-9c0b-4ef8-bb6d-6bb9bd380e04', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'closed-event-1', 'Closed Public Event', 'Test closed public event', 'public', 'closed')
 ON CONFLICT (id) DO NOTHING;
 
 -- Insert wishes

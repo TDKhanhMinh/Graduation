@@ -45,7 +45,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3100',
     trace: 'on-first-retry',
   },
 
@@ -57,12 +57,15 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
+    command: 'npm run dev -- --port 3100',
+    url: 'http://localhost:3100',
     reuseExistingServer: !process.env.CI,
     env: {
       ...inheritedEnv,
       ...getLocalSupabaseEnv(),
+      NEXT_DIST_DIR: '.next/playwright',
+      NEXT_PUBLIC_SITE_URL: 'http://localhost:3100',
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: 'playwright-site-key',
     },
   },
 });
