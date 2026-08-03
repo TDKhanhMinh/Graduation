@@ -13,7 +13,17 @@ export type PublicWish = Pick<
   | 'content'
   | 'is_pinned'
   | 'created_at'
->
+> & {
+  media?: {
+    path: string;
+    type: 'image' | 'audio';
+    mime_type: string;
+    width?: number;
+    height?: number;
+    duration_ms?: number;
+  } | null
+  reactions?: import('@/features/reactions/dal').ReactionCount[]
+}
 
 type PublicWishCursor = {
   created_at: string
@@ -30,7 +40,7 @@ export const getApprovedWishesPage = cache(async (
   
   let query = supabase
     .from('public_wishes_view')
-    .select('id,event_id,sender_name,sender_avatar_path,content,is_pinned,created_at')
+    .select('id,event_id,sender_name,sender_avatar_path,content,is_pinned,created_at,media')
     .eq('event_id', eventId)
     .order('is_pinned', { ascending: false })
     .order('created_at', { ascending: false })
@@ -54,7 +64,7 @@ export const getApprovedWishesPage = cache(async (
     return []
   }
 
-  return data.flatMap((wish) => {
+  const validWishes = data.flatMap((wish) => {
     if (
       !wish.id ||
       !wish.event_id ||
@@ -67,4 +77,12 @@ export const getApprovedWishesPage = cache(async (
 
     return [wish as PublicWish]
   })
+  
+  const wishIds = validWishes.map(w => w.id)
+  const reactionsBatch = await import("@/features/reactions/batch").then(m => m.getReactionCountsBatch(wishIds))
+  
+  return validWishes.map(wish => ({
+    ...wish,
+    reactions: reactionsBatch[wish.id] || []
+  }))
 })

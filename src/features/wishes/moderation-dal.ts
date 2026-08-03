@@ -14,7 +14,16 @@ export type ModerationWish = Pick<
   | 'is_pinned'
   | 'created_at'
   | 'updated_at'
->
+> & {
+  media?: {
+    storage_path: string;
+    media_type: 'image' | 'audio';
+    mime_type: string;
+    width?: number;
+    height?: number;
+    duration_ms?: number;
+  } | null
+}
 
 export type AuditLog = {
   id: number
@@ -44,7 +53,7 @@ export const getModerationQueue = cache(async (
   
   let query = supabase
     .from('wishes')
-    .select('id,event_id,sender_name,sender_avatar_path,content,moderation_status,is_pinned,created_at,updated_at', { count: 'exact' })
+    .select('id,event_id,sender_name,sender_avatar_path,content,moderation_status,is_pinned,created_at,updated_at,media:wish_media(storage_path,media_type,mime_type,width,height,duration_ms)', { count: 'exact' })
     .eq('event_id', eventId)
     .is('deleted_at', null)
 
@@ -75,7 +84,12 @@ export const getModerationQueue = cache(async (
     return { data: [], count: 0 }
   }
 
-  return { data: data as ModerationWish[], count: count || 0 }
+  const mappedData = data.map((wish: Record<string, unknown>) => ({
+    ...wish,
+    media: Array.isArray(wish.media) ? (wish.media as Record<string, unknown>[])[0] || null : null
+  }))
+
+  return { data: mappedData as unknown as ModerationWish[], count: count || 0 }
 })
 
 export const getAuditHistory = cache(async (

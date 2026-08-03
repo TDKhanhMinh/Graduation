@@ -11,6 +11,8 @@ export type WishDraft = {
   senderName: string
   clientRequestId: string
   deviceKey: string
+  mediaPath?: string
+  senderAvatarPath?: string
 }
 
 export type StoredWishDraft = WishDraft & {
@@ -21,6 +23,8 @@ export type WishDraftAction =
   | { type: "hydrate"; draft: WishDraft }
   | { type: "content"; value: string }
   | { type: "senderName"; value: string }
+  | { type: "mediaPath"; value?: string }
+  | { type: "senderAvatarPath"; value?: string }
   | { type: "newDraft"; clientRequestId: string }
 
 export const EMPTY_WISH_DRAFT: WishDraft = {
@@ -41,11 +45,17 @@ export function wishDraftReducer(
       return { ...state, content: action.value }
     case "senderName":
       return { ...state, senderName: action.value }
+    case "mediaPath":
+      return { ...state, mediaPath: action.value }
+    case "senderAvatarPath":
+      return { ...state, senderAvatarPath: action.value }
     case "newDraft":
       return {
         ...state,
         content: "",
         senderName: "",
+        mediaPath: undefined,
+        senderAvatarPath: undefined,
         clientRequestId: action.clientRequestId,
       }
   }
@@ -79,6 +89,8 @@ export function parseStoredWishDraft(
       content: typeof parsed.content === "string" ? parsed.content : "",
       senderName:
         typeof parsed.senderName === "string" ? parsed.senderName : "",
+      mediaPath: typeof parsed.mediaPath === "string" ? parsed.mediaPath : undefined,
+      senderAvatarPath: typeof parsed.senderAvatarPath === "string" ? parsed.senderAvatarPath : undefined,
       clientRequestId:
         typeof parsed.clientRequestId === "string" &&
         UUID_PATTERN.test(parsed.clientRequestId)
@@ -99,8 +111,10 @@ export const serializeWishDraft = (draft: WishDraft): StoredWishDraft => ({
   version: WISH_DRAFT_VERSION,
   content: draft.content,
   senderName: draft.senderName,
+  mediaPath: draft.mediaPath,
+  senderAvatarPath: draft.senderAvatarPath,
   clientRequestId: draft.clientRequestId,
-  deviceKey: "",
+  deviceKey: draft.deviceKey,
 })
 
 export const countDraftUrls = (content: string) =>

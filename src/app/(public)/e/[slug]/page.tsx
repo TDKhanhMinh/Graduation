@@ -108,6 +108,7 @@ export default async function PublicEventPage({ params }: Props) {
             maxLength={event.max_wish_length}
             submissionMode={event.submission_mode as "open" | "approval_required" | "closed"}
             turnstileSiteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""}
+            allowAi={event.allow_ai}
           />
         </section>
 

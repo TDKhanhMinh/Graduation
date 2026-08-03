@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import type { PublicWish } from "@/features/wishes/dal"
+import { PublicMediaRenderer } from "./PublicMediaRenderer"
+import { ReactionBar } from "./reaction-bar"
 
 export function WishCard({ wish }: { wish: PublicWish }) {
   return (
@@ -28,6 +30,8 @@ export function WishCard({ wish }: { wish: PublicWish }) {
       </CardHeader>
       <CardContent className="p-4 pt-2">
         <p className="text-sm whitespace-pre-wrap">{wish.content}</p>
+        {wish.media && <PublicMediaRenderer media={wish.media} />}
+        <ReactionBar initialCounts={wish.reactions || []} wishId={wish.id} />
       </CardContent>
     </Card>
   )

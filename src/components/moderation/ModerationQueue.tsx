@@ -1,5 +1,6 @@
 import { type ModerationWish } from "@/features/wishes/moderation-dal"
 import { Checkbox } from "@/components/ui/checkbox"
+import { ModerationMediaPreview } from "./ModerationMediaPreview"
 import {
   Table,
   TableBody,
@@ -58,8 +59,11 @@ export function ModerationQueue({
                   />
                 </TableCell>
                 <TableCell className="font-medium">{wish.sender_name}</TableCell>
-                <TableCell className="max-w-xs truncate" title={wish.content || ""}>
-                  {wish.content || <span className="italic text-muted-foreground">No content</span>}
+                <TableCell className="max-w-xs" title={wish.content || ""}>
+                  <div className="truncate">
+                    {wish.content || <span className="italic text-muted-foreground">No content</span>}
+                  </div>
+                  {wish.media && <ModerationMediaPreview media={wish.media} />}
                 </TableCell>
                 <TableCell>
                   <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${

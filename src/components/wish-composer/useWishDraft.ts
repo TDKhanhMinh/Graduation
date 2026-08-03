@@ -57,6 +57,8 @@ export function useWishDraft(eventId: string) {
     setContent: (value: string) => dispatch({ type: "content", value }),
     setSenderName: (value: string) =>
       dispatch({ type: "senderName", value }),
+    setMediaPath: (value?: string) => dispatch({ type: "mediaPath", value }),
+    setSenderAvatarPath: (value?: string) => dispatch({ type: "senderAvatarPath", value }),
     beginNewDraft,
   }
 }

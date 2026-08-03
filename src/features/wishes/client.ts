@@ -5,6 +5,8 @@ export type SubmitWishInput = {
   content: string
   captchaToken: string
   deviceKey: string
+  mediaPath?: string
+  senderAvatarPath?: string
 }
 
 export type SubmitWishResult = {

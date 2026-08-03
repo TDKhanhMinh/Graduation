@@ -17,10 +17,11 @@ export type PublicEvent = Pick<
   | 'submission_mode'
   | 'max_wish_length'
   | 'archived_at'
+  | 'allow_ai'
 >
 
 const PUBLIC_EVENT_SELECT =
-  'id,slug,title,description,event_date,visibility,submission_mode,max_wish_length,archived_at'
+  'id,slug,title,description,event_date,visibility,submission_mode,max_wish_length,archived_at,allow_ai'
 
 export const getOwnedEvents = cache(async (): Promise<Event[]> => {
   const session = await verifySession()

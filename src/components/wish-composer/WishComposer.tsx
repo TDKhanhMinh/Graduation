@@ -15,6 +15,9 @@ import {
 } from "./draft"
 import { TurnstileWidget } from "./TurnstileWidget"
 import { useWishDraft } from "./useWishDraft"
+import { ImageUploadField } from "./image-upload"
+import { AudioRecorderField } from "./audio-recorder"
+import { AiWishAssistant } from "./ai-assistant"
 
 type Props = {
   eventId: string
@@ -22,6 +25,7 @@ type Props = {
   maxLength: number
   submissionMode: "open" | "approval_required" | "closed"
   turnstileSiteKey: string
+  allowAi?: boolean
 }
 
 type ResultState =
@@ -35,12 +39,13 @@ export function WishComposer({
   maxLength,
   submissionMode,
   turnstileSiteKey,
+  allowAi,
 }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const openButtonRef = useRef<HTMLButtonElement>(null)
   const contentRef = useRef<HTMLTextAreaElement>(null)
   const inFlightRef = useRef(false)
-  const { draft, hydrated, setContent, setSenderName, beginNewDraft } =
+  const { draft, hydrated, setContent, setSenderName, setMediaPath, setSenderAvatarPath, beginNewDraft } =
     useWishDraft(eventId)
 
   const [step, setStep] = useState<1 | 2>(1)
@@ -124,6 +129,8 @@ export function WishComposer({
         content: draft.content.trim(),
         captchaToken,
         deviceKey: draft.deviceKey,
+        mediaPath: draft.mediaPath,
+        senderAvatarPath: draft.senderAvatarPath,
       })
 
       setResult({ type: response.status, message: response.message })
@@ -233,7 +240,18 @@ export function WishComposer({
                   goToConfirmation()
                 }}
               >
-                <Label htmlFor="wish-content">Nội dung lời chúc</Label>
+                <Label htmlFor="wish-content" className="mb-2 block">Nội dung lời chúc</Label>
+                {allowAi && (
+                  <AiWishAssistant 
+                    eventId={eventId}
+                    draftSenderName={draft.senderName}
+                    onSuggestionSelect={(suggestion) => {
+                      setContent(suggestion)
+                      setContentError(null)
+                      contentRef.current?.focus()
+                    }}
+                  />
+                )}
                 <textarea
                   ref={contentRef}
                   id="wish-content"
@@ -278,6 +296,42 @@ export function WishComposer({
                     {contentError}
                   </p>
                 ) : null}
+                <div className="mt-4">
+                  <Label className="mb-2 block">Đính kèm ảnh hoặc ghi âm (Tùy chọn)</Label>
+                  <div className="flex flex-col gap-4">
+                    {(!draft.mediaPath || !draft.mediaPath.match(/\.(webm|mp4|ogg|aac|wav)$/i)) && (
+                      <ImageUploadField
+                        eventId={eventId}
+                        clientRequestId={draft.clientRequestId}
+                        onUploadSuccess={(path) => setMediaPath(path)}
+                        onRemove={() => setMediaPath(undefined)}
+                        disabled={!!draft.mediaPath}
+                      />
+                    )}
+                    {!draft.mediaPath && (
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                          <span className="bg-background px-2 text-muted-foreground">Hoặc</span>
+                        </div>
+                      </div>
+                    )}
+                    {(!draft.mediaPath || draft.mediaPath.match(/\.(webm|mp4|ogg|aac|wav)$/i)) && (
+                      <AudioRecorderField
+                        eventId={eventId}
+                        clientRequestId={draft.clientRequestId}
+                        onUploadSuccess={(path) => setMediaPath(path)}
+                        onRemove={() => setMediaPath(undefined)}
+                        disabled={!!draft.mediaPath}
+                      />
+                    )}
+                  </div>
+                  {draft.mediaPath && (
+                    <p className="mt-2 text-xs font-medium text-green-600">Đã đính kèm file thành công.</p>
+                  )}
+                </div>
                 <div className="mt-6 flex justify-end">
                   <Button type="submit" size="lg">
                     Tiếp tục
@@ -312,6 +366,20 @@ export function WishComposer({
                       {senderError}
                     </p>
                   ) : null}
+                </div>
+
+                <div className="mt-4">
+                  <Label className="mb-2 block">Ảnh đại diện (Tùy chọn)</Label>
+                  <ImageUploadField
+                    eventId={eventId}
+                    clientRequestId={draft.clientRequestId}
+                    onUploadSuccess={(path) => setSenderAvatarPath(path)}
+                    onRemove={() => setSenderAvatarPath(undefined)}
+                    isAvatar
+                  />
+                  {draft.senderAvatarPath && (
+                    <p className="mt-1 text-xs text-green-600">Đã tải ảnh đại diện thành công.</p>
+                  )}
                 </div>
 
                 <div className="mt-5 rounded-xl border bg-muted/40 p-4">

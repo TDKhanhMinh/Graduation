@@ -22,6 +22,7 @@ const ALLOWED_FIELDS = new Set([
   'content',
   'captchaToken',
   'deviceKey',
+  'media',
 ]);
 
 export type SubmitWishRequest = {
@@ -31,6 +32,15 @@ export type SubmitWishRequest = {
   content: string;
   captchaToken: string;
   deviceKey: string;
+  media?: {
+    path: string;
+    type: 'image' | 'audio';
+    mimeType: string;
+    sizeBytes: number;
+    durationMs?: number;
+    width?: number;
+    height?: number;
+  };
 };
 
 export type SubmissionValidationIssue = {
@@ -119,6 +129,28 @@ export const parseSubmitWishRequest = (input: unknown): SubmissionParseResult =>
     return { success: false, issues };
   }
 
+  let mediaParsed = undefined;
+  if (input.media && isRecord(input.media)) {
+    const m = input.media as Record<string, unknown>;
+    if (typeof m.path !== 'string' || typeof m.type !== 'string' || typeof m.mimeType !== 'string' || typeof m.sizeBytes !== 'number') {
+      addIssue(issues, 'media', 'INVALID_MEDIA', 'Media object is missing required fields.');
+    } else {
+      mediaParsed = {
+        path: m.path as string,
+        type: m.type as 'image' | 'audio',
+        mimeType: m.mimeType as string,
+        sizeBytes: m.sizeBytes as number,
+        durationMs: typeof m.durationMs === 'number' ? m.durationMs : undefined,
+        width: typeof m.width === 'number' ? m.width : undefined,
+        height: typeof m.height === 'number' ? m.height : undefined,
+      };
+    }
+  }
+
+  if (issues.length > 0) {
+    return { success: false, issues };
+  }
+
   return {
     success: true,
     data: {
@@ -128,6 +160,7 @@ export const parseSubmitWishRequest = (input: unknown): SubmissionParseResult =>
       content,
       captchaToken,
       deviceKey,
+      media: mediaParsed,
     },
   };
 };

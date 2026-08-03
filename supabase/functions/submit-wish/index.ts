@@ -175,6 +175,13 @@ Deno.serve(async (req) => {
       p_content: parsed.data.content,
       p_ip_hash: ipHash,
       p_device_hash: deviceHash,
+      p_media_path: parsed.data.media?.path || null,
+      p_media_type: parsed.data.media?.type || null,
+      p_media_mime_type: parsed.data.media?.mimeType || null,
+      p_media_size_bytes: parsed.data.media?.sizeBytes || null,
+      p_media_duration_ms: parsed.data.media?.durationMs || null,
+      p_media_width: parsed.data.media?.width || null,
+      p_media_height: parsed.data.media?.height || null,
     });
 
     if (error || !Array.isArray(data) || data.length !== 1) {

@@ -332,6 +332,7 @@ export type Database = {
           is_pinned: boolean | null
           sender_avatar_path: string | null
           sender_name: string | null
+          media: Json | null
         }
         Relationships: [
           {
