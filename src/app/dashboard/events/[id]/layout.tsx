@@ -50,6 +50,11 @@ export default async function EventLayout({
             Cài đặt
           </Button>
         </Link>
+        <Link href={`/dashboard/events/${event.id}/export`}>
+          <Button variant="ghost" className="rounded-none border-b-2 border-transparent hover:border-muted data-[active=true]:border-primary data-[active=true]:bg-transparent">
+            Xuất bản
+          </Button>
+        </Link>
       </div>
 
       <div>

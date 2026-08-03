@@ -9,6 +9,69 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      export_jobs: {
+        Row: {
+          id: string
+          event_id: string
+          owner_id: string
+          idempotency_key: string | null
+          status: 'queued' | 'processing' | 'completed' | 'failed'
+          snapshot: Json | null
+          token: string
+          output_path: string | null
+          retry_count: number
+          claimed_at: string | null
+          claimed_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          owner_id: string
+          idempotency_key?: string | null
+          status?: 'queued' | 'processing' | 'completed' | 'failed'
+          snapshot?: Json | null
+          token: string
+          output_path?: string | null
+          retry_count?: number
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          owner_id?: string
+          idempotency_key?: string | null
+          status?: 'queued' | 'processing' | 'completed' | 'failed'
+          snapshot?: Json | null
+          token?: string
+          output_path?: string | null
+          retry_count?: number
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "export_jobs_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "export_jobs_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       events: {
         Row: {
           allow_ai: boolean
