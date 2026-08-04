@@ -21,3 +21,12 @@ export const eventSchema = z.object({
 });
 
 export type EventInput = z.infer<typeof eventSchema>;
+
+export const appearanceSchema = z.object({
+  theme_key: z.enum(['graduation', 'editorial', 'minimal']),
+  cover_path: z
+    .string()
+    .trim()
+    .max(500, 'Cover URL is too long.')
+    .refine((value) => value === '' || /^https:\/\/res\.cloudinary\.com\//.test(value), 'Cover must be a Cloudinary delivery URL.'),
+});

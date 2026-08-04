@@ -4,7 +4,9 @@ Baseline contract for the Graduation Message/Memoria UI refresh. Later UI tasks 
 
 ## Principles
 
-- Mobile-first layout with no horizontal overflow at 320px.
+- Web-first layout: desktop/laptop is the primary information architecture, with deliberate tablet and mobile simplification and no horizontal overflow at 320px.
+- Target breakpoints: large desktop >= 1440px, desktop 1200-1439px, laptop 1024-1199px, tablet 768-1023px, mobile < 768px.
+- Desktop baseline: a 1440px content container, 12-column workspace grid, and dense dashboard surfaces; tablet uses 8 columns and mobile uses 4 columns.
 - Use semantic tokens instead of route-specific raw colors for surfaces, text, focus and status.
 - Every async or conditional route owns an explicit loading, empty, error and success state where applicable.
 - Status is communicated with text or icon plus color; color is never the only signal.
@@ -43,8 +45,13 @@ Tokens live in src/app/globals.css so they load from the root layout for every A
 | --status-warning | Pending, attention or reversible risk | Pair with next action or explanation |
 | --status-danger | Error/destructive state | Use role="alert" for actionable errors |
 | --focus and --focus-ring-width | Keyboard focus visibility | Never remove the focus ring without an equivalent |
-| --page-gutter | Responsive horizontal page padding | 1rem mobile, 1.5rem tablet, 2rem desktop |
-| --content-max-width | Shared readable content width | 72rem baseline; route may narrow for focused flows |
+| --page-gutter | Responsive horizontal page padding | 1rem mobile, 1.5rem tablet, 2rem desktop/laptop |
+| --content-max-width | Shared readable content width | 90rem Web-first baseline; route may narrow for focused flows |
+| --grid-columns | Layout planning columns | 4 mobile, 8 tablet, 12 laptop/desktop |
+| --hero-heading-size | Public event hero heading scale | 4rem-5.5rem on desktop; scale down by breakpoint |
+| --page-heading-size | Route heading scale | 2.25rem-3rem on desktop; scale down by breakpoint |
+| --section-heading-size | Section heading scale | 1.625rem-2rem on desktop; scale down by breakpoint |
+| --card-padding | Desktop card content padding | 1.25rem-1.5rem; compact only on narrow screens |
 | --control-min-size | Minimum touch target | Target 2.75rem for primary/icon controls |
 
 Dark mode overrides semantic tokens in .dark. Reduced-motion behavior is defined globally with prefers-reduced-motion.
@@ -83,6 +90,17 @@ Route-specific components may compose these primitives but should not redefine t
 - [ ] GM-UI P3-T06 through P3-T08 owner workspace uses shared heading, surface and action contracts.
 - [ ] GM-UI P4-T09 through P4-T11 closes media/reaction/export, accessibility and regression coverage.
 
+## GM-WF Web-first dependency checklist
+
+- [x] GM-WF P0-T01 foundation contract and breakpoint baseline.
+- [ ] GM-WF P1-T02 public event hero and identity.
+- [ ] GM-WF P1-T03 responsive wall, masonry and filter contract.
+- [ ] GM-WF P2-T04 desktop two-column Wish Composer.
+- [ ] GM-WF P3-T05 dashboard desktop workspace.
+- [ ] GM-WF P3-T06 moderation table and sticky preview.
+- [ ] GM-WF P4-T07 theme editor and live preview.
+- [ ] GM-WF P4-T08 Cloudinary Media Library.
+- [ ] GM-WF P5-T09 responsive, keyboard and visual release gate.
 ## Non-goals
 
 This foundation does not change routes, server actions, Supabase queries, permissions, storage, realtime protocol or business copy beyond the contract documentation above.

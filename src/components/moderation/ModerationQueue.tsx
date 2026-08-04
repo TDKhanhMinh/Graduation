@@ -23,13 +23,17 @@ function ModerationStatus({ status }: { status: string }) {
 export function ModerationQueue({
   wishes,
   selectedIds,
+  selectedWishId,
   onSelectAll,
   onSelect,
+  onInspect,
 }: {
   wishes: ModerationWish[]
   selectedIds: string[]
+  selectedWishId: string | null
   onSelectAll: (checked: boolean) => void
   onSelect: (id: string, checked: boolean) => void
+  onInspect: (id: string) => void
 }) {
   const isAllSelected = wishes.length > 0 && selectedIds.length === wishes.length
 
@@ -46,7 +50,7 @@ export function ModerationQueue({
 
   return (
     <div className="min-w-0">
-      <div className="hidden overflow-hidden rounded-xl border bg-card md:block">
+      <div className="hidden overflow-hidden rounded-xl border bg-card lg:block">
         <Table>
           <TableHeader>
             <TableRow>
@@ -61,7 +65,21 @@ export function ModerationQueue({
           </TableHeader>
           <TableBody>
             {wishes.map((wish) => (
-              <TableRow key={wish.id} data-state={selectedIds.includes(wish.id) ? "selected" : undefined}>
+              <TableRow
+                key={wish.id}
+                data-state={selectedWishId === wish.id ? "inspected" : selectedIds.includes(wish.id) ? "selected" : undefined}
+                tabIndex={0}
+                role="button"
+                aria-label={`Inspect wish from ${wish.sender_name}`}
+                aria-pressed={selectedWishId === wish.id}
+                onClick={() => onInspect(wish.id)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault()
+                    onInspect(wish.id)
+                  }
+                }}
+              >
                 <TableCell>
                   <Checkbox
                     checked={selectedIds.includes(wish.id)}
@@ -84,7 +102,7 @@ export function ModerationQueue({
         </Table>
       </div>
 
-      <div className="grid gap-3 md:hidden">
+      <div className="grid gap-3 lg:hidden">
         <div className="flex items-center justify-between rounded-lg border bg-card px-3 py-3">
           <label className="flex min-h-(--control-min-size) items-center gap-3 text-sm font-medium">
             <Checkbox checked={isAllSelected} onCheckedChange={onSelectAll} aria-label="Chọn tất cả lời chúc" />
@@ -93,7 +111,19 @@ export function ModerationQueue({
           <span className="text-xs text-muted-foreground">{selectedIds.length}/{wishes.length}</span>
         </div>
         {wishes.map((wish) => (
-          <article key={wish.id} className="min-w-0 rounded-xl border bg-card p-4" data-state={selectedIds.includes(wish.id) ? "selected" : undefined}>
+          <article
+            key={wish.id}
+            className="min-w-0 rounded-xl border bg-card p-4"
+            data-state={selectedWishId === wish.id ? "inspected" : selectedIds.includes(wish.id) ? "selected" : undefined}
+            tabIndex={0}
+            role="button"
+            aria-label={`Inspect wish from ${wish.sender_name}`}
+            onClick={() => onInspect(wish.id)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                }
+              }}
+            >
             <div className="flex min-w-0 items-start gap-3">
               <Checkbox
                 checked={selectedIds.includes(wish.id)}

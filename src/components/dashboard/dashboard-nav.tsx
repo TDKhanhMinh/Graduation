@@ -26,7 +26,7 @@ export function DashboardNav({ mobile = false }: { mobile?: boolean }) {
     <nav aria-label="Điều hướng dashboard">
       <ul className={cn(mobile ? "grid grid-cols-2" : "space-y-1")}>
         {items.map(({ href, label, Icon }) => {
-          const isActive = pathname === href
+          const isActive = href === "/dashboard" ? pathname === href || pathname.startsWith("/dashboard/events/") : pathname === href
 
           return (
             <li key={href}>

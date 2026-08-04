@@ -13,7 +13,14 @@ export default function Loading() {
         </PageShell>
       </header>
       <PageShell className="space-y-8 py-6 sm:py-8">
-        <div className="h-36 animate-pulse rounded-xl border bg-card" />
+        <div className="grid min-h-[520px] animate-pulse overflow-hidden rounded-[2rem] border bg-card lg:grid-cols-[3fr_2fr]">
+          <div className="space-y-4 p-6 sm:p-10 lg:p-14">
+            <div className="h-4 w-32 rounded bg-muted" />
+            <div className="h-16 w-4/5 rounded bg-muted" />
+            <div className="h-6 w-3/5 rounded bg-muted" />
+          </div>
+          <div className="min-h-64 bg-muted lg:min-h-full" />
+        </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }, (_, index) => (
             <div

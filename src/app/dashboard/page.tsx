@@ -70,13 +70,38 @@ async function EventList() {
     )
   }
 
+  const activeEvents = events.filter((event) => !event.archived_at).length
+  const closedEvents = events.filter((event) => event.submission_mode === "closed").length
+
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="space-y-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-12">
+        <Card className="lg:col-span-4">
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">Total events</p>
+            <p className="mt-2 text-3xl font-semibold">{events.length}</p>
+          </CardContent>
+        </Card>
+        <Card className="lg:col-span-4">
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">Active events</p>
+            <p className="mt-2 text-3xl font-semibold">{activeEvents}</p>
+          </CardContent>
+        </Card>
+        <Card className="lg:col-span-4">
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">Closed submissions</p>
+            <p className="mt-2 text-3xl font-semibold">{closedEvents}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-12">
       {events.map((event) => {
         const isArchived = Boolean(event.archived_at)
 
         return (
-          <Card key={event.id} className="min-w-0">
+          <Card key={event.id} className="min-w-0 lg:col-span-4">
             <CardHeader className="gap-3">
               <div className="flex items-start justify-between gap-3">
                 <CardTitle className="min-w-0 truncate">{event.title}</CardTitle>
@@ -111,6 +136,7 @@ async function EventList() {
           </Card>
         )
       })}
+    </div>
     </div>
   )
 }

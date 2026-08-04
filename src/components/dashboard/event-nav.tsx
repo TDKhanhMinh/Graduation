@@ -26,7 +26,7 @@ const items = [
     segment: "/appearance",
     label: "Giao diện",
     Icon: Palette,
-    available: false,
+    available: true,
   },
   {
     segment: "/sharing",

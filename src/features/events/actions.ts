@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { verifySession } from "@/lib/auth/dal"
 import { createClient } from "@/lib/supabase/server"
-import { eventSchema, normalizeSlug } from "./schema"
+import { appearanceSchema, eventSchema, normalizeSlug } from "./schema"
 import { createError } from "@/lib/observability/error"
 import { logger } from "@/lib/observability/logger"
 
@@ -144,6 +144,50 @@ export async function updateEvent(
   revalidatePath(`/dashboard/events/${eventId}`)
   
   return { message: "Đã cập nhật sự kiện thành công." }
+}
+
+export async function updateEventAppearance(
+  eventId: string,
+  prevState: EventActionState,
+  formData: FormData
+): Promise<EventActionState> {
+  const session = await verifySession()
+  if (!session) redirect("/auth/login")
+  void prevState
+  const validated = appearanceSchema.safeParse({
+    theme_key: formData.get("theme_key"),
+    cover_path: String(formData.get("cover_path") || ""),
+  })
+
+  if (!validated.success) {
+    return {
+      error: "Appearance settings are invalid.",
+      fieldErrors: validated.error.flatten().fieldErrors,
+    }
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from("events")
+    .update({
+      theme_key: validated.data.theme_key,
+      cover_path: validated.data.cover_path || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", eventId)
+    .eq("owner_id", session.userId)
+    .select("id")
+    .single()
+
+  if (error) {
+    logger.error("Failed to update event appearance", error, { userId: session.userId, eventId })
+    return { error: "Could not save appearance settings." }
+  }
+
+  revalidatePath("/dashboard/events/" + eventId)
+  revalidatePath("/dashboard/events/" + eventId + "/appearance")
+  // The public page reads the saved event projection on the next request.
+  return { message: "Appearance settings saved." }
 }
 
 export async function archiveEvent(eventId: string) {

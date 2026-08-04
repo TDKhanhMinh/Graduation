@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { AlertCircle, CheckCircle2, RefreshCcw, Wifi, WifiOff } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -9,6 +9,9 @@ import { type PublicWish } from "@/features/wishes/dal"
 import { type RealtimeWallEvent, useRealtimeWallEvents } from "@/features/wishes/realtime"
 
 import { WishCard } from "./WishCard"
+
+type WallFilter = "all" | "pinned" | "media"
+type WallSort = "newest" | "oldest"
 
 export function RealtimeWall({
   eventId,
@@ -22,6 +25,8 @@ export function RealtimeWall({
   const [wishes, setWishes] = useState<PublicWish[]>(initialWishes)
   const [isRefetching, setIsRefetching] = useState(false)
   const [refetchError, setRefetchError] = useState(false)
+  const [filter, setFilter] = useState<WallFilter>("all")
+  const [sort, setSort] = useState<WallSort>("newest")
   const wishesLengthRef = useRef(initialWishes.length)
 
   useEffect(() => {
@@ -66,6 +71,20 @@ export function RealtimeWall({
     }
   }, [eventId, fetchWishesAction])
 
+  const visibleWishes = useMemo(() => {
+    const filtered = wishes.filter((wish) => {
+      if (filter === "pinned") return wish.is_pinned
+      if (filter === "media") return Boolean(wish.media)
+      return true
+    })
+
+    return [...filtered].sort((a, b) => {
+      if (sort === "oldest") return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
+  }, [filter, sort, wishes])
+
   const { status } = useRealtimeWallEvents(eventId, handleEvent, handleReconnect)
   const showConnectionNotice = status !== "connected" || isRefetching || refetchError
 
@@ -76,6 +95,13 @@ export function RealtimeWall({
       data-testid="realtime-wall"
       data-connection-status={status}
     >
+      <div className="mb-4 flex flex-col gap-3 rounded-xl border bg-card p-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-wrap gap-3">
+          <label className="flex min-w-40 flex-col gap-1 text-sm"><span className="font-medium">Filter wishes</span><select value={filter} onChange={(event) => setFilter(event.target.value as WallFilter)} className="min-h-(--control-min-size) rounded-lg border bg-background px-3"><option value="all">All wishes</option><option value="pinned">Pinned</option><option value="media">With media</option></select></label>
+          <label className="flex min-w-40 flex-col gap-1 text-sm"><span className="font-medium">Sort</span><select value={sort} onChange={(event) => setSort(event.target.value as WallSort)} className="min-h-(--control-min-size) rounded-lg border bg-background px-3"><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select></label>
+        </div>
+        {filter !== "all" || sort !== "newest" ? <Button type="button" variant="ghost" onClick={() => { setFilter("all"); setSort("newest") }}>Reset filters</Button> : null}
+      </div>
       {showConnectionNotice ? (
         <div
           className={
@@ -136,10 +162,18 @@ export function RealtimeWall({
           description="Hãy là người đầu tiên gửi lời chúc để bắt đầu lưu giữ kỷ niệm tại đây."
           className="min-h-52"
         />
+      ) : visibleWishes.length === 0 ? (
+        <FeedbackState
+          status="empty"
+          title="No wishes match these filters"
+          description="Reset the filters to see all approved wishes."
+          action={<Button type="button" variant="outline" onClick={() => { setFilter("all"); setSort("newest") }}>Reset filters</Button>}
+          className="min-h-52"
+        />
       ) : (
-        <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {wishes.map((wish) => (
-            <WishCard key={wish.id} wish={wish} />
+        <div className="columns-1 min-w-0 gap-4 md:columns-2 lg:columns-3 min-[1440px]:columns-4">
+          {visibleWishes.map((wish) => (
+            <WishCard key={wish.id} wish={wish} className="mb-4" />
           ))}
         </div>
       )}

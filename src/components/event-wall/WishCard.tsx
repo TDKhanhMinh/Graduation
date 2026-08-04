@@ -9,12 +9,13 @@ import { PublicAvatar } from "./PublicAvatar"
 import { PublicMediaRenderer } from "./PublicMediaRenderer"
 import { ReactionBar } from "./reaction-bar"
 
-export function WishCard({ wish }: { wish: PublicWish }) {
+export function WishCard({ wish, className }: { wish: PublicWish; className?: string }) {
   return (
     <Card
       className={cn(
-        "min-w-0 overflow-hidden transition-shadow hover:shadow-md",
-        wish.is_pinned && "border-primary/50 shadow-sm"
+        "min-w-0 break-inside-avoid overflow-hidden transition-shadow hover:shadow-md",
+        wish.is_pinned && "border-primary/50 shadow-sm",
+        className
       )}
       data-pinned={wish.is_pinned ? "true" : "false"}
     >

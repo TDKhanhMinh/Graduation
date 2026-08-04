@@ -2,9 +2,9 @@
 
 import Image from "next/image"
 import { AlertCircle, LoaderCircle } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { useState } from "react"
 
-import { createClient } from "@/lib/supabase/client"
+// Cloudinary media URLs are resolved directly; no storage client is used.
 
 type MediaProps = {
   media: {
@@ -15,32 +15,14 @@ type MediaProps = {
 }
 
 export function ModerationMediaPreview({ media }: MediaProps) {
-  const [url, setUrl] = useState<string | null>(null)
-  const [resolvedPath, setResolvedPath] = useState<string | null>(null)
-  const [errorPath, setErrorPath] = useState<string | null>(null)
-  const supabase = useMemo(() => createClient(), [])
+  const [hasError, setHasError] = useState(false)
+  const setErrorPath = (path: string) => { void path; setHasError(true) }
+  const isCloudinaryPath = /^https:\/\/res\.cloudinary\.com\//.test(media.storage_path)
 
-  useEffect(() => {
-    let active = true
-    void supabase.storage.from("event-media-private").createSignedUrl(media.storage_path, 3600).then(({ data, error }) => {
-      if (!active) return
-      if (error || !data?.signedUrl) {
-        console.error("Failed to load signed URL", error)
-        setErrorPath(media.storage_path)
-      } else {
-        setUrl(data.signedUrl)
-        setResolvedPath(media.storage_path)
-        setErrorPath(null)
-      }
-    })
+  const url = isCloudinaryPath && !hasError ? media.storage_path : null
 
-    return () => {
-      active = false
-    }
-  }, [media.storage_path, supabase])
-
-  const isError = errorPath === media.storage_path
-  const isReady = resolvedPath === media.storage_path && Boolean(url)
+  const isError = !isCloudinaryPath || hasError
+  const isReady = Boolean(url)
 
   if (isError) {
     return (

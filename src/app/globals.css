@@ -95,8 +95,13 @@
   --status-warning: oklch(0.62 0.16 75);
   --status-danger: oklch(0.577 0.245 27.325);
   --focus: oklch(0.55 0.2 250);
-  --content-max-width: 72rem;
+  --content-max-width: 90rem;
   --page-gutter: 1rem;
+  --grid-columns: 4;
+  --hero-heading-size: 2.75rem;
+  --page-heading-size: 2rem;
+  --section-heading-size: 1.625rem;
+  --card-padding: 1rem;
   --control-min-size: 2.75rem;
   --focus-ring-width: 3px;
 }
@@ -148,9 +153,24 @@
   }
 }
 
+@media (min-width: 768px) {
+  :root {
+    --grid-columns: 8;
+    --hero-heading-size: 4rem;
+    --page-heading-size: 2.5rem;
+    --section-heading-size: 1.875rem;
+    --card-padding: 1.25rem;
+  }
+}
+
 @media (min-width: 1024px) {
   :root {
     --page-gutter: 2rem;
+    --grid-columns: 12;
+    --hero-heading-size: 5rem;
+    --page-heading-size: 3rem;
+    --section-heading-size: 2rem;
+    --card-padding: 1.5rem;
   }
 }
 

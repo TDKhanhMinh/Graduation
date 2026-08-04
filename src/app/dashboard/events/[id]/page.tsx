@@ -91,6 +91,8 @@ export default async function EventOverviewPage({
             Icon={Palette}
             title="Giao diện"
             description="Chuẩn bị bố cục, màu sắc và kiểu hiển thị riêng cho sự kiện."
+            href={"/dashboard/events/" + event.id + "/appearance"}
+            actionLabel="Open appearance editor"
           />
           <CapabilityCard
             Icon={QrCode}

@@ -1,8 +1,10 @@
 import { Metadata } from "next"
+import Image from "next/image"
 import { notFound } from "next/navigation"
 import Link from "next/link"
+import { CalendarDays } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { PageShell } from "@/components/ui/page-shell"
 import { SectionHeading } from "@/components/ui/section-heading"
@@ -16,6 +18,10 @@ import { getSiteUrl } from "@/lib/supabase/env"
 
 type Props = {
   params: Promise<{ slug: string }>
+}
+
+function getCloudinaryCover(path: string | null) {
+  return path && /^https:\/\/res\.cloudinary\.com\//.test(path) ? path : null
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -73,6 +79,7 @@ export default async function PublicEventPage({ params }: Props) {
     )
   }
 
+  const coverUrl = getCloudinaryCover(event.cover_path)
   const wishes = await getApprovedWishesPage(event.id, 20)
 
   return (
@@ -97,6 +104,66 @@ export default async function PublicEventPage({ params }: Props) {
 
       <main id="main-content">
         <PageShell className="space-y-8 py-6 sm:py-8">
+          <section aria-labelledby="event-hero-title" className="overflow-hidden rounded-[2rem] border bg-card shadow-sm">
+            <div className="grid min-h-[520px] lg:grid-cols-[3fr_2fr]">
+              <div className="flex flex-col justify-center gap-6 p-6 sm:p-10 lg:p-14">
+                <StatusBadge tone="info" className="w-fit">A digital yearbook</StatusBadge>
+                <div className="space-y-4">
+                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    Memoria
+                  </p>
+                  <h2
+                    id="event-hero-title"
+                    className="max-w-3xl font-heading text-4xl font-semibold tracking-tight sm:text-5xl lg:text-7xl"
+                  >
+                    {event.title}
+                  </h2>
+                  {event.description ? (
+                    <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
+                      {event.description}
+                    </p>
+                  ) : null}
+                  {event.event_date ? (
+                    <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      <CalendarDays aria-hidden="true" className="size-4" />
+                      {new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(new Date(event.event_date))}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link
+                    href="#composer-heading"
+                    className={buttonVariants({ size: "lg", className: "min-h-(--control-min-size)" })}
+                  >
+                    Send a wish
+                  </Link>
+                  <CopyEventLinkButton url={canonicalUrl} />
+                </div>
+              </div>
+              <div className="relative min-h-64 overflow-hidden bg-[radial-gradient(circle_at_20%_20%,oklch(0.85_0.12_80),transparent_45%),linear-gradient(135deg,oklch(0.25_0.08_280),oklch(0.62_0.16_25))] lg:min-h-full">
+                {coverUrl ? (
+                  <Image
+                    src={coverUrl}
+                    alt={event.title + " cover"}
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 40vw"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-end p-6 sm:p-10" aria-label="Cover image unavailable">
+                    <div className="max-w-sm rounded-2xl border border-white/30 bg-black/20 p-5 text-white backdrop-blur-sm">
+                      <p className="text-sm font-medium">Your memories, beautifully kept.</p>
+                      <p className="mt-2 text-sm leading-6 text-white/80">
+                        Add a Cloudinary cover in event appearance settings when available.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+
           <section aria-labelledby="composer-heading" className="space-y-4">
             <SectionHeading
               as="h2"

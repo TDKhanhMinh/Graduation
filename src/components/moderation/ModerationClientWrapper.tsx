@@ -7,6 +7,7 @@ import { submitBulkModeration } from "@/app/dashboard/events/[id]/moderation/act
 import { Button } from "@/components/ui/button"
 import { ModerationFilters } from "./ModerationFilters"
 import { ModerationQueue } from "./ModerationQueue"
+import { ModerationDetailPanel } from "./ModerationDetailPanel"
 import { BulkActionBar } from "./BulkActionBar"
 import type { ModerationWish } from "@/features/wishes/moderation-dal"
 import type { ModerationAction } from "@/features/wishes/moderation-schema"
@@ -32,6 +33,8 @@ export function ModerationClientWrapper({
   const router = useRouter()
   const searchParams = useSearchParams()
   const visibleSelectedIds = selectedIds.filter((id) => wishes.some((wish) => wish.id === id))
+  const [selectedWishId, setSelectedWishId] = useState<string | null>(wishes[0]?.id ?? null)
+  const selectedWish = wishes.find((wish) => wish.id === selectedWishId) ?? wishes[0] ?? null
 
   const handleSelectAll = (checked: boolean) => {
     setSelectedIds(checked ? wishes.map((wish) => wish.id) : [])
@@ -96,7 +99,20 @@ export function ModerationClientWrapper({
         </div>
       ) : null}
 
-      <ModerationQueue wishes={wishes} selectedIds={visibleSelectedIds} onSelectAll={handleSelectAll} onSelect={handleSelect} />
+      <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] lg:items-start">
+        <ModerationQueue
+          wishes={wishes}
+          selectedIds={visibleSelectedIds}
+          selectedWishId={selectedWish?.id ?? null}
+          onSelectAll={handleSelectAll}
+          onSelect={handleSelect}
+          onInspect={setSelectedWishId}
+        />
+        <div className="min-w-0 lg:sticky lg:top-6">
+          <ModerationDetailPanel wish={selectedWish} />
+        </div>
+      </div>
+
       <BulkActionBar selectedCount={visibleSelectedIds.length} isPending={isPending} onAction={handleBulkAction} onClear={() => setSelectedIds([])} />
 
       {totalPages > 1 ? (

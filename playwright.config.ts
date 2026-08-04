@@ -1,16 +1,31 @@
 import { defineConfig, devices } from '@playwright/test';
 import { execSync } from 'node:child_process';
+import path from 'node:path';
 
 function getLocalSupabaseEnv() {
-  const supabaseCommand = process.platform === 'win32' ? 'supabase.cmd' : 'supabase'
-  const output = execSync(`${supabaseCommand} status -o env`, {
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'ignore'],
-    env: {
-      ...process.env,
-      PATH: `${process.cwd()}/node_modules/.bin${process.platform === 'win32' ? ';' : ':'}${process.env.PATH ?? ''}`,
-    },
-  });
+  const supabaseCommand = path.join(
+    process.cwd(),
+    'node_modules',
+    '.bin',
+    process.platform === 'win32' ? 'supabase.cmd' : 'supabase',
+  )
+  let output = ''
+  let lastError: unknown
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      output = execSync(`"${supabaseCommand}" status -o env`, {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'ignore'],
+        env: process.env,
+      });
+      break
+    } catch (error) {
+      lastError = error
+      if (attempt === 2) throw lastError
+    }
+  }
+
   const values = Object.fromEntries(
     output.split(/\r?\n/).flatMap((line) => {
       const match = line.match(/^([A-Z0-9_]+)=["']?(.*?)["']?$/);

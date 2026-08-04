@@ -1,5 +1,7 @@
-const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config({ path: '.env.local' });
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: '.env.local' });
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -7,7 +9,7 @@ const supabase = createClient(
 );
 
 async function test() {
-  const { data, count, error } = await supabase
+  const { data, error } = await supabase
     .from('wishes')
     .select('id,event_id,sender_name,sender_avatar_path,content,moderation_status,is_pinned,created_at,updated_at,media:wish_media(storage_path,media_type,mime_type,width,height,duration_ms)')
     .limit(1);

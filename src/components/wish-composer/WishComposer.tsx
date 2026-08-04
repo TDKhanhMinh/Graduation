@@ -214,7 +214,7 @@ export function WishComposer({
 
       <dialog
         ref={dialogRef}
-        className="m-auto max-h-[95dvh] w-[calc(100%-1rem)] max-w-xl rounded-2xl border bg-background p-0 text-foreground shadow-2xl backdrop:bg-black/50 sm:w-full"
+        className="m-auto max-h-[85dvh] w-[calc(100%-1rem)] max-w-[68.75rem] rounded-2xl border bg-background p-0 text-foreground shadow-2xl backdrop:bg-black/50 sm:w-full"
         aria-labelledby="wish-composer-title"
         aria-describedby="wish-composer-description"
         onClose={restoreOpenButtonFocus}
@@ -223,7 +223,7 @@ export function WishComposer({
         }}
         data-testid="wish-composer-dialog"
       >
-        <div className="flex max-h-[95dvh] flex-col">
+        <div className="flex max-h-[85dvh] flex-col">
           <header className="space-y-4 border-b px-5 py-4">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
@@ -249,7 +249,8 @@ export function WishComposer({
             <StepIndicator step={step} />
           </header>
 
-          <div className="overflow-y-auto px-5 py-5">
+          <div className="min-h-0 overflow-y-auto px-5 py-5 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)] lg:gap-8 lg:px-8 lg:py-7">
+            <div className="min-w-0">
             {pending ? (
               <div className="mb-4 flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm text-primary" role="status" aria-live="polite">
                 <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
@@ -399,7 +400,7 @@ export function WishComposer({
 
                 <div className="mt-5 rounded-xl border bg-surface-sunken p-4" aria-label="Xem trước lời chúc">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Xem trước</p>
-                  <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6">{draft.content.trim()}</p>
+                  <textarea readOnly value={draft.content.trim()} aria-label="Draft preview" rows={4} className="mt-2 w-full resize-none bg-transparent text-sm leading-6 outline-none" placeholder="Your draft is ready to review before submitting." />
                   <p className="mt-3 text-sm font-medium">— {draft.senderName.trim() || "Tên của bạn"}</p>
                 </div>
 
@@ -424,6 +425,27 @@ export function WishComposer({
                 </div>
               </form>
             )}
+            </div>
+
+            <aside className="mt-8 hidden min-w-0 lg:mt-0 lg:block" aria-label="Wish preview">
+              <div className="sticky top-0 rounded-2xl border bg-surface-sunken p-5">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Live preview</p>
+                <div className="mt-4 rounded-xl border bg-background p-5 shadow-sm">
+                  <input readOnly value={draft.content.trim()} aria-label="Live wish preview" className="w-full bg-transparent text-base leading-7 outline-none" placeholder="Your wish will appear here as you write it." />
+                  <p className="mt-5 text-sm font-medium">
+                    - {draft.senderName.trim() || "Your name"}
+                  </p>
+                  {draft.media ? (
+                    <p className="mt-4 rounded-lg bg-primary/10 px-3 py-2 text-xs text-primary">
+                      {draft.media.type === "image" ? "Image attached" : "Audio attached"}
+                    </p>
+                  ) : null}
+                </div>
+                <p className="mt-4 text-sm leading-6 text-muted-foreground">
+                  The preview stays visible on desktop while you edit the form.
+                </p>
+              </div>
+            </aside>
           </div>
         </div>
       </dialog>

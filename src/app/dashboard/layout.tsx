@@ -22,6 +22,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-screen flex-col bg-surface-sunken">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-3 focus:text-primary-foreground">Skip to main content</a>
       <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <PageShell className="px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between gap-4">
@@ -45,13 +46,13 @@ export default async function DashboardLayout({
             </form>
           </div>
         </PageShell>
-        <div className="border-t md:hidden">
+        <div className="border-t lg:hidden">
           <DashboardNav mobile />
         </div>
       </header>
 
       <div className="flex flex-1">
-        <aside className="hidden w-64 shrink-0 border-r bg-background md:block">
+        <aside className="hidden w-64 shrink-0 border-r bg-background lg:block">
           <div className="sticky top-16 p-4">
             <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Workspace
