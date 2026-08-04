@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { PageShell } from "@/components/ui/page-shell"
 import { SectionHeading } from "@/components/ui/section-heading"
 import { StatusBadge } from "@/components/ui/status-badge"
-import { CopyEventLinkButton, ShareEventButton } from "@/components/event-wall/PublicEventShareButton"
+import { CopyEventLinkButton, PublicQrButton, ShareEventButton } from "@/components/event-wall/PublicEventShareButton"
 import { RealtimeWall } from "@/components/event-wall/RealtimeWall"
 import { WishComposer } from "@/components/wish-composer/WishComposer"
 import { getPublicEventBySlug } from "@/features/events/dal"
@@ -88,7 +88,10 @@ export default async function PublicEventPage({ params }: Props) {
               <p className="truncate text-sm text-muted-foreground">{event.description}</p>
             ) : null}
           </div>
-          <ShareEventButton title={event.title} url={canonicalUrl} />
+          <div className="flex shrink-0 items-center gap-2">
+            <PublicQrButton url={canonicalUrl} />
+            <ShareEventButton title={event.title} url={canonicalUrl} />
+          </div>
         </PageShell>
       </header>
 

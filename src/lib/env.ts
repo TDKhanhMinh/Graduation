@@ -16,7 +16,11 @@ export type ClientEnv = z.infer<typeof clientSchema>;
 
 const publicProcessEnv = {
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  // Keep the legacy anon variable compatible with the publishable-key setup.
+  // The app's SSR/browser clients already use NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.
+  NEXT_PUBLIC_SUPABASE_ANON_KEY:
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
 };
 
 const parsePublicEnv = (): ClientEnv => {
@@ -53,5 +57,3 @@ export const getServerEnv = (): ServerEnv => {
 
   return parsed.data;
 };
-
-export const ENV = getServerEnv();

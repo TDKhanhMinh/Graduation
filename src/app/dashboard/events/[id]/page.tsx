@@ -96,6 +96,8 @@ export default async function EventOverviewPage({
             Icon={QrCode}
             title="Chia sẻ & QR"
             description="Tạo bộ liên kết và mã QR để chia sẻ trang sự kiện."
+            href={"/dashboard/events/" + event.id + "/sharing"}
+            actionLabel="Mở chia sẻ & QR"
           />
           <CapabilityCard
             Icon={Download}

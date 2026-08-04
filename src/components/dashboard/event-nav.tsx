@@ -32,7 +32,7 @@ const items = [
     segment: "/sharing",
     label: "Chia sẻ & QR",
     Icon: QrCode,
-    available: false,
+    available: true,
   },
   {
     segment: "/export",

@@ -18,6 +18,7 @@
     "test:unit": "vitest run",
     "test:db": "supabase test db --local supabase/tests/database",
     "test:e2e": "playwright test",
+    "test:e2e:qr": "playwright test e2e/qr-sharing.spec.ts",
     "test:e2e:ui": "playwright test e2e/ui-refresh.spec.ts"
   },
   "dependencies": {
@@ -30,6 +31,7 @@
     "lucide-react": "^1.27.0",
     "next": "16.2.12",
     "next-themes": "^0.4.6",
+    "qrcode": "^1.5.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "server-only": "^0.0.1",
@@ -46,6 +48,7 @@
     "@testing-library/jest-dom": "7.0.0",
     "@testing-library/react": "16.3.2",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "6.0.4",
