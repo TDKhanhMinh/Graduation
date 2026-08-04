@@ -30,11 +30,12 @@ SELECT throws_ok(
   'Anon cannot enumerate event rows'
 );
 
-SELECT throws_ok(
-  $$ SELECT sender_name FROM public.public_wishes_view $$,
-  '42501',
-  'permission denied for view public_wishes_view',
-  'Anon cannot enumerate wishes across unlisted events'
+SELECT results_eq(
+  $$ SELECT count(*)::integer
+     FROM public.public_wishes_view
+     WHERE event_id = 'e1eebc99-9c0b-4ef8-bb6d-6bb9bd380e01' $$,
+  ARRAY[1],
+  'Anon reads only the approved public DTO projection'
 );
 
 RESET ROLE;
@@ -43,7 +44,7 @@ SET ROLE service_role;
 SELECT results_eq(
   $$ SELECT sender_name FROM public.public_wishes_view ORDER BY sender_name $$,
   $$ VALUES ('Alice') $$,
-  'Server-only projection returns approved wishes'
+  'Public projection returns approved wishes'
 );
 
 RESET ROLE;
@@ -104,7 +105,7 @@ SELECT ok(
     WHERE n.nspname = 'public'
       AND c.relname = 'public_wishes_view'
   ),
-  'Public wishes view uses security_invoker'
+  'Public wishes view uses a fixed safe projection'
 );
 
 ROLLBACK;

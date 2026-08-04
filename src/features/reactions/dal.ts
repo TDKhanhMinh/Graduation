@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin"
 import { getReactionActor } from "./actor"
 import { cache } from "react"
 
-const ALLOWED_EMOJIS = ["❤️", "👍", "🎉", "😂", "🔥", "👏"]
+const ALLOWED_EMOJIS = ["Ã¢ÂÂ¤Ã¯Â¸Â", "Ã°Å¸â€˜Â", "Ã°Å¸Å½â€°", "Ã°Å¸Ëœâ€š", "Ã°Å¸â€Â¥", "Ã°Å¸â€˜Â"]
 
 export async function toggleReaction(wishId: string, emoji: string): Promise<boolean> {
   if (!ALLOWED_EMOJIS.includes(emoji)) {
@@ -35,7 +35,7 @@ export type ReactionCount = {
 }
 
 export const getReactionCounts = cache(async (wishId: string): Promise<ReactionCount[]> => {
-  const { actorId, actorKeyHash } = await getReactionActor()
+  const { actorId, actorKeyHash } = await getReactionActor({ persistGuestCookie: false })
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase: any = createAdminClient()
   

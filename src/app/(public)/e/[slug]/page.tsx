@@ -113,6 +113,7 @@ export default async function PublicEventPage({ params }: Props) {
         </section>
 
         <RealtimeWall 
+          key={event.id}
           eventId={event.id}
           initialWishes={wishes}
           fetchWishesAction={async (eventId: string, limit: number) => {

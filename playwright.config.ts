@@ -2,7 +2,8 @@ import { defineConfig, devices } from '@playwright/test';
 import { execSync } from 'node:child_process';
 
 function getLocalSupabaseEnv() {
-  const output = execSync('supabase status -o env', {
+  const supabaseCommand = process.platform === 'win32' ? 'supabase.cmd' : 'supabase'
+  const output = execSync(`${supabaseCommand} status -o env`, {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'ignore'],
     env: {
@@ -66,6 +67,7 @@ export default defineConfig({
       NEXT_DIST_DIR: '.next/playwright',
       NEXT_PUBLIC_SITE_URL: 'http://localhost:3100',
       NEXT_PUBLIC_TURNSTILE_SITE_KEY: 'playwright-site-key',
+      CAPTCHA_BYPASS_TOKEN: 'mock-turnstile-token',
     },
   },
 });

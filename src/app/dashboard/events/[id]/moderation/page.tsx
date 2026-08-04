@@ -11,7 +11,10 @@ export default async function ModerationPage({
   searchParams: Promise<{ [key: string]: string | undefined }>
 }) {
   const { id } = await params
-  const { status, search, dateFrom, dateTo } = await searchParams
+  const { status, search, dateFrom, dateTo, page: pageParam } = await searchParams
+  const pageSize = 50
+  const parsedPage = Number.parseInt(pageParam ?? "1", 10)
+  const currentPage = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1
 
   const filters = {
     status: status,
@@ -21,7 +24,7 @@ export default async function ModerationPage({
   }
 
   const [{ data: wishes, count }, auditLogs] = await Promise.all([
-    getModerationQueue(id, filters),
+    getModerationQueue(id, filters, pageSize, (currentPage - 1) * pageSize),
     getAuditHistory(id, 10),
   ])
 
@@ -36,7 +39,13 @@ export default async function ModerationPage({
         </h2>
         
         <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-md" />}>
-          <ModerationClientWrapper eventId={id} wishes={wishes} />
+          <ModerationClientWrapper
+            eventId={id}
+            wishes={wishes}
+            totalCount={count}
+            currentPage={currentPage}
+            pageSize={pageSize}
+          />
         </Suspense>
       </div>
 

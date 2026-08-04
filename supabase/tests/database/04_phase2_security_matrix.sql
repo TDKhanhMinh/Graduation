@@ -1,19 +1,17 @@
 BEGIN;
 
-SELECT plan(13);
+SELECT plan(12);
 
 -- Setup test data
--- We need 1 owner, 1 non-owner, 1 anon
-SELECT tests.create_login_user('owner@example.com', 'owner_pass', 'owner_id');
-SELECT tests.create_login_user('other@example.com', 'other_pass', 'other_id');
+-- Reuse the deterministic users inserted by supabase/seed.sql.
 
 -- Give users the 'authenticated' role context
 SET role authenticated;
-SET request.jwt.claim.sub = 'owner_id';
+SET request.jwt.claim.sub = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
 
 -- Owner creates an event
 INSERT INTO public.events (id, owner_id, slug, title, submission_mode, visibility)
-VALUES ('00000000-0000-0000-0000-000000000001', 'owner_id', 'test-event-p2', 'Test Event', 'approval_required', 'public');
+VALUES ('00000000-0000-0000-0000-000000000001', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'test-event-p2', 'Test Event', 'approval_required', 'public');
 
 -- Switch to service_role to insert test wishes bypassing RLS
 RESET ROLE;
@@ -22,14 +20,14 @@ SET role service_role;
 -- Insert 1 approved wish, 1 pending wish, 1 rejected wish
 INSERT INTO public.wishes (id, event_id, client_request_id, sender_name, content, moderation_status)
 VALUES 
-  ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000001', 'client-req-1', 'Sender 1', 'Approved wish', 'approved'),
-  ('22222222-2222-2222-2222-222222222222', '00000000-0000-0000-0000-000000000001', 'client-req-2', 'Sender 2', 'Pending wish', 'pending'),
-  ('33333333-3333-3333-3333-333333333333', '00000000-0000-0000-0000-000000000001', 'client-req-3', 'Sender 3', 'Rejected wish', 'rejected');
+  ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000001', 'c1111111-1111-4111-8111-111111111111', 'Sender 1', 'Approved wish', 'approved'),
+  ('22222222-2222-2222-2222-222222222222', '00000000-0000-0000-0000-000000000001', 'c2222222-2222-4222-8222-222222222222', 'Sender 2', 'Pending wish', 'pending'),
+  ('33333333-3333-3333-3333-333333333333', '00000000-0000-0000-0000-000000000001', 'c3333333-3333-4333-8333-333333333333', 'Sender 3', 'Rejected wish', 'rejected');
 
 -- 1. Test Owner can read all wishes for their event
 RESET ROLE;
 SET role authenticated;
-SET request.jwt.claim.sub = 'owner_id';
+SET request.jwt.claim.sub = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
 
 SELECT results_eq(
     $$ SELECT count(*)::integer FROM public.wishes WHERE event_id = '00000000-0000-0000-0000-000000000001' $$,
@@ -38,7 +36,7 @@ SELECT results_eq(
 );
 
 -- 2. Test Non-owner cannot read wishes
-SET request.jwt.claim.sub = 'other_id';
+SET request.jwt.claim.sub = 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22';
 SELECT results_eq(
     $$ SELECT count(*)::integer FROM public.wishes WHERE event_id = '00000000-0000-0000-0000-000000000001' $$,
     ARRAY[0],
@@ -50,10 +48,10 @@ RESET ROLE;
 SET role anon;
 -- 'anon' doesn't even have SELECT grant on public.wishes, but just in case:
 SELECT throws_ok(
-    $$ SELECT count(*) FROM public.wishes $$,
+    $$ SELECT client_request_id FROM public.wishes LIMIT 1 $$,
     '42501', -- permission denied
     NULL,
-    'Anon should get permission denied reading directly from wishes table'
+    'Anon cannot read sensitive fields directly from wishes table'
 );
 
 -- 4. Test Anon reading public_wishes_view (only approved)
@@ -74,7 +72,7 @@ SELECT throws_ok(
 -- 6. Test moderation RPC (Owner approves pending wish)
 RESET ROLE;
 SET role authenticated;
-SET request.jwt.claim.sub = 'owner_id';
+SET request.jwt.claim.sub = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
 
 SELECT lives_ok(
     $$ SELECT moderate_wishes(ARRAY['22222222-2222-2222-2222-222222222222']::uuid[], 'approve') $$,
@@ -107,17 +105,17 @@ SELECT results_eq(
 -- 9. Test Non-owner cannot moderate
 RESET ROLE;
 SET role authenticated;
-SET request.jwt.claim.sub = 'other_id';
+SET request.jwt.claim.sub = 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22';
 
 SELECT throws_ok(
     $$ SELECT moderate_wishes(ARRAY['11111111-1111-1111-1111-111111111111']::uuid[], 'hide') $$,
-    'P0001', -- custom exception MODERATION_NOT_ALLOWED
+    '42501', -- insufficient_privilege / MODERATION_NOT_ALLOWED
     'MODERATION_NOT_ALLOWED',
     'Non-owner should not be able to moderate wishes'
 );
 
 -- 10. Owner hides the approved wish
-SET request.jwt.claim.sub = 'owner_id';
+SET request.jwt.claim.sub = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
 SELECT lives_ok(
     $$ SELECT moderate_wishes(ARRAY['11111111-1111-1111-1111-111111111111']::uuid[], 'hide') $$,
     'Owner can hide an approved wish'

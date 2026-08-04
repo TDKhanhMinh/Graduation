@@ -114,7 +114,9 @@ export const serializeWishDraft = (draft: WishDraft): StoredWishDraft => ({
   mediaPath: draft.mediaPath,
   senderAvatarPath: draft.senderAvatarPath,
   clientRequestId: draft.clientRequestId,
-  deviceKey: draft.deviceKey,
+  // Keep the device identifier in runtime state only; it must not be persisted
+  // in the event draft payload.
+  deviceKey: '',
 })
 
 export const countDraftUrls = (content: string) =>

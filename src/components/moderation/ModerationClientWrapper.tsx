@@ -13,14 +13,22 @@ import { toast } from "sonner"
 export function ModerationClientWrapper({
   eventId,
   wishes,
+  totalCount,
+  currentPage,
+  pageSize,
 }: {
   eventId: string
   wishes: ModerationWish[]
+  totalCount: number
+  currentPage: number
+  pageSize: number
 }) {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
   const searchParams = useSearchParams()
+
+  const visibleSelectedIds = selectedIds.filter((id) => wishes.some((wish) => wish.id === id))
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -39,26 +47,27 @@ export function ModerationClientWrapper({
   }
 
   const handleBulkAction = (action: ModerationAction) => {
-    if (selectedIds.length === 0) return
+    if (visibleSelectedIds.length === 0) return
+    if (action === "soft_delete" && !window.confirm("Delete the selected wishes?")) return
 
     startTransition(async () => {
       // Create expected versions map for optimistic concurrency control
       const expectedVersions = wishes
-        .filter(w => selectedIds.includes(w.id))
+        .filter(w => visibleSelectedIds.includes(w.id))
         .reduce((acc, w) => {
           acc[w.id] = w.updated_at
           return acc
         }, {} as Record<string, string>)
 
       const result = await submitBulkModeration(eventId, {
-        wishIds: selectedIds,
+        wishIds: visibleSelectedIds,
         action,
         expectedVersions
       })
 
       if (result.success) {
         setSelectedIds([]) // Reset selection on success
-        toast.success(`Đã xử lý thành công ${selectedIds.length} lời chúc`)
+        toast.success(`Đã xử lý thành công ${visibleSelectedIds.length} lời chúc`)
       } else {
         toast.error(result.error || "Có lỗi xảy ra, vui lòng thử lại")
       }
@@ -67,35 +76,66 @@ export function ModerationClientWrapper({
 
   const handleFilterChange = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams)
+    if (key !== "page") params.delete("page")
     if (value) {
       params.set(key, value)
     } else {
       params.delete(key)
     }
-    router.push(`?${params.toString()}`)
+      router.push(`?${params.toString()}`)
   }
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
 
   return (
     <div className="space-y-6">
       <ModerationFilters 
         currentStatus={searchParams.get("status") || ""} 
         currentSearch={searchParams.get("search") || ""}
+        currentDateFrom={searchParams.get("dateFrom") || ""}
+        currentDateTo={searchParams.get("dateTo") || ""}
         onFilterChange={handleFilterChange} 
       />
       
       <ModerationQueue 
         wishes={wishes}
-        selectedIds={selectedIds}
+        selectedIds={visibleSelectedIds}
         onSelectAll={handleSelectAll}
         onSelect={handleSelect}
       />
 
       <BulkActionBar 
-        selectedCount={selectedIds.length}
+        selectedCount={visibleSelectedIds.length}
         isPending={isPending}
         onAction={handleBulkAction}
         onClear={() => setSelectedIds([])}
       />
+
+      {totalPages > 1 ? (
+        <div className="flex items-center justify-between" aria-label="Pagination">
+          <span className="text-sm text-muted-foreground">
+            Page {currentPage} of {totalPages}
+          </span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="rounded-md border px-3 py-2 text-sm disabled:opacity-50"
+              disabled={currentPage <= 1}
+              onClick={() => handleFilterChange("page", String(currentPage - 1))}
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              className="rounded-md border px-3 py-2 text-sm disabled:opacity-50"
+              disabled={currentPage >= totalPages}
+              onClick={() => handleFilterChange("page", String(currentPage + 1))}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

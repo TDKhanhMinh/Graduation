@@ -1,130 +1,114 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test'
 
-// Define the journey test
+const eventSlug = 'public-event-1'
+const eventId = 'e1eebc99-9c0b-4ef8-bb6d-6bb9bd380e01'
+
+const installTurnstileMock = async (page: import('@playwright/test').Page) => {
+  await page.route(
+    'https://challenges.cloudflare.com/turnstile/v0/api.js*',
+    async (route) => {
+      await route.fulfill({
+        contentType: 'application/javascript',
+        body: `
+          window.turnstile = {
+            render: (_element, options) => {
+              setTimeout(() => options.callback('mock-turnstile-token'), 0)
+              return 'mock-widget-id'
+            },
+            remove: () => {}
+          }
+        `,
+      })
+    },
+  )
+}
+
+const proxySubmitWish = async (page: import('@playwright/test').Page) => {
+  await page.route('**/functions/v1/submit-wish', async (route) => {
+    const response = await route.fetch()
+    await route.fulfill({ response })
+  })
+}
+const loginOwner = async (page: import('@playwright/test').Page) => {
+  await page.goto(`/auth/login?next=/dashboard/events/${eventId}/moderation`)
+  await page.fill('input[name="email"]', 'owner@example.com')
+  await page.fill('input[name="password"]', 'password123')
+  await page.click('button[type="submit"]')
+  await page.waitForURL(new RegExp(`/dashboard/events/${eventId}/moderation`))
+}
+
 test.describe('Phase 2: Submission and Moderation Realtime Journey', () => {
-  // Common event slug for the test
-  const eventSlug = 'test-e2e-event';
-
   test.beforeEach(async ({ page }) => {
-    // Mock Turnstile CAPTCHA response to always return success
-    await page.route('https://challenges.cloudflare.com/turnstile/**', async (route) => {
-      // If it's a request to the API, mock it. For simplicity, we just mock the POST to siteverify if called from client
-      // But Turnstile is verified on the server. The client-side widget just returns a token.
-      // We can inject a script to mock the window.turnstile object.
-      await route.continue();
-    });
-
-    await page.addInitScript(() => {
-      // Mock Cloudflare Turnstile widget
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).turnstile = {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        render: (element: string | HTMLElement, options: any) => {
-          setTimeout(() => {
-            if (options.callback) {
-              options.callback('mock-turnstile-token');
-            }
-          }, 100);
-          return 'mock-widget-id';
-        },
-        remove: () => {},
-      };
-    });
-  });
+    await installTurnstileMock(page)
+  })
 
   test('Guest submit -> Owner moderate -> Guest sees realtime update', async ({ browser }) => {
-    // 1. Setup two isolated browser contexts
-    const ownerContext = await browser.newContext();
-    const guestContext = await browser.newContext();
+    const ownerContext = await browser.newContext()
+    const guestContext = await browser.newContext()
+    const ownerPage = await ownerContext.newPage()
+    const guestPage = await guestContext.newPage()
+    await installTurnstileMock(ownerPage)
+    await installTurnstileMock(guestPage)
+    await proxySubmitWish(guestPage)
 
-    const ownerPage = await ownerContext.newPage();
-    const guestPage = await guestContext.newPage();
+    const wishContent = `Hello from E2E Guest ${Date.now()}`
+    const wishSender = `E2E Guest ${Date.now()}`
 
-    // 2. Owner logs in and creates an event (or we assume it's created via setup)
-    // For this test, we'll assume the owner login is mocked or done via a dedicated test user
-    // And the event `test-e2e-event` exists and belongs to the owner.
-    
-    // We'll skip the login UI automation to keep it focused on moderation, 
-    // but in reality we would use `ownerPage.goto('/auth/login')` etc.
+    await loginOwner(ownerPage)
 
-    // 3. Guest visits the public wall and submits a wish
-    await guestPage.goto(`/e/${eventSlug}`);
-    await expect(guestPage.locator('h1')).toBeVisible();
+    await guestPage.goto(`/e/${eventSlug}`)
+    await expect(guestPage.locator('h1').first()).toBeVisible()
+    await guestPage.getByTestId('open-composer').click()
+    const dialog = guestPage.getByTestId('wish-composer-dialog')
+    await dialog.locator('textarea[name="content"]').fill(wishContent)
+    await dialog.locator('form button[type="submit"]').click()
+    await dialog.locator('input[name="senderName"]').fill(wishSender)
+    await dialog.getByTestId('submit-wish').click()
+    await expect(dialog.locator('[aria-live="polite"] h3')).toBeVisible()
 
-    // Guest submits wish
-    await guestPage.fill('textarea[name="content"]', 'Hello from E2E Guest!');
-    await guestPage.fill('input[name="senderName"]', 'E2E Guest');
-    await guestPage.click('button:has-text("Tiếp tục")');
-    await guestPage.click('button:has-text("Gửi lời chúc")');
+    const pendingUrl = `/dashboard/events/${eventId}/moderation?status=pending&search=${encodeURIComponent(wishContent)}`
+    await ownerPage.goto(pendingUrl)
+    const wishRow = ownerPage.locator('tr', { hasText: wishContent })
+    await expect(wishRow).toBeVisible()
+    await wishRow.getByRole('checkbox', { name: `Select wish from ${wishSender}` }).check()
+    await ownerPage.getByRole('button', { name: 'Approve' }).click()
+    await expect(wishRow).toHaveCount(0)
 
-    // Wait for success message
-    await expect(guestPage.locator('text=đang chờ kiểm duyệt')).toBeVisible();
+    const guestWishCard = guestPage.locator('.wish-card', { hasText: wishContent })
+    await expect(guestWishCard).toBeVisible({ timeout: 10000 })
 
-    // 4. Owner moderates the wish
-    // Navigate to moderation dashboard
-    await ownerPage.goto(`/dashboard/events/${eventSlug}/moderation`);
-    
-    // Assume owner is logged in (session injected or logged in before)
-    // Find the pending wish
-    const wishRow = ownerPage.locator('tr', { hasText: 'Hello from E2E Guest!' });
-    await expect(wishRow).toBeVisible();
+    await ownerPage.goto(`/dashboard/events/${eventId}/moderation?status=approved&search=${encodeURIComponent(wishContent)}`)
+    const approvedRow = ownerPage.locator('tr', { hasText: wishContent })
+    await expect(approvedRow).toBeVisible()
+    await approvedRow.getByRole('checkbox', { name: `Select wish from ${wishSender}` }).check()
+    await ownerPage.getByRole('button', { name: 'Hide' }).click()
+    await expect(approvedRow).toHaveCount(0)
+    await expect(guestWishCard).toBeHidden({ timeout: 10000 })
 
-    // Select the wish
-    await wishRow.locator('input[type="checkbox"]').check();
-
-    // Click Approve in the bulk action bar
-    await ownerPage.click('button:has-text("Phê duyệt")');
-    // Wait for moderation to complete (row disappears from pending queue)
-    await expect(wishRow).toBeHidden();
-
-    // 5. Guest sees the realtime update on the public wall
-    // The public wall should now display the approved wish via Realtime
-    // We do NOT refresh the page. It should appear automatically.
-    const guestWishCard = guestPage.locator('.wish-card', { hasText: 'Hello from E2E Guest!' });
-    await expect(guestWishCard).toBeVisible({ timeout: 10000 }); // Wait up to 10s for realtime
-
-    // 6. Owner hides the wish
-    // Owner switches to "Đã duyệt" tab (assuming we have one, or just general queue)
-    await ownerPage.click('button[role="tab"]:has-text("Đã duyệt")');
-    const approvedRow = ownerPage.locator('tr', { hasText: 'Hello from E2E Guest!' });
-    await expect(approvedRow).toBeVisible();
-
-    // Hide it
-    await approvedRow.locator('input[type="checkbox"]').check();
-    await ownerPage.click('button:has-text("Ẩn")');
-    await expect(approvedRow).toBeHidden();
-
-    // 7. Guest sees the wish disappear
-    await expect(guestWishCard).toBeHidden({ timeout: 10000 });
-
-    await ownerContext.close();
-    await guestContext.close();
-  });
+    await ownerContext.close()
+    await guestContext.close()
+  })
 
   test('Concurrency: Prevent duplicate wishes on double click', async ({ page }) => {
-    // Go to event page
-    await page.goto(`/e/${eventSlug}`);
-    await page.fill('textarea[name="content"]', 'Double click test');
-    await page.fill('input[name="senderName"]', 'Speedy');
-    await page.click('button:has-text("Tiếp tục")');
-    
-    // Intercept API request to delay it, making double click possible
-    await page.route('**/api/wishes', async (route) => {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await route.continue();
-    });
+    let requests = 0
+    await page.route('**/functions/v1/submit-wish', async (route) => {
+      requests += 1
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      const response = await route.fetch()
+      await route.fulfill({ response })
+    })
 
-    const submitBtn = page.locator('button:has-text("Gửi lời chúc")');
-    
-    // Click twice rapidly
-    await submitBtn.click();
-    await submitBtn.click({ force: true }); // force in case it gets disabled
+    await page.goto(`/e/${eventSlug}`)
+    await page.getByTestId('open-composer').click()
+    const dialog = page.getByTestId('wish-composer-dialog')
+    await dialog.locator('textarea[name="content"]').fill(`Double click test ${Date.now()}`)
+    await dialog.locator('form button[type="submit"]').click()
+    await dialog.locator('input[name="senderName"]').fill(`Speedy ${Date.now()}`)
+    const submitButton = dialog.getByTestId('submit-wish')
+    await expect(submitButton).toBeEnabled()
+    await submitButton.dblclick()
 
-    // The button should be disabled after first click, or backend should reject idempotency key
-    // We assert that only ONE success message appears
-    await expect(page.locator('text=đang chờ kiểm duyệt')).toBeVisible();
-    
-    // Actually asserting exact database state is better done in integration tests,
-    // but the UI shouldn't crash or show two success dialogs.
-  });
-});
+    await expect(dialog.locator('[aria-live="polite"] h3')).toBeVisible()
+    expect(requests).toBe(1)
+  })
+})

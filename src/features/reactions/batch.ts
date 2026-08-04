@@ -6,7 +6,7 @@ import type { ReactionCount } from "./dal"
 export async function getReactionCountsBatch(wishIds: string[]): Promise<Record<string, ReactionCount[]>> {
   if (wishIds.length === 0) return {}
   
-  const { actorId, actorKeyHash } = await getReactionActor()
+  const { actorId, actorKeyHash } = await getReactionActor({ persistGuestCookie: false })
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase: any = createAdminClient()
   

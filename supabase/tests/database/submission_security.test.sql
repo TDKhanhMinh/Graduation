@@ -5,7 +5,7 @@ SELECT plan(19);
 SELECT is(
   has_function_privilege(
     'anon',
-    'public.submit_wish_transaction(uuid,uuid,text,text,text,text,integer,integer,integer,integer)',
+    'public.submit_wish_transaction(uuid,uuid,text,text,text,text,text,text,text,bigint,integer,integer,integer,integer,integer,integer,integer)',
     'EXECUTE'
   ),
   false,
@@ -15,7 +15,7 @@ SELECT is(
 SELECT is(
   has_function_privilege(
     'authenticated',
-    'public.submit_wish_transaction(uuid,uuid,text,text,text,text,integer,integer,integer,integer)',
+    'public.submit_wish_transaction(uuid,uuid,text,text,text,text,text,text,text,bigint,integer,integer,integer,integer,integer,integer,integer)',
     'EXECUTE'
   ),
   false,
@@ -204,10 +204,10 @@ SELECT results_eq(
        'First limited wish',
        'shared-ip',
        'unique-device-1',
-       100,
-       1,
-       100,
-       600
+       p_event_limit => 100,
+       p_ip_limit => 1,
+       p_device_limit => 100,
+       p_window_seconds => 600
      ) $$,
   $$ VALUES ('OK'::text) $$,
   'First request inside a rate window succeeds'
@@ -222,10 +222,10 @@ SELECT results_eq(
        'Second limited wish',
        'shared-ip',
        'unique-device-2',
-       100,
-       1,
-       100,
-       600
+       p_event_limit => 100,
+       p_ip_limit => 1,
+       p_device_limit => 100,
+       p_window_seconds => 600
      ) $$,
   $$ VALUES ('RATE_LIMITED'::text) $$,
   'Multi-key rate limiter rejects an exhausted IP key'
@@ -241,10 +241,10 @@ SELECT ok(
       'Third limited wish',
       'shared-ip',
       'unique-device-3',
-      100,
-      1,
-      100,
-      600
+       p_event_limit => 100,
+       p_ip_limit => 1,
+       p_device_limit => 100,
+       p_window_seconds => 600
     )
   ),
   'Rate-limit response includes positive retry guidance'
@@ -254,7 +254,7 @@ SELECT is(
   (
     SELECT prosecdef
     FROM pg_proc
-    WHERE oid = 'public.submit_wish_transaction(uuid,uuid,text,text,text,text,integer,integer,integer,integer)'::regprocedure
+    WHERE oid = 'public.submit_wish_transaction(uuid,uuid,text,text,text,text,text,text,text,bigint,integer,integer,integer,integer,integer,integer,integer)'::regprocedure
   ),
   false,
   'Submission RPC remains security invoker'

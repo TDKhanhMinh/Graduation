@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import { type PublicWish } from "@/features/wishes/dal"
 import { WishCard } from "./WishCard"
 import { useRealtimeWallEvents, type RealtimeWallEvent } from "@/features/wishes/realtime"
@@ -18,6 +18,11 @@ export function RealtimeWall({
 }) {
   const [wishes, setWishes] = useState<PublicWish[]>(initialWishes)
   const [isRefetching, setIsRefetching] = useState(false)
+  const wishesLengthRef = useRef(initialWishes.length)
+
+  useEffect(() => {
+    wishesLengthRef.current = wishes.length
+  }, [wishes.length])
 
   const handleEvent = useCallback((event: RealtimeWallEvent) => {
     setWishes((currentWishes) => {
@@ -46,14 +51,14 @@ export function RealtimeWall({
   const handleReconnect = useCallback(async () => {
     try {
       setIsRefetching(true)
-      const freshWishes = await fetchWishesAction(eventId, Math.max(20, wishes.length))
+      const freshWishes = await fetchWishesAction(eventId, Math.max(20, wishesLengthRef.current))
       setWishes(freshWishes)
     } catch (err) {
       console.error("Failed to refetch wishes on reconnect", err)
     } finally {
       setIsRefetching(false)
     }
-  }, [eventId, fetchWishesAction, wishes.length])
+  }, [eventId, fetchWishesAction])
 
   const { status } = useRealtimeWallEvents(eventId, handleEvent, handleReconnect)
 

@@ -70,7 +70,9 @@ export const getModerationQueue = cache(async (
   }
 
   if (filters.dateTo) {
-    query = query.lte('created_at', filters.dateTo)
+    const dateToExclusive = new Date(`${filters.dateTo}T00:00:00.000Z`)
+    dateToExclusive.setUTCDate(dateToExclusive.getUTCDate() + 1)
+    query = query.lt('created_at', dateToExclusive.toISOString())
   }
 
   // Use offset pagination for queue management as rows might shift
