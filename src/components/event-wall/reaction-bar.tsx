@@ -1,79 +1,106 @@
 "use client"
+
+import { SmilePlus } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useOptimisticReactions } from "@/features/reactions/client"
 import type { ReactionCount } from "@/features/reactions/dal"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { SmilePlus } from "lucide-react"
 
 const ALLOWED_EMOJIS = ["❤️", "👍", "🎉", "😂", "🔥", "👏"]
 
-export function ReactionBar({ initialCounts, wishId }: { initialCounts: ReactionCount[], wishId: string }) {
-  const { reactions, toggle, inflight } = useOptimisticReactions(initialCounts, wishId)
-  
-  // Sort reactions so that active ones appear consistently
+export function ReactionBar({
+  initialCounts,
+  wishId,
+}: {
+  initialCounts: ReactionCount[]
+  wishId: string
+}) {
+  const { reactions, toggle, inflight, error } = useOptimisticReactions(initialCounts, wishId)
   const sortedReactions = [...reactions].sort((a, b) => b.count - a.count)
-  
+
   return (
-    <div className="flex flex-wrap gap-2 items-center mt-3">
-      {sortedReactions.map(reaction => (
-        <Button
-          key={reaction.emoji}
-          variant="outline"
-          size="sm"
-          className={cn(
-            "h-8 px-2.5 rounded-full transition-all duration-200 ease-in-out font-medium",
-            reaction.hasReacted ? "bg-primary/10 border-primary/20 text-primary hover:bg-primary/20" : "text-muted-foreground",
-            inflight.has(reaction.emoji) && "opacity-50 cursor-not-allowed"
-          )}
-          onClick={() => toggle(reaction.emoji)}
-          disabled={inflight.has(reaction.emoji)}
-          aria-label={`${reaction.emoji} (${reaction.count} reactions${reaction.hasReacted ? ', you reacted' : ''})`}
-          aria-pressed={reaction.hasReacted}
+    <div className="mt-4 min-w-0" aria-label="Tương tác lời chúc">
+      {error ? (
+        <p
+          className="mb-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs leading-5 text-destructive"
+          role="alert"
         >
-          <span className="mr-1.5 text-base leading-none">{reaction.emoji}</span>
-          <span className="text-xs">{reaction.count}</span>
-        </Button>
-      ))}
-      
-      <Popover>
-        <PopoverTrigger
-          className="inline-flex items-center justify-center h-8 w-8 p-0 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
-          aria-label="Add reaction"
-        >
-          <SmilePlus className="h-4 w-4" />
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-2" align="start">
-          <div className="flex gap-1">
-            {ALLOWED_EMOJIS.map(emoji => {
-              const current = reactions.find(r => r.emoji === emoji)
-              const hasReacted = current?.hasReacted
-              
-              return (
-                <Button
-                  key={emoji}
-                  variant={hasReacted ? "secondary" : "ghost"}
-                  size="sm"
-                  className={cn(
-                    "h-10 w-10 p-0 text-xl",
-                    inflight.has(emoji) && "opacity-50 cursor-not-allowed"
-                  )}
-                  onClick={() => toggle(emoji)}
-                  disabled={inflight.has(emoji)}
-                  aria-label={emoji}
-                  aria-pressed={hasReacted}
-                >
-                  {emoji}
-                </Button>
-              )
-            })}
-          </div>
-        </PopoverContent>
-      </Popover>
+          {error}
+        </p>
+      ) : null}
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
+        {sortedReactions.map((reaction) => {
+          const isPending = inflight.has(reaction.emoji)
+
+          return (
+            <Button
+              key={reaction.emoji}
+              type="button"
+              variant="outline"
+              size="sm"
+              className={cn(
+                "min-h-(--control-min-size) min-w-14 rounded-full px-3 font-medium transition-colors",
+                reaction.hasReacted
+                  ? "border-primary/30 bg-primary/10 text-primary hover:bg-primary/20"
+                  : "text-muted-foreground",
+                isPending && "cursor-wait opacity-60",
+              )}
+              onClick={() => void toggle(reaction.emoji)}
+              disabled={isPending}
+              aria-label={reaction.emoji + ", " + reaction.count + " lượt phản ứng" + (reaction.hasReacted ? ", bạn đã chọn" : "")}
+              aria-pressed={reaction.hasReacted}
+              aria-busy={isPending}
+            >
+              <span className="text-base leading-none" aria-hidden="true">
+                {reaction.emoji}
+              </span>
+              <span className="text-xs tabular-nums">{reaction.count}</span>
+            </Button>
+          )
+        })}
+
+        <Popover>
+          <PopoverTrigger
+            type="button"
+            className="inline-flex min-h-(--control-min-size) min-w-(--control-min-size) items-center justify-center rounded-full text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-focus/50"
+            aria-label="Thêm phản ứng"
+            title="Thêm phản ứng"
+          >
+            <SmilePlus aria-hidden="true" className="size-4" />
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-2" align="start">
+            <div className="flex flex-wrap gap-1" aria-label="Chọn phản ứng">
+              {ALLOWED_EMOJIS.map((emoji) => {
+                const current = reactions.find((reaction) => reaction.emoji === emoji)
+                const hasReacted = current?.hasReacted ?? false
+                const isPending = inflight.has(emoji)
+
+                return (
+                  <Button
+                    key={emoji}
+                    type="button"
+                    variant={hasReacted ? "secondary" : "ghost"}
+                    size="sm"
+                    className={cn(
+                      "min-h-(--control-min-size) min-w-(--control-min-size) p-0 text-xl focus-visible:ring-3 focus-visible:ring-focus/50",
+                      isPending && "cursor-wait opacity-60",
+                    )}
+                    onClick={() => void toggle(emoji)}
+                    disabled={isPending}
+                    aria-label={"Chọn phản ứng " + emoji}
+                    aria-pressed={hasReacted}
+                    aria-busy={isPending}
+                  >
+                    {emoji}
+                  </Button>
+                )
+              })}
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
     </div>
   )
 }

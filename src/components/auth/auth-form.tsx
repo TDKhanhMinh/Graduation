@@ -1,8 +1,12 @@
 "use client"
 
+import { LoaderCircle } from "lucide-react"
 import { useActionState } from "react"
 
 import type { AuthActionState } from "@/app/auth/actions"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 type AuthAction = (
   state: AuthActionState,
@@ -20,22 +24,22 @@ const initialState: AuthActionState = {}
 export function AuthForm({ action, mode, nextPath }: AuthFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState)
   const isSignUp = mode === "sign-up"
+  const errorId = "auth-form-error"
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form
+      action={formAction}
+      className="space-y-5"
+      aria-describedby={state.error ? errorId : undefined}
+    >
       {nextPath ? <input name="next" type="hidden" value={nextPath} /> : null}
 
       {isSignUp ? (
-        <div className="space-y-2">
-          <label
-            className="text-sm font-medium text-zinc-800"
-            htmlFor="displayName"
-          >
-            Tên hiển thị
-          </label>
-          <input
+        <div className="grid gap-2">
+          <Label htmlFor="displayName">Tên hiển thị</Label>
+          <Input
             autoComplete="name"
-            className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-3 focus:ring-emerald-100"
+            className="h-11"
             id="displayName"
             maxLength={100}
             minLength={2}
@@ -46,35 +50,35 @@ export function AuthForm({ action, mode, nextPath }: AuthFormProps) {
         </div>
       ) : null}
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-zinc-800" htmlFor="email">
-          Email
-        </label>
-        <input
+      <div className="grid gap-2">
+        <Label htmlFor="email">Email</Label>
+        <Input
           autoComplete="email"
-          className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-3 focus:ring-emerald-100"
+          className="h-11"
           id="email"
           name="email"
           required
           type="email"
+          aria-invalid={Boolean(state.error)}
+          aria-describedby={state.error ? errorId : undefined}
         />
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-zinc-800" htmlFor="password">
-          Mật khẩu
-        </label>
-        <input
+      <div className="grid gap-2">
+        <Label htmlFor="password">Mật khẩu</Label>
+        <Input
           autoComplete={isSignUp ? "new-password" : "current-password"}
-          className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-3 focus:ring-emerald-100"
+          className="h-11"
           id="password"
           minLength={8}
           name="password"
           required
           type="password"
+          aria-invalid={Boolean(state.error)}
+          aria-describedby={state.error ? errorId : undefined}
         />
         {isSignUp ? (
-          <p className="text-xs leading-5 text-zinc-500">
+          <p className="text-xs leading-5 text-muted-foreground">
             Ít nhất 8 ký tự, gồm chữ và số.
           </p>
         ) : null}
@@ -82,7 +86,8 @@ export function AuthForm({ action, mode, nextPath }: AuthFormProps) {
 
       {state.error ? (
         <p
-          className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700"
+          id={errorId}
+          className="rounded-lg border border-status-danger/30 bg-status-danger/10 px-3 py-2 text-sm text-status-danger"
           role="alert"
         >
           {state.error}
@@ -91,24 +96,29 @@ export function AuthForm({ action, mode, nextPath }: AuthFormProps) {
 
       {state.message ? (
         <p
-          className="rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-800"
+          className="rounded-lg border border-status-success/30 bg-status-success/10 px-3 py-2 text-sm text-status-success"
           role="status"
         >
           {state.message}
         </p>
       ) : null}
 
-      <button
-        className="h-11 w-full rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
+      <Button
+        className="min-h-(--control-min-size) w-full"
         disabled={pending}
         type="submit"
       >
-        {pending
-          ? "Đang xử lý..."
-          : isSignUp
-            ? "Tạo tài khoản"
-            : "Đăng nhập"}
-      </button>
+        {pending ? (
+          <>
+            <LoaderCircle aria-hidden="true" className="animate-spin" />
+            Đang xử lý…
+          </>
+        ) : isSignUp ? (
+          "Tạo tài khoản"
+        ) : (
+          "Đăng nhập"
+        )}
+      </Button>
     </form>
   )
 }

@@ -1,10 +1,13 @@
-import { notFound } from "next/navigation"
+import { Download, ExternalLink, Palette, QrCode, Settings } from "lucide-react"
 import Link from "next/link"
-import { ExternalLink, Settings, LayoutTemplate } from "lucide-react"
+import { notFound } from "next/navigation"
 
-import { getOwnedEventById } from "@/features/events/dal"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CapabilityCard } from "@/components/dashboard/capability-card"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { SectionHeading } from "@/components/ui/section-heading"
+import { StatusBadge } from "@/components/ui/status-badge"
+import { getOwnedEventById } from "@/features/events/dal"
 
 export default async function EventOverviewPage({
   params,
@@ -18,53 +21,90 @@ export default async function EventOverviewPage({
     notFound()
   }
 
-  const publicUrl = `/e/${event.slug}`
+  const publicUrl = "/e/" + event.slug
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            Truy cập công khai
-          </CardTitle>
-          <ExternalLink className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{event.visibility}</div>
-          <p className="text-xs text-muted-foreground mt-1 truncate">
-            {publicUrl}
-          </p>
-          <div className="mt-4">
-            <Link href={publicUrl} target="_blank">
-              <Button size="sm" variant="outline" className="w-full">Mở trang sự kiện</Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="space-y-8">
+      <SectionHeading
+        title="Tổng quan sự kiện"
+        description="Theo dõi trạng thái hiển thị và luồng nhận lời chúc."
+      />
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            Trạng thái nhận lời chúc
-          </CardTitle>
-          <LayoutTemplate className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold capitalize">{event.submission_mode}</div>
-          <p className="text-xs text-muted-foreground mt-1">
-            {event.submission_mode === 'open' && "Nhận và tự động đăng"}
-            {event.submission_mode === 'approval_required' && "Cần duyệt trước khi đăng"}
-            {event.submission_mode === 'closed' && "Đã đóng nhận lời chúc"}
-          </p>
-          <div className="mt-4">
-            <Link href={`/dashboard/events/${event.id}/settings`}>
-              <Button size="sm" variant="secondary" className="w-full">
-                <Settings className="mr-2 h-4 w-4" /> Cài đặt
+      <div className="grid gap-5 md:grid-cols-2">
+        <Card>
+          <CardHeader className="flex flex-row items-start justify-between gap-4">
+            <CardTitle className="text-base">Truy cập công khai</CardTitle>
+            <ExternalLink aria-hidden="true" className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <StatusBadge tone="info">{event.visibility}</StatusBadge>
+            <p className="truncate text-sm text-muted-foreground">{publicUrl}</p>
+            <Link href={publicUrl} target="_blank" rel="noreferrer">
+              <Button variant="outline" className="min-h-(--control-min-size) w-full">
+                Mở trang sự kiện
               </Button>
             </Link>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-start justify-between gap-4">
+            <CardTitle className="text-base">Trạng thái nhận lời chúc</CardTitle>
+            <Settings aria-hidden="true" className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <StatusBadge tone={event.submission_mode === "closed" ? "warning" : "success"}>
+              {event.submission_mode === "open"
+                ? "Đang mở"
+                : event.submission_mode === "approval_required"
+                  ? "Cần duyệt"
+                  : "Đã đóng"}
+            </StatusBadge>
+            <p className="text-sm leading-6 text-muted-foreground">
+              {event.submission_mode === "open"
+                ? "Lời chúc được nhận và hiển thị theo cấu hình sự kiện."
+                : event.submission_mode === "approval_required"
+                  ? "Lời chúc cần được duyệt trước khi hiển thị."
+                  : "Sự kiện đã dừng nhận lời chúc mới."}
+            </p>
+            <Link href={"/dashboard/events/" + event.id + "/settings"}>
+              <Button variant="secondary" className="min-h-(--control-min-size) w-full">
+                <Settings aria-hidden="true" />
+                Mở cài đặt
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+
+      <section className="space-y-4" aria-labelledby="workspace-capabilities-heading">
+        <div>
+          <h2 id="workspace-capabilities-heading" className="font-heading text-xl font-semibold">
+            Không gian quản lý
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Các khu vực mở rộng được hiển thị rõ trạng thái để bạn không đi vào dead-end.
+          </p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <CapabilityCard
+            Icon={Palette}
+            title="Giao diện"
+            description="Chuẩn bị bố cục, màu sắc và kiểu hiển thị riêng cho sự kiện."
+          />
+          <CapabilityCard
+            Icon={QrCode}
+            title="Chia sẻ & QR"
+            description="Tạo bộ liên kết và mã QR để chia sẻ trang sự kiện."
+          />
+          <CapabilityCard
+            Icon={Download}
+            title="Xuất dữ liệu"
+            description="Theo dõi và tải xuống dữ liệu lời chúc theo quyền của owner."
+            detail="Chưa có route export khả dụng cho sự kiện này; không hiển thị thao tác tải giả."
+          />
+        </div>
+      </section>
     </div>
   )
 }

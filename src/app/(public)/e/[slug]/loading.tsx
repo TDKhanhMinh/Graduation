@@ -1,34 +1,29 @@
+import { PageShell } from "@/components/ui/page-shell"
+
 export default function Loading() {
   return (
-    <div className="min-h-screen bg-muted/20">
-      <header className="bg-background border-b h-[73px] flex items-center px-4">
-        <div className="max-w-4xl mx-auto w-full flex items-center justify-between">
-          <div className="space-y-2">
-            <div className="h-6 w-48 bg-muted animate-pulse rounded" />
-            <div className="h-4 w-64 bg-muted animate-pulse rounded" />
+    <div className="min-h-screen bg-surface-sunken" role="status" aria-label="Đang tải trang sự kiện">
+      <header className="border-b bg-background">
+        <PageShell className="flex min-h-18 items-center justify-between gap-4 py-3">
+          <div className="min-w-0 space-y-2">
+            <div className="h-3 w-20 animate-pulse rounded bg-muted" />
+            <div className="h-6 w-48 max-w-full animate-pulse rounded bg-muted" />
           </div>
-          <div className="h-10 w-10 bg-muted animate-pulse rounded" />
-        </div>
+          <div className="size-11 shrink-0 animate-pulse rounded-lg bg-muted" />
+        </PageShell>
       </header>
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden h-[150px] flex flex-col p-4 animate-pulse">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-muted rounded-full shrink-0" />
-                <div className="space-y-2 w-full">
-                  <div className="h-4 w-24 bg-muted rounded" />
-                  <div className="h-3 w-16 bg-muted rounded" />
-                </div>
-              </div>
-              <div className="mt-4 space-y-2">
-                <div className="h-4 w-full bg-muted rounded" />
-                <div className="h-4 w-4/5 bg-muted rounded" />
-              </div>
-            </div>
+      <PageShell className="space-y-8 py-6 sm:py-8">
+        <div className="h-36 animate-pulse rounded-xl border bg-card" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }, (_, index) => (
+            <div
+              key={index}
+              className="h-44 animate-pulse rounded-xl border bg-card"
+              aria-hidden="true"
+            />
           ))}
         </div>
-      </main>
+      </PageShell>
     </div>
   )
 }

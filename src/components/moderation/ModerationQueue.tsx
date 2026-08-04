@@ -1,14 +1,24 @@
-import { type ModerationWish } from "@/features/wishes/moderation-dal"
+import { Pin } from "lucide-react"
+
 import { Checkbox } from "@/components/ui/checkbox"
+import { FeedbackState } from "@/components/ui/feedback-state"
+import { StatusBadge } from "@/components/ui/status-badge"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import type { ModerationWish } from "@/features/wishes/moderation-dal"
+
 import { ModerationMediaPreview } from "./ModerationMediaPreview"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+
+const statusCopy: Record<string, { label: string; tone: "info" | "success" | "warning" | "danger" | "neutral" }> = {
+  pending: { label: "Chờ duyệt", tone: "warning" },
+  approved: { label: "Đã duyệt", tone: "success" },
+  rejected: { label: "Từ chối", tone: "danger" },
+  hidden: { label: "Đã ẩn", tone: "neutral" },
+}
+
+function ModerationStatus({ status }: { status: string }) {
+  const copy = statusCopy[status] || { label: status, tone: "neutral" as const }
+  return <StatusBadge tone={copy.tone}>{copy.label}</StatusBadge>
+}
 
 export function ModerationQueue({
   wishes,
@@ -23,67 +33,87 @@ export function ModerationQueue({
 }) {
   const isAllSelected = wishes.length > 0 && selectedIds.length === wishes.length
 
+  if (wishes.length === 0) {
+    return (
+      <FeedbackState
+        status="empty"
+        title="Không tìm thấy lời chúc"
+        description="Thử xóa bớt bộ lọc hoặc quay lại sau khi có lời chúc mới."
+        className="min-h-52"
+      />
+    )
+  }
+
   return (
-    <div className="rounded-md border bg-card">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-12">
-              <Checkbox 
-                checked={isAllSelected} 
-                onCheckedChange={onSelectAll} 
-                aria-label="Select all"
-              />
-            </TableHead>
-            <TableHead>Sender</TableHead>
-            <TableHead>Content</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Date</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {wishes.length === 0 ? (
+    <div className="min-w-0">
+      <div className="hidden overflow-hidden rounded-xl border bg-card md:block">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
-                No wishes found.
-              </TableCell>
+              <TableHead className="w-12">
+                <Checkbox checked={isAllSelected} onCheckedChange={onSelectAll} aria-label="Chọn tất cả lời chúc" />
+              </TableHead>
+              <TableHead>Người gửi</TableHead>
+              <TableHead>Nội dung & media</TableHead>
+              <TableHead>Trạng thái</TableHead>
+              <TableHead>Thời gian</TableHead>
             </TableRow>
-          ) : (
-            wishes.map((wish) => (
-              <TableRow key={wish.id}>
+          </TableHeader>
+          <TableBody>
+            {wishes.map((wish) => (
+              <TableRow key={wish.id} data-state={selectedIds.includes(wish.id) ? "selected" : undefined}>
                 <TableCell>
-                  <Checkbox 
+                  <Checkbox
                     checked={selectedIds.includes(wish.id)}
-                    onCheckedChange={(c) => onSelect(wish.id, !!c)}
-                    aria-label={`Select wish from ${wish.sender_name}`}
+                    onCheckedChange={(checked) => onSelect(wish.id, Boolean(checked))}
+                    aria-label={`Chọn lời chúc của ${wish.sender_name}`}
                   />
                 </TableCell>
-                <TableCell className="font-medium">{wish.sender_name}</TableCell>
-                <TableCell className="max-w-xs" title={wish.content || ""}>
-                  <div className="truncate">
-                    {wish.content || <span className="italic text-muted-foreground">No content</span>}
-                  </div>
-                  {wish.media && <ModerationMediaPreview media={wish.media} />}
+                <TableCell className="max-w-40 whitespace-normal font-medium">{wish.sender_name}</TableCell>
+                <TableCell className="max-w-md whitespace-normal">
+                  <p className="break-words text-sm leading-6">{wish.content || <span className="italic text-muted-foreground">Không có nội dung</span>}</p>
+                  {wish.media ? <ModerationMediaPreview media={wish.media} /> : null}
                 </TableCell>
-                <TableCell>
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                    wish.moderation_status === 'approved' ? 'bg-green-100 text-green-800' :
-                    wish.moderation_status === 'rejected' ? 'bg-red-100 text-red-800' :
-                    wish.moderation_status === 'hidden' ? 'bg-gray-100 text-gray-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {wish.moderation_status}
-                  </span>
-                  {wish.is_pinned && <span className="ml-2 text-xs text-blue-600">📌 Pinned</span>}
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {new Date(wish.created_at).toLocaleDateString()}
+                <TableCell><div className="flex flex-wrap items-center gap-2"><ModerationStatus status={wish.moderation_status} />{wish.is_pinned ? <StatusBadge tone="info"><Pin aria-hidden="true" className="mr-1 size-3" />Đã ghim</StatusBadge> : null}</div></TableCell>
+                <TableCell className="whitespace-normal text-sm text-muted-foreground">
+                  <time dateTime={wish.created_at}>{new Date(wish.created_at).toLocaleString("vi-VN")}</time>
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="grid gap-3 md:hidden">
+        <div className="flex items-center justify-between rounded-lg border bg-card px-3 py-3">
+          <label className="flex min-h-(--control-min-size) items-center gap-3 text-sm font-medium">
+            <Checkbox checked={isAllSelected} onCheckedChange={onSelectAll} aria-label="Chọn tất cả lời chúc" />
+            Chọn tất cả trên trang
+          </label>
+          <span className="text-xs text-muted-foreground">{selectedIds.length}/{wishes.length}</span>
+        </div>
+        {wishes.map((wish) => (
+          <article key={wish.id} className="min-w-0 rounded-xl border bg-card p-4" data-state={selectedIds.includes(wish.id) ? "selected" : undefined}>
+            <div className="flex min-w-0 items-start gap-3">
+              <Checkbox
+                checked={selectedIds.includes(wish.id)}
+                onCheckedChange={(checked) => onSelect(wish.id, Boolean(checked))}
+                aria-label={`Chọn lời chúc của ${wish.sender_name}`}
+              />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="truncate font-medium">{wish.sender_name}</h3>
+                  <ModerationStatus status={wish.moderation_status} />
+                  {wish.is_pinned ? <StatusBadge tone="info"><Pin aria-hidden="true" className="mr-1 size-3" />Đã ghim</StatusBadge> : null}
+                </div>
+                <time dateTime={wish.created_at} className="mt-1 block text-xs text-muted-foreground">{new Date(wish.created_at).toLocaleString("vi-VN")}</time>
+              </div>
+            </div>
+            <p className="mt-4 break-words whitespace-pre-wrap text-sm leading-6">{wish.content || <span className="italic text-muted-foreground">Không có nội dung</span>}</p>
+            {wish.media ? <ModerationMediaPreview media={wish.media} /> : null}
+          </article>
+        ))}
+      </div>
     </div>
   )
 }

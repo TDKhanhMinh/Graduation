@@ -1,7 +1,10 @@
+import { Suspense } from "react"
+
 import { AuditHistory } from "@/components/moderation/AuditHistory"
 import { ModerationClientWrapper } from "@/components/moderation/ModerationClientWrapper"
+import { FeedbackState } from "@/components/ui/feedback-state"
+import { SectionHeading } from "@/components/ui/section-heading"
 import { getAuditHistory, getModerationQueue } from "@/features/wishes/moderation-dal"
-import { Suspense } from "react"
 
 export default async function ModerationPage({
   params,
@@ -15,44 +18,29 @@ export default async function ModerationPage({
   const pageSize = 50
   const parsedPage = Number.parseInt(pageParam ?? "1", 10)
   const currentPage = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1
-
-  const filters = {
-    status: status,
-    search: search,
-    dateFrom: dateFrom,
-    dateTo: dateTo,
-  }
-
+  const filters = { status, search, dateFrom, dateTo }
   const [{ data: wishes, count }, auditLogs] = await Promise.all([
     getModerationQueue(id, filters, pageSize, (currentPage - 1) * pageSize),
     getAuditHistory(id, 10),
   ])
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 items-start">
-      <div className="flex-1 w-full min-w-0">
-        <h2 className="text-xl font-semibold tracking-tight mb-4">
-          Moderation Queue
-          <span className="ml-2 text-sm font-normal text-muted-foreground">
-            ({count} total)
-          </span>
-        </h2>
-        
-        <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-md" />}>
-          <ModerationClientWrapper
-            eventId={id}
-            wishes={wishes}
-            totalCount={count}
-            currentPage={currentPage}
-            pageSize={pageSize}
-          />
-        </Suspense>
-      </div>
-
-      <div className="w-full lg:w-80 lg:shrink-0">
-        <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-md" />}>
-          <AuditHistory logs={auditLogs} />
-        </Suspense>
+    <div className="min-w-0 space-y-6 pb-10">
+      <SectionHeading
+        title="Kiểm duyệt lời chúc"
+        description="Lọc, xem preview an toàn và xử lý từng hoặc nhiều lời chúc."
+      />
+      <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
+        <div className="min-w-0">
+          <Suspense fallback={<FeedbackState status="loading" title="Đang tải hàng đợi" />}>
+            <ModerationClientWrapper eventId={id} wishes={wishes} totalCount={count} currentPage={currentPage} pageSize={pageSize} />
+          </Suspense>
+        </div>
+        <div className="min-w-0 lg:sticky lg:top-6">
+          <Suspense fallback={<FeedbackState status="loading" title="Đang tải lịch sử" />}>
+            <AuditHistory logs={auditLogs} />
+          </Suspense>
+        </div>
       </div>
     </div>
   )

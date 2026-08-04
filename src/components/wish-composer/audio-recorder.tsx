@@ -1,258 +1,263 @@
-"use client";
+"use client"
 
-import { useState, useRef, useEffect } from "react";
-import { Mic, Square, Trash2, Loader2, MicOff } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { uploadPreparedMedia, type UploadedMedia } from "@/features/media/client";
-import { toast } from "sonner";
+import { LoaderCircle, Mic, MicOff, RefreshCcw, Square, Trash2, X } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 
-interface Props {
-  eventId: string;
-  clientRequestId: string;
-  onUploadSuccess: (media: UploadedMedia) => void;
-  onRemove: () => void;
-  disabled?: boolean;
+import { Button } from "@/components/ui/button"
+import { uploadPreparedMedia, type UploadedMedia } from "@/features/media/client"
+
+type Props = {
+  eventId: string
+  clientRequestId: string
+  onUploadSuccess: (media: UploadedMedia) => void
+  onRemove: () => void
+  disabled?: boolean
 }
 
-type Status = "idle" | "recording" | "preview" | "uploading" | "error" | "unsupported";
+type Status = "idle" | "recording" | "preview" | "uploading" | "uploaded" | "unsupported"
+
+const MAX_DURATION = 90
 
 export function AudioRecorderField({ eventId, clientRequestId, onUploadSuccess, onRemove, disabled }: Props) {
   const [status, setStatus] = useState<Status>(() => {
-    if (typeof window !== "undefined") {
-      if (!navigator.mediaDevices || !window.MediaRecorder) {
-        return "unsupported";
-      }
+    if (typeof window !== "undefined" && (!navigator.mediaDevices || !window.MediaRecorder)) {
+      return "unsupported"
     }
-    return "idle";
-  });
-  const [recordingTime, setRecordingTime] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const streamRef = useRef<MediaStream | null>(null);
-  const audioElRef = useRef<HTMLAudioElement | null>(null);
-  const timerRef = useRef<number | null>(null);
-  const xhrRef = useRef<XMLHttpRequest | null>(null);
-  const mountedRef = useRef(true);
-  
-  const MAX_DURATION = 90; // 90 seconds max
-
-  const stopStream = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-  };
+    return "idle"
+  })
+  const [recordingTime, setRecordingTime] = useState(0)
+  const [progress, setProgress] = useState(0)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
+  const streamRef = useRef<MediaStream | null>(null)
+  const timerRef = useRef<number | null>(null)
+  const xhrRef = useRef<XMLHttpRequest | null>(null)
+  const mountedRef = useRef(true)
+  const cancelledRef = useRef(false)
 
   useEffect(() => {
     return () => {
-      mountedRef.current = false;
-      stopStream();
-      if (timerRef.current) clearInterval(timerRef.current);
-      if (xhrRef.current) xhrRef.current.abort();
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    };
-  }, [previewUrl]);
-
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      
-      const options = getSupportedMimeType();
-      const mediaRecorder = new MediaRecorder(stream, options ? { mimeType: options } : undefined);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
-      
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          audioChunksRef.current.push(e.data);
-        }
-      };
-
-      mediaRecorder.onstop = () => {
-        if (!mountedRef.current) return;
-        stopStream();
-        if (status === "recording") {
-          setStatus("preview");
-          if (audioChunksRef.current.length) {
-            setPreviewUrl(URL.createObjectURL(new Blob(audioChunksRef.current)));
-          }
-        }
-      };
-
-      mediaRecorder.start(1000);
-      setStatus("recording");
-      setRecordingTime(0);
-      
-      timerRef.current = window.setInterval(() => {
-        setRecordingTime(prev => {
-          if (prev >= MAX_DURATION - 1) {
-            stopRecording();
-            return MAX_DURATION;
-          }
-          return prev + 1;
-        });
-      }, 1000);
-      
-    } catch (err: unknown) {
-      if (err instanceof Error && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')) {
-        setStatus("unsupported");
-      } else if (err instanceof Error) {
-        setStatus("idle");
-        toast.error("Không thể ghi âm: " + err.message);
-      }
+      mountedRef.current = false
+      streamRef.current?.getTracks().forEach((track) => track.stop())
+      if (timerRef.current) window.clearInterval(timerRef.current)
+      xhrRef.current?.abort()
     }
-  };
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+    }
+  }, [previewUrl])
+
+  const stopStream = () => {
+    streamRef.current?.getTracks().forEach((track) => track.stop())
+    streamRef.current = null
+  }
 
   const stopRecording = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
-      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stop()
     }
     if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
+      window.clearInterval(timerRef.current)
+      timerRef.current = null
     }
-  };
+  }
 
-  const handleCancel = () => {
-    stopRecording();
-    stopStream();
-    if (xhrRef.current) xhrRef.current.abort();
-    setStatus("idle");
-    setRecordingTime(0);
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-      setPreviewUrl(null);
-    }
-    onRemove();
-  };
-
-  const getSupportedMimeType = () => {
-    const types = [
-      "audio/webm",
-      "audio/mp4",
-      "audio/ogg",
-      "audio/aac"
-    ];
-    for (const type of types) {
-      if (MediaRecorder.isTypeSupported(type)) return type;
-    }
-    return "";
-  };
-
-  const handleUpload = async () => {
-    if (audioChunksRef.current.length === 0) return;
-    
+  const startRecording = async () => {
     try {
-      setStatus("uploading");
-      setProgress(0);
-      
-      const mimeType = mediaRecorderRef.current?.mimeType || "audio/webm";
-      const blob = new Blob(audioChunksRef.current, { type: mimeType });
-      // Get extension from mimeType e.g., "audio/webm;codecs=opus" -> "webm"
-      const ext = mimeType.split(';')[0].split('/')[1] || "webm";
-      const file = new File([blob], `audio_${Date.now()}.${ext}`, { type: mimeType });
-      
+      setError(null)
+      cancelledRef.current = false
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      streamRef.current = stream
+      const supportedType = ["audio/webm", "audio/mp4", "audio/ogg", "audio/aac"].find((type) =>
+        MediaRecorder.isTypeSupported(type)
+      )
+      const recorder = new MediaRecorder(stream, supportedType ? { mimeType: supportedType } : undefined)
+      mediaRecorderRef.current = recorder
+      audioChunksRef.current = []
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data)
+      }
+      recorder.onstop = () => {
+        stopStream()
+        if (!mountedRef.current || cancelledRef.current) return
+        if (audioChunksRef.current.length > 0) {
+          if (previewUrl) URL.revokeObjectURL(previewUrl)
+          setPreviewUrl(URL.createObjectURL(new Blob(audioChunksRef.current)))
+          setStatus("preview")
+        }
+      }
+
+      recorder.start(1000)
+      setStatus("recording")
+      setRecordingTime(0)
+      timerRef.current = window.setInterval(() => {
+        setRecordingTime((value) => {
+          if (value >= MAX_DURATION - 1) {
+            stopRecording()
+            return MAX_DURATION
+          }
+          return value + 1
+        })
+      }, 1000)
+    } catch (caught: unknown) {
+      stopStream()
+      setStatus("idle")
+      setError(caught instanceof Error ? caught.message : "Không thể truy cập micro.")
+    }
+  }
+
+  const removeRecording = () => {
+    cancelledRef.current = true
+    stopRecording()
+    stopStream()
+    xhrRef.current?.abort()
+    xhrRef.current = null
+    audioChunksRef.current = []
+    if (previewUrl) URL.revokeObjectURL(previewUrl)
+    setPreviewUrl(null)
+    setRecordingTime(0)
+    setProgress(0)
+    setError(null)
+    setStatus("idle")
+    onRemove()
+  }
+
+  const cancelUpload = () => {
+    xhrRef.current?.abort()
+    xhrRef.current = null
+  }
+
+  const uploadRecording = async () => {
+    if (!audioChunksRef.current.length) return
+
+    try {
+      setError(null)
+      setStatus("uploading")
+      setProgress(0)
+      const mimeType = mediaRecorderRef.current?.mimeType || "audio/webm"
+      const blob = new Blob(audioChunksRef.current, { type: mimeType })
+      const extension = mimeType.split(";")[0].split("/")[1] || "webm"
+      const file = new File([blob], `audio_${Date.now()}.${extension}`, { type: mimeType })
       const uploaded = await uploadPreparedMedia({
         file,
         eventId,
         clientRequestId,
         mediaType: "audio",
         durationMs: recordingTime * 1000,
-        onProgress: (percent) => {
-          if (mountedRef.current) setProgress(percent);
-        },
+        onProgress: setProgress,
         xhrRef,
-      });
+      })
 
-      if (mountedRef.current) {
-        setStatus("idle"); // or uploaded state
-        onUploadSuccess(uploaded);
-        xhrRef.current = null;
-      }
-    } catch (err: unknown) {
-      if (mountedRef.current && err instanceof Error && err.message !== 'Upload cancelled') {
-        setStatus("idle");
-        toast.error("Lỗi tải lên: " + err.message);
-        xhrRef.current = null;
-      }
+      if (!mountedRef.current) return
+      xhrRef.current = null
+      setStatus("uploaded")
+      setError(null)
+      onUploadSuccess(uploaded)
+    } catch (caught: unknown) {
+      if (!mountedRef.current) return
+      xhrRef.current = null
+      setStatus("preview")
+      setError(
+        caught instanceof Error && caught.message === "Upload cancelled"
+          ? "Đã hủy tải lên. Bạn có thể thử lại."
+          : caught instanceof Error
+            ? caught.message
+            : "Không thể tải bản ghi âm lên."
+      )
     }
-  };
+  }
 
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s.toString().padStart(2, '0')}`;
-  };
+  const formatTime = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`
 
   if (status === "unsupported") {
     return (
-      <div className="rounded-md border p-4 bg-muted/50 flex flex-col items-center justify-center gap-2 text-sm text-muted-foreground text-center">
-        <MicOff className="h-6 w-6" />
-        <span>Trình duyệt của bạn không hỗ trợ ghi âm hoặc quyền bị từ chối.</span>
-        <span className="text-destructive">Vui lòng cấp quyền micro để ghi âm (hoặc đính kèm file thay thế).</span>
+      <div className="flex flex-col items-center justify-center gap-2 rounded-lg border bg-surface-sunken p-4 text-center text-sm text-muted-foreground" role="status">
+        <MicOff aria-hidden="true" className="size-6" />
+        <span>Trình duyệt không hỗ trợ ghi âm hoặc quyền micro đã bị từ chối.</span>
+        <span className="text-status-danger">Bạn có thể đính kèm ảnh thay thế.</span>
       </div>
-    );
+    )
   }
 
   return (
-    <div className="rounded-md border p-4 bg-card w-full">
-      <div className="flex flex-col gap-3">
-        {status === "idle" && (
-          <Button type="button" variant="outline" className="w-full flex gap-2" onClick={startRecording} disabled={disabled}>
-            <Mic className="h-4 w-4" /> Bắt đầu ghi âm lời chúc (Tối đa {MAX_DURATION}s)
-          </Button>
-        )}
+    <div className="w-full rounded-lg border bg-card p-4">
+      {status === "idle" ? (
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-(--control-min-size) w-full"
+          onClick={() => void startRecording()}
+          disabled={disabled}
+        >
+          <Mic aria-hidden="true" />
+          Bắt đầu ghi âm (tối đa {MAX_DURATION}s)
+        </Button>
+      ) : null}
 
-        {status === "recording" && (
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-destructive animate-pulse">
-              <div className="h-3 w-3 rounded-full bg-destructive" />
-              <span className="font-medium text-sm font-mono">{formatTime(recordingTime)}</span>
-            </div>
-            <div className="flex gap-2">
-              <Button type="button" variant="destructive" size="sm" onClick={handleCancel}>
-                Hủy
-              </Button>
-              <Button type="button" size="sm" onClick={stopRecording}>
-                <Square className="h-4 w-4 mr-1" /> Dừng
-              </Button>
-            </div>
+      {status === "recording" ? (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" role="status" aria-live="polite">
+          <div className="flex items-center gap-2 text-status-danger">
+            <span className="size-3 rounded-full bg-status-danger" aria-hidden="true" />
+            <span className="font-mono text-sm font-medium">Đang ghi {formatTime(recordingTime)}</span>
           </div>
-        )}
-
-        {status === "preview" && (
-          <div className="flex flex-col gap-3">
-            <audio 
-              ref={audioElRef} 
-              src={previewUrl || ""} 
-              controls 
-              className="w-full h-10"
-            />
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={handleCancel}>
-                <Trash2 className="h-4 w-4 mr-1" /> Thu lại
-              </Button>
-              <Button type="button" size="sm" onClick={handleUpload}>
-                Xác nhận
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {status === "uploading" && (
-          <div className="flex flex-col items-center justify-center py-2">
-            <Loader2 className="h-6 w-6 animate-spin text-primary mb-2" />
-            <span className="text-sm">Đang tải lên... {progress}%</span>
-            <Button type="button" variant="ghost" size="sm" className="mt-2 text-destructive" onClick={handleCancel}>
-              Hủy tải lên
+          <div className="flex gap-2">
+            <Button type="button" variant="destructive" onClick={removeRecording} className="min-h-(--control-min-size)">
+              <X aria-hidden="true" />
+              Hủy
+            </Button>
+            <Button type="button" onClick={stopRecording} className="min-h-(--control-min-size)">
+              <Square aria-hidden="true" />
+              Dừng
             </Button>
           </div>
-        )}
-      </div>
+        </div>
+      ) : null}
+
+      {status === "preview" ? (
+        <div className="flex flex-col gap-3">
+          <audio src={previewUrl || ""} controls className="h-10 w-full" aria-label="Nghe thử bản ghi âm" />
+          {error ? <p className="text-sm text-status-danger" role="alert">{error}</p> : null}
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button type="button" variant="outline" onClick={removeRecording} className="min-h-(--control-min-size)">
+              <Trash2 aria-hidden="true" />
+              Xóa bản ghi
+            </Button>
+            <Button type="button" onClick={() => void uploadRecording()} className="min-h-(--control-min-size)">
+              <RefreshCcw aria-hidden="true" />
+              {error ? "Thử tải lại" : "Đính kèm bản ghi"}
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      {status === "uploading" ? (
+        <div className="flex flex-col items-center justify-center gap-2 py-2" role="status" aria-live="polite">
+          <LoaderCircle aria-hidden="true" className="size-6 animate-spin text-primary" />
+          <progress className="h-2 w-40" value={progress} max={100} aria-label={`Đang tải bản ghi lên ${progress}%`} />
+          <span className="text-sm">Đang tải bản ghi lên… {progress}%</span>
+          <Button type="button" variant="outline" onClick={cancelUpload} className="min-h-(--control-min-size) text-status-danger">
+            Hủy tải lên
+          </Button>
+        </div>
+      ) : null}
+
+      {status === "uploaded" ? (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" role="status">
+          <p className="text-sm font-medium text-status-success">Đã đính kèm bản ghi âm.</p>
+          <Button type="button" variant="outline" onClick={removeRecording} className="min-h-(--control-min-size)">
+            <Trash2 aria-hidden="true" />
+            Xóa bản ghi
+          </Button>
+        </div>
+      ) : null}
+
+      {status === "idle" && error ? <p className="mt-2 text-sm text-status-danger" role="alert">{error}</p> : null}
     </div>
-  );
+  )
 }

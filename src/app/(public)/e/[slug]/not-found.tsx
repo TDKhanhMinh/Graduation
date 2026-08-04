@@ -1,20 +1,26 @@
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
 import { SearchX } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { PageShell } from "@/components/ui/page-shell"
 
 export default function NotFound() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center px-4 bg-muted/20">
-      <div className="bg-muted h-20 w-20 rounded-full flex items-center justify-center mb-6">
-        <SearchX className="h-10 w-10 text-muted-foreground" />
-      </div>
-      <h1 className="text-2xl font-bold mb-2">Không tìm thấy sự kiện</h1>
-      <p className="text-muted-foreground mb-8 max-w-md">
-        Sự kiện này không tồn tại, có thể đã bị xóa, thiết lập ở chế độ riêng tư, hoặc bạn đã nhập sai đường dẫn.
-      </p>
-      <Link href="/">
-        <Button>Quay về trang chủ</Button>
-      </Link>
-    </div>
+    <main className="min-h-screen bg-surface-sunken">
+      <PageShell className="flex min-h-screen items-center justify-center py-10">
+        <div className="flex w-full max-w-xl flex-col items-center rounded-xl border bg-card px-6 py-10 text-center shadow-sm sm:px-10">
+          <span className="flex size-16 items-center justify-center rounded-full bg-muted">
+            <SearchX aria-hidden="true" className="size-8 text-muted-foreground" />
+          </span>
+          <h1 className="mt-5 font-heading text-2xl font-semibold">Không tìm thấy sự kiện</h1>
+          <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+            Sự kiện không tồn tại, đã bị xóa, đang ở chế độ riêng tư hoặc đường dẫn chưa chính xác.
+          </p>
+          <Link href="/" className="mt-6">
+            <Button className="min-h-(--control-min-size)">Quay về trang chủ</Button>
+          </Link>
+        </div>
+      </PageShell>
+    </main>
   )
 }

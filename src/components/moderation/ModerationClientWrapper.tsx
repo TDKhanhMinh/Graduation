@@ -2,13 +2,16 @@
 
 import { useState, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+
 import { submitBulkModeration } from "@/app/dashboard/events/[id]/moderation/actions"
+import { Button } from "@/components/ui/button"
 import { ModerationFilters } from "./ModerationFilters"
 import { ModerationQueue } from "./ModerationQueue"
 import { BulkActionBar } from "./BulkActionBar"
-import { type ModerationWish } from "@/features/wishes/moderation-dal"
-import { type ModerationAction } from "@/features/wishes/moderation-schema"
-import { toast } from "sonner"
+import type { ModerationWish } from "@/features/wishes/moderation-dal"
+import type { ModerationAction } from "@/features/wishes/moderation-schema"
+
+type Feedback = { type: "success" | "error"; message: string } | null
 
 export function ModerationClientWrapper({
   eventId,
@@ -25,51 +28,42 @@ export function ModerationClientWrapper({
 }) {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [isPending, startTransition] = useTransition()
+  const [feedback, setFeedback] = useState<Feedback>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
-
   const visibleSelectedIds = selectedIds.filter((id) => wishes.some((wish) => wish.id === id))
 
   const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedIds(wishes.map((w) => w.id))
-    } else {
-      setSelectedIds([])
-    }
+    setSelectedIds(checked ? wishes.map((wish) => wish.id) : [])
   }
 
   const handleSelect = (id: string, checked: boolean) => {
-    if (checked) {
-      setSelectedIds((prev) => [...prev, id])
-    } else {
-      setSelectedIds((prev) => prev.filter((i) => i !== id))
-    }
+    setSelectedIds((previous) => checked ? [...new Set([...previous, id])] : previous.filter((value) => value !== id))
   }
 
   const handleBulkAction = (action: ModerationAction) => {
     if (visibleSelectedIds.length === 0) return
-    if (action === "soft_delete" && !window.confirm("Delete the selected wishes?")) return
+    if (action === "soft_delete" && !window.confirm("Bạn có chắc muốn xóa các lời chúc đã chọn? Thao tác này không thể hoàn tác trong giao diện.")) return
 
+    setFeedback(null)
     startTransition(async () => {
-      // Create expected versions map for optimistic concurrency control
-      const expectedVersions = wishes
-        .filter(w => visibleSelectedIds.includes(w.id))
-        .reduce((acc, w) => {
-          acc[w.id] = w.updated_at
-          return acc
-        }, {} as Record<string, string>)
+      try {
+        const expectedVersions = wishes
+          .filter((wish) => visibleSelectedIds.includes(wish.id))
+          .reduce((acc, wish) => ({ ...acc, [wish.id]: wish.updated_at }), {} as Record<string, string>)
+        const result = await submitBulkModeration(eventId, { wishIds: visibleSelectedIds, action, expectedVersions })
 
-      const result = await submitBulkModeration(eventId, {
-        wishIds: visibleSelectedIds,
-        action,
-        expectedVersions
-      })
+        if (!result.success) {
+          setFeedback({ type: "error", message: result.error || "Không thể xử lý. Dữ liệu có thể đã thay đổi, vui lòng thử lại." })
+          return
+        }
 
-      if (result.success) {
-        setSelectedIds([]) // Reset selection on success
-        toast.success(`Đã xử lý thành công ${visibleSelectedIds.length} lời chúc`)
-      } else {
-        toast.error(result.error || "Có lỗi xảy ra, vui lòng thử lại")
+        setSelectedIds([])
+        setFeedback({ type: "success", message: `Đã xử lý ${visibleSelectedIds.length} lời chúc thành công.` })
+        router.refresh()
+      } catch (error) {
+        console.error(error)
+        setFeedback({ type: "error", message: "Không thể xử lý lúc này. Vui lòng thử lại." })
       }
     })
   }
@@ -77,64 +71,42 @@ export function ModerationClientWrapper({
   const handleFilterChange = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams)
     if (key !== "page") params.delete("page")
-    if (value) {
-      params.set(key, value)
-    } else {
-      params.delete(key)
-    }
-      router.push(`?${params.toString()}`)
+    if (value) params.set(key, value)
+    else params.delete(key)
+    router.replace(`?${params.toString()}`, { scroll: false })
   }
 
+  const clearFilters = () => router.replace("?", { scroll: false })
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
 
   return (
-    <div className="space-y-6">
-      <ModerationFilters 
-        currentStatus={searchParams.get("status") || ""} 
+    <div className={"space-y-6 " + (visibleSelectedIds.length > 0 ? "pb-40 sm:pb-24" : "") }>
+      <ModerationFilters
+        currentStatus={searchParams.get("status") || ""}
         currentSearch={searchParams.get("search") || ""}
         currentDateFrom={searchParams.get("dateFrom") || ""}
         currentDateTo={searchParams.get("dateTo") || ""}
-        onFilterChange={handleFilterChange} 
-      />
-      
-      <ModerationQueue 
-        wishes={wishes}
-        selectedIds={visibleSelectedIds}
-        onSelectAll={handleSelectAll}
-        onSelect={handleSelect}
+        onFilterChange={handleFilterChange}
+        onClearFilters={clearFilters}
       />
 
-      <BulkActionBar 
-        selectedCount={visibleSelectedIds.length}
-        isPending={isPending}
-        onAction={handleBulkAction}
-        onClear={() => setSelectedIds([])}
-      />
+      {feedback ? (
+        <div className={feedback.type === "error" ? "rounded-lg border border-status-danger/30 bg-status-danger/10 px-4 py-3 text-sm text-status-danger" : "rounded-lg border border-status-success/30 bg-status-success/10 px-4 py-3 text-sm text-status-success"} role={feedback.type === "error" ? "alert" : "status"} aria-live="polite">
+          {feedback.message}
+        </div>
+      ) : null}
+
+      <ModerationQueue wishes={wishes} selectedIds={visibleSelectedIds} onSelectAll={handleSelectAll} onSelect={handleSelect} />
+      <BulkActionBar selectedCount={visibleSelectedIds.length} isPending={isPending} onAction={handleBulkAction} onClear={() => setSelectedIds([])} />
 
       {totalPages > 1 ? (
-        <div className="flex items-center justify-between" aria-label="Pagination">
-          <span className="text-sm text-muted-foreground">
-            Page {currentPage} of {totalPages}
-          </span>
+        <nav className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between" aria-label="Phân trang hàng đợi kiểm duyệt">
+          <span className="text-sm text-muted-foreground">Trang {currentPage}/{totalPages} · {totalCount} lời chúc</span>
           <div className="flex gap-2">
-            <button
-              type="button"
-              className="rounded-md border px-3 py-2 text-sm disabled:opacity-50"
-              disabled={currentPage <= 1}
-              onClick={() => handleFilterChange("page", String(currentPage - 1))}
-            >
-              Previous
-            </button>
-            <button
-              type="button"
-              className="rounded-md border px-3 py-2 text-sm disabled:opacity-50"
-              disabled={currentPage >= totalPages}
-              onClick={() => handleFilterChange("page", String(currentPage + 1))}
-            >
-              Next
-            </button>
+            <Button type="button" variant="outline" disabled={currentPage <= 1} onClick={() => handleFilterChange("page", String(currentPage - 1))} className="min-h-(--control-min-size)">Trang trước</Button>
+            <Button type="button" variant="outline" disabled={currentPage >= totalPages} onClick={() => handleFilterChange("page", String(currentPage + 1))} className="min-h-(--control-min-size)">Trang sau</Button>
           </div>
-        </div>
+        </nav>
       ) : null}
     </div>
   )

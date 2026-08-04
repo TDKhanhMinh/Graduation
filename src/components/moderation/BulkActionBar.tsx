@@ -1,6 +1,9 @@
+"use client"
+
+import { CheckCircle, EyeOff, LoaderCircle, Pin, Trash2, X, XCircle } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
-import { type ModerationAction } from "@/features/wishes/moderation-schema"
-import { CheckCircle, XCircle, EyeOff, Pin, Trash2, X } from "lucide-react"
+import type { ModerationAction } from "@/features/wishes/moderation-schema"
 
 export function BulkActionBar({
   selectedCount,
@@ -16,73 +19,38 @@ export function BulkActionBar({
   if (selectedCount === 0) return null
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground border shadow-lg rounded-full px-6 py-3 flex items-center gap-4 z-50">
-      <div className="text-sm font-medium mr-2">
-        {selectedCount} selected
-      </div>
-      
-      <div className="flex items-center gap-2 border-l pl-4">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          disabled={isPending}
-          onClick={() => onAction("approve")}
-          className="text-green-600 hover:text-green-700 hover:bg-green-50"
-        >
-          <CheckCircle className="w-4 h-4 mr-2" />
-          Approve
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          disabled={isPending}
-          onClick={() => onAction("reject")}
-          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-        >
-          <XCircle className="w-4 h-4 mr-2" />
-          Reject
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          disabled={isPending}
-          onClick={() => onAction("hide")}
-        >
-          <EyeOff className="w-4 h-4 mr-2" />
-          Hide
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          disabled={isPending}
-          onClick={() => onAction("pin")}
-        >
-          <Pin className="w-4 h-4 mr-2" />
-          Pin
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          disabled={isPending}
-          onClick={() => onAction("soft_delete")}
-          className="text-muted-foreground"
-        >
-          <Trash2 className="w-4 h-4 mr-2" />
-          Delete
+    <div
+      className="fixed bottom-3 left-3 right-3 z-40 flex flex-col gap-3 rounded-xl border bg-popover px-4 py-3 text-popover-foreground shadow-lg sm:bottom-6 sm:left-1/2 sm:right-auto sm:w-max sm:-translate-x-1/2 sm:flex-row sm:items-center"
+      role="region"
+      aria-label="Thao tác hàng loạt"
+      aria-live="polite"
+      aria-busy={isPending}
+    >
+      <div className="flex items-center justify-between gap-3 sm:justify-start">
+        <span className="text-sm font-medium">Đã chọn {selectedCount} lời chúc</span>
+        <Button type="button" variant="ghost" size="icon" onClick={onClear} disabled={isPending} aria-label="Bỏ chọn tất cả" className="min-h-(--control-min-size) min-w-(--control-min-size)">
+          <X aria-hidden="true" />
         </Button>
       </div>
-
-      <div className="border-l pl-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClear}
-          disabled={isPending}
-          className="h-8 w-8 rounded-full"
-        >
-          <X className="w-4 h-4" />
+      <div className="grid grid-cols-2 gap-2 border-t pt-3 sm:flex sm:border-l sm:border-t-0 sm:pl-3 sm:pt-0">
+        <Button type="button" variant="outline" onClick={() => onAction("approve")} disabled={isPending} className="min-h-(--control-min-size)">
+          <CheckCircle aria-hidden="true" /> Duyệt
+        </Button>
+        <Button type="button" variant="outline" onClick={() => onAction("reject")} disabled={isPending} className="min-h-(--control-min-size) text-status-danger">
+          <XCircle aria-hidden="true" /> Từ chối
+        </Button>
+        <Button type="button" variant="outline" onClick={() => onAction("hide")} disabled={isPending} className="min-h-(--control-min-size)">
+          <EyeOff aria-hidden="true" /> Ẩn
+        </Button>
+        <Button type="button" variant="outline" onClick={() => onAction("pin")} disabled={isPending} className="min-h-(--control-min-size)">
+          <Pin aria-hidden="true" /> Ghim
+        </Button>
+        <Button type="button" variant="destructive" onClick={() => onAction("soft_delete")} disabled={isPending} className="min-h-(--control-min-size)">
+          <Trash2 aria-hidden="true" /> Xóa
         </Button>
       </div>
+      {isPending ? <span className="sr-only" role="status">Đang xử lý thao tác hàng loạt…</span> : null}
+      {isPending ? <LoaderCircle aria-hidden="true" className="absolute right-4 top-4 size-4 animate-spin" /> : null}
     </div>
   )
 }

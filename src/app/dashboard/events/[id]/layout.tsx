@@ -1,10 +1,13 @@
-import { ReactNode } from "react"
+import { ChevronLeft } from "lucide-react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ChevronLeft } from "lucide-react"
+import { ReactNode } from "react"
 
-import { Button } from "@/components/ui/button"
+import { EventNav } from "@/components/dashboard/event-nav"
+import { SectionHeading } from "@/components/ui/section-heading"
+import { buttonVariants } from "@/components/ui/button"
 import { getOwnedEventById } from "@/features/events/dal"
+import { cn } from "@/lib/utils"
 
 export default async function EventLayout({
   children,
@@ -22,39 +25,25 @@ export default async function EventLayout({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href="/dashboard">
-          <Button aria-label="Quay về dashboard" variant="ghost" size="icon">
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">{event.title}</h1>
-          <p className="text-muted-foreground">/{event.slug}</p>
-        </div>
-      </div>
+      <SectionHeading
+        as="h1"
+        title={event.title}
+        description={"/" + event.slug}
+        actions={
+          <Link
+            href="/dashboard"
+            aria-label="Quay về dashboard"
+            title="Quay về dashboard"
+            className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
+          >
+            <ChevronLeft aria-hidden="true" />
+          </Link>
+        }
+      />
 
-      <div className="flex space-x-2 border-b">
-        <Link href={`/dashboard/events/${event.id}`}>
-          <Button variant="ghost" className="rounded-none border-b-2 border-transparent hover:border-muted data-[active=true]:border-primary data-[active=true]:bg-transparent">
-            Tổng quan
-          </Button>
-        </Link>
-        <Link href={`/dashboard/events/${event.id}/moderation`}>
-          <Button variant="ghost" className="rounded-none border-b-2 border-transparent hover:border-muted data-[active=true]:border-primary data-[active=true]:bg-transparent">
-            Kiểm duyệt
-          </Button>
-        </Link>
-        <Link href={`/dashboard/events/${event.id}/settings`}>
-          <Button variant="ghost" className="rounded-none border-b-2 border-transparent hover:border-muted data-[active=true]:border-primary data-[active=true]:bg-transparent">
-            Cài đặt
-          </Button>
-        </Link>
-      </div>
+      <EventNav eventId={event.id} />
 
-      <div>
-        {children}
-      </div>
+      <div>{children}</div>
     </div>
   )
 }

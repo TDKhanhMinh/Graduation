@@ -1,17 +1,18 @@
-"use client";
+"use client"
 
-import { useEffect, useRef, useState } from "react";
-import { ImagePlus, Loader2, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { prepareImage, uploadPreparedMedia, type UploadedMedia } from "@/features/media/client";
+import { ImagePlus, LoaderCircle, RefreshCcw, X } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+
+import { Button } from "@/components/ui/button"
+import { prepareImage, uploadPreparedMedia, type UploadedMedia } from "@/features/media/client"
 
 interface Props {
-  eventId: string;
-  clientRequestId: string;
-  onUploadSuccess: (media: UploadedMedia) => void;
-  onRemove: () => void;
-  isAvatar?: boolean;
-  disabled?: boolean;
+  eventId: string
+  clientRequestId: string
+  onUploadSuccess: (media: UploadedMedia) => void
+  onRemove: () => void
+  isAvatar?: boolean
+  disabled?: boolean
 }
 
 export function ImageUploadField({
@@ -22,98 +23,153 @@ export function ImageUploadField({
   isAvatar,
   disabled,
 }: Props) {
-  const [preview, setPreview] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const xhrRef = useRef<XMLHttpRequest | null>(null);
-  const mountedRef = useRef(true);
+  const [preview, setPreview] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [error, setError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const fileRef = useRef<File | null>(null)
+  const xhrRef = useRef<XMLHttpRequest | null>(null)
+  const mountedRef = useRef(true)
 
   useEffect(() => {
     return () => {
-      mountedRef.current = false;
-      if (preview) URL.revokeObjectURL(preview);
-      xhrRef.current?.abort();
-    };
-  }, [preview]);
-
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0];
-    if (!selectedFile) return;
-
-    if (!selectedFile.type.startsWith("image/")) {
-      setError("Please select an image file.");
-      return;
+      mountedRef.current = false
+      xhrRef.current?.abort()
     }
+  }, [])
 
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview)
+    }
+  }, [preview])
+
+  const uploadFile = async (file: File) => {
     try {
-      setError(null);
-      setUploading(true);
-      setProgress(0);
-      const preparedFile = await prepareImage(selectedFile, 1920);
-      if (!mountedRef.current) return;
-
-      const previewUrl = URL.createObjectURL(preparedFile);
-      setPreview(previewUrl);
+      setError(null)
+      setUploading(true)
+      setProgress(0)
       const uploaded = await uploadPreparedMedia({
-        file: preparedFile,
+        file,
         eventId,
         clientRequestId,
         mediaType: "image",
         isAvatar,
         onProgress: setProgress,
         xhrRef,
-      });
+      })
 
-      if (mountedRef.current) {
-        setUploading(false);
-        xhrRef.current = null;
-        onUploadSuccess(uploaded);
-      }
+      if (!mountedRef.current) return
+      setUploading(false)
+      xhrRef.current = null
+      onUploadSuccess(uploaded)
     } catch (caught: unknown) {
-      if (mountedRef.current && caught instanceof Error && caught.message !== "Upload cancelled") {
-        setUploading(false);
-        setError(caught.message || "Failed to upload image.");
-        setPreview(null);
-        xhrRef.current = null;
+      if (!mountedRef.current) return
+      setUploading(false)
+      xhrRef.current = null
+      if (caught instanceof Error && caught.message === "Upload cancelled") {
+        setError("Đã hủy tải lên. Bạn có thể thử lại hoặc xóa ảnh.")
+      } else {
+        setError(caught instanceof Error ? caught.message : "Không thể tải ảnh lên.")
       }
     }
-  };
+  }
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0]
+    if (!selectedFile) return
+
+    if (!selectedFile.type.startsWith("image/")) {
+      setError("Vui lòng chọn tệp hình ảnh.")
+      return
+    }
+
+    try {
+      setError(null)
+      const preparedFile = await prepareImage(selectedFile, 1920)
+      if (!mountedRef.current) return
+
+      if (preview) URL.revokeObjectURL(preview)
+      fileRef.current = preparedFile
+      setPreview(URL.createObjectURL(preparedFile))
+      await uploadFile(preparedFile)
+    } catch (caught: unknown) {
+      if (mountedRef.current) {
+        setError(caught instanceof Error ? caught.message : "Không thể đọc ảnh.")
+        setUploading(false)
+      }
+    }
+  }
 
   const handleRemove = () => {
-    xhrRef.current?.abort();
-    xhrRef.current = null;
-    setPreview(null);
-    setProgress(0);
-    setError(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-    onRemove();
-  };
+    xhrRef.current?.abort()
+    xhrRef.current = null
+    fileRef.current = null
+    if (preview) URL.revokeObjectURL(preview)
+    setPreview(null)
+    setProgress(0)
+    setError(null)
+    if (fileInputRef.current) fileInputRef.current.value = ""
+    onRemove()
+  }
+
+  const handleCancelUpload = () => {
+    xhrRef.current?.abort()
+    xhrRef.current = null
+  }
 
   if (preview) {
     return (
-      <div className="relative inline-block w-full">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={preview} alt="Preview" className="max-h-64 w-full rounded-md border object-cover" />
-        <Button
-          type="button"
-          variant="destructive"
-          size="icon"
-          className="absolute right-2 top-2 h-8 w-8 rounded-full"
-          onClick={handleRemove}
-          disabled={uploading}
-        >
-          <X className="h-4 w-4" />
-        </Button>
-        {uploading && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center rounded-md bg-background/50">
-            <Loader2 className="mb-2 h-8 w-8 animate-spin text-primary" />
-            <span className="text-sm font-medium">{progress}%</span>
+      <div className="relative w-full overflow-hidden rounded-lg border bg-surface-sunken">
+        {/* eslint-disable-next-line @next/next/no-img-element -- preview uses a local object URL before upload */}
+        <img src={preview} alt="Xem trước ảnh đính kèm" width={1920} height={1080} className="max-h-64 w-full object-contain" />
+        <div className="absolute right-2 top-2 flex gap-2">
+          <Button
+            type="button"
+            variant="destructive"
+            size="icon"
+            className="min-h-(--control-min-size) min-w-(--control-min-size) rounded-full"
+            onClick={handleRemove}
+            disabled={uploading}
+            aria-label="Xóa ảnh đính kèm"
+          >
+            <X aria-hidden="true" />
+          </Button>
+        </div>
+        {uploading ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background/75">
+            <LoaderCircle aria-hidden="true" className="size-8 animate-spin text-primary" />
+            <progress className="h-2 w-40" value={progress} max={100} aria-label={`Đang tải ảnh lên ${progress}%`} />
+            <span className="text-sm font-medium" role="status" aria-live="polite">
+              Đang tải ảnh lên… {progress}%
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancelUpload}
+              className="min-h-(--control-min-size)"
+            >
+              Hủy tải lên
+            </Button>
           </div>
-        )}
+        ) : null}
+        {error ? (
+          <div className="flex items-center justify-between gap-3 border-t border-status-danger/30 bg-status-danger/10 px-3 py-2 text-sm text-status-danger" role="alert">
+            <span>{error}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => fileRef.current && void uploadFile(fileRef.current)}
+              className="min-h-(--control-min-size) shrink-0 text-status-danger"
+            >
+              <RefreshCcw aria-hidden="true" />
+              Thử lại
+            </Button>
+          </div>
+        ) : null}
       </div>
-    );
+    )
   }
 
   return (
@@ -124,18 +180,21 @@ export function ImageUploadField({
         className="hidden"
         ref={fileInputRef}
         onChange={handleFileChange}
+        aria-label={isAvatar ? "Chọn ảnh đại diện" : "Chọn ảnh đính kèm"}
       />
       <Button
         type="button"
         variant="outline"
-        className="flex h-24 w-full flex-col items-center justify-center gap-2 border-dashed text-muted-foreground hover:text-foreground"
+        className="flex min-h-28 w-full flex-col items-center justify-center gap-2 border-dashed text-muted-foreground hover:text-foreground"
         onClick={() => fileInputRef.current?.click()}
         disabled={disabled || uploading}
       >
-        <ImagePlus className="h-6 w-6" />
-        <span>Select an image</span>
+        <ImagePlus aria-hidden="true" className="size-6" />
+        <span>{isAvatar ? "Chọn ảnh đại diện" : "Thêm ảnh đính kèm"}</span>
       </Button>
-      {error && <p className="mt-1 text-sm text-destructive">{error}</p>}
+      {error ? (
+        <p className="mt-2 text-sm text-status-danger" role="alert">{error}</p>
+      ) : null}
     </div>
-  );
+  )
 }
