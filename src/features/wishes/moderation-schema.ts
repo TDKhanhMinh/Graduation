@@ -16,7 +16,7 @@ export const bulkModerationSchema = z.object({
   wishIds: z.array(z.string().uuid()).min(1).max(100),
   action: z.enum(moderationActions),
   reason: z.string().trim().max(500).optional(),
-  expectedVersions: z.record(z.string().uuid(), z.string().datetime()).optional(),
+  expectedVersions: z.record(z.string().uuid(), z.string()).optional(),
 })
 
 export type BulkModerationInput = z.infer<typeof bulkModerationSchema>

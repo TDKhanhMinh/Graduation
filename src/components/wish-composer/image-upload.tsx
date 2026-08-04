@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { ImagePlus, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { prepareImage, requestUploadSession, uploadToSignedUrl } from "@/features/media/client";
+import { prepareImage, uploadMedia } from "@/features/media/client";
+import { toast } from "sonner";
 
 interface Props {
   eventId: string;
@@ -18,7 +19,6 @@ export function ImageUploadField({ eventId, clientRequestId, onUploadSuccess, on
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
   const mountedRef = useRef(true);
@@ -36,12 +36,11 @@ export function ImageUploadField({ eventId, clientRequestId, onUploadSuccess, on
     if (!selectedFile) return;
 
     if (!selectedFile.type.startsWith('image/')) {
-      setError("Please select an image file.");
+      toast.error("Vui lòng chọn một file ảnh.");
       return;
     }
 
     try {
-      setError(null);
       setUploading(true);
       setProgress(0);
 
@@ -52,29 +51,20 @@ export function ImageUploadField({ eventId, clientRequestId, onUploadSuccess, on
       const url = URL.createObjectURL(preparedFile);
       setPreview(url);
 
-      // 2. Request session
-      const ext = preparedFile.name.split('.').pop() || 'webp';
-      const session = await requestUploadSession({
-        eventId,
-        clientRequestId,
-        ext,
-        isAvatar,
-      });
-
-      // 3. Upload
-      await uploadToSignedUrl(session.signedUrl, preparedFile, (p) => {
+      // 2. Upload to Cloudinary
+      const cloudinaryUrl = await uploadMedia(preparedFile, (p) => {
         if (mountedRef.current) setProgress(p);
       }, xhrRef);
 
       if (mountedRef.current) {
         setUploading(false);
-        onUploadSuccess(session.path);
+        onUploadSuccess(cloudinaryUrl);
         xhrRef.current = null;
       }
     } catch (err: unknown) {
       if (mountedRef.current && err instanceof Error && err.message !== 'Upload cancelled') {
         setUploading(false);
-        setError(err.message || "Failed to upload image.");
+        toast.error(err.message || "Failed to upload image.");
         setPreview(null);
         xhrRef.current = null;
       }
@@ -88,7 +78,6 @@ export function ImageUploadField({ eventId, clientRequestId, onUploadSuccess, on
     }
     setPreview(null);
     setProgress(0);
-    setError(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
     onRemove();
   };
@@ -137,7 +126,6 @@ export function ImageUploadField({ eventId, clientRequestId, onUploadSuccess, on
         <ImagePlus className="h-6 w-6" />
         <span>Select an image</span>
       </Button>
-      {error && <p className="text-destructive text-sm mt-1">{error}</p>}
     </div>
   );
 }

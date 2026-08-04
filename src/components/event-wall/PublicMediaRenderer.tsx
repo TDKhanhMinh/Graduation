@@ -20,7 +20,13 @@ export function PublicMediaRenderer({ media }: MediaProps) {
   useEffect(() => {
     let active = true
     async function loadUrl() {
-      // Create signed URL valid for 2 hours
+      // If the path is already a full URL (like Cloudinary), use it directly
+      if (media.path.startsWith('http://') || media.path.startsWith('https://')) {
+        if (active) setUrl(media.path)
+        return
+      }
+
+      // Legacy fallback: Create signed URL from Supabase valid for 2 hours
       const { data, error } = await supabase
         .storage
         .from('event-media-private')

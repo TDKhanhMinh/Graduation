@@ -1,42 +1,28 @@
 import { createClient } from "@/lib/supabase/client";
 
-export async function requestUploadSession(params: {
-  eventId: string;
-  clientRequestId: string;
-  ext: string;
-  isAvatar?: boolean;
-}) {
-  const supabase = createClient();
-  
-  const { data, error } = await supabase.functions.invoke('create-upload-session', {
-    body: {
-      event_id: params.eventId,
-      client_request_id: params.clientRequestId,
-      ext: params.ext,
-      is_avatar: params.isAvatar,
-    }
-  });
-
-  if (error) {
-    throw new Error(error.message || 'Failed to request upload session');
-  }
-
-  return data as { path: string; token: string; signedUrl: string };
-}
-
-export async function uploadToSignedUrl(
-  signedUrl: string,
+export async function uploadMedia(
   file: File,
   onProgress?: (percent: number) => void,
   xhrRef?: { current: XMLHttpRequest | null }
-) {
-  return new Promise<void>((resolve, reject) => {
+): Promise<string> {
+  // 1. Get Cloudinary signature
+  const signRes = await fetch('/api/upload/cloudinary-sign', {
+    method: 'POST',
+  });
+  
+  if (!signRes.ok) {
+    throw new Error('Failed to get upload signature');
+  }
+
+  const { signature, timestamp, cloudName, apiKey, folder } = await signRes.json();
+
+  // 2. Upload to Cloudinary
+  return new Promise<string>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     if (xhrRef) xhrRef.current = xhr;
     
-    xhr.open('PUT', signedUrl, true);
-    // Supabase storage signed URL PUT doesn't require auth headers, it uses the token in the URL.
-    xhr.setRequestHeader('Content-Type', file.type);
+    const url = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
+    xhr.open('POST', url, true);
 
     if (onProgress) {
       xhr.upload.onprogress = (e) => {
@@ -49,7 +35,12 @@ export async function uploadToSignedUrl(
 
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
-        resolve();
+        try {
+          const response = JSON.parse(xhr.responseText);
+          resolve(response.secure_url);
+        } catch (err) {
+          reject(new Error('Invalid response from Cloudinary'));
+        }
       } else {
         reject(new Error(`Upload failed with status ${xhr.status}`));
       }
@@ -58,7 +49,14 @@ export async function uploadToSignedUrl(
     xhr.onerror = () => reject(new Error('Network error during upload'));
     xhr.onabort = () => reject(new Error('Upload cancelled'));
     
-    xhr.send(file);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('api_key', apiKey);
+    formData.append('timestamp', timestamp.toString());
+    formData.append('signature', signature);
+    formData.append('folder', folder);
+    
+    xhr.send(formData);
   });
 }
 
@@ -103,4 +101,3 @@ export async function prepareImage(file: File, maxSize: number = 1920): Promise<
     img.src = url;
   });
 }
-

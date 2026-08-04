@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Mic, Square, Trash2, Loader2, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { requestUploadSession, uploadToSignedUrl } from "@/features/media/client";
+import { uploadMedia } from "@/features/media/client";
+import { toast } from "sonner";
 
 interface Props {
   eventId: string;
@@ -24,7 +25,6 @@ export function AudioRecorderField({ eventId, clientRequestId, onUploadSuccess, 
     }
     return "idle";
   });
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const [progress, setProgress] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -58,7 +58,6 @@ export function AudioRecorderField({ eventId, clientRequestId, onUploadSuccess, 
 
   const startRecording = async () => {
     try {
-      setErrorMsg(null);
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       
@@ -101,10 +100,9 @@ export function AudioRecorderField({ eventId, clientRequestId, onUploadSuccess, 
     } catch (err: unknown) {
       if (err instanceof Error && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')) {
         setStatus("unsupported");
-        setErrorMsg("Vui lòng cấp quyền micro để ghi âm (hoặc sử dụng text thay thế).");
       } else if (err instanceof Error) {
-        setStatus("error");
-        setErrorMsg("Không thể ghi âm: " + err.message);
+        setStatus("idle");
+        toast.error("Không thể ghi âm: " + err.message);
       }
     }
   };
@@ -125,7 +123,6 @@ export function AudioRecorderField({ eventId, clientRequestId, onUploadSuccess, 
     if (xhrRef.current) xhrRef.current.abort();
     setStatus("idle");
     setRecordingTime(0);
-    setErrorMsg(null);
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
       setPreviewUrl(null);
@@ -152,7 +149,6 @@ export function AudioRecorderField({ eventId, clientRequestId, onUploadSuccess, 
     try {
       setStatus("uploading");
       setProgress(0);
-      setErrorMsg(null);
       
       const mimeType = mediaRecorderRef.current?.mimeType || "audio/webm";
       const blob = new Blob(audioChunksRef.current, { type: mimeType });
@@ -160,25 +156,19 @@ export function AudioRecorderField({ eventId, clientRequestId, onUploadSuccess, 
       const ext = mimeType.split(';')[0].split('/')[1] || "webm";
       const file = new File([blob], `audio_${Date.now()}.${ext}`, { type: mimeType });
       
-      const session = await requestUploadSession({
-        eventId,
-        clientRequestId,
-        ext
-      });
-
-      await uploadToSignedUrl(session.signedUrl, file, (p) => {
+      const cloudinaryUrl = await uploadMedia(file, (p) => {
         if (mountedRef.current) setProgress(p);
       }, xhrRef);
 
       if (mountedRef.current) {
         setStatus("idle"); // or uploaded state
-        onUploadSuccess(session.path);
+        onUploadSuccess(cloudinaryUrl);
         xhrRef.current = null;
       }
     } catch (err: unknown) {
       if (mountedRef.current && err instanceof Error && err.message !== 'Upload cancelled') {
-        setStatus("error");
-        setErrorMsg("Lỗi tải lên: " + err.message);
+        setStatus("idle");
+        toast.error("Lỗi tải lên: " + err.message);
         xhrRef.current = null;
       }
     }
@@ -195,7 +185,7 @@ export function AudioRecorderField({ eventId, clientRequestId, onUploadSuccess, 
       <div className="rounded-md border p-4 bg-muted/50 flex flex-col items-center justify-center gap-2 text-sm text-muted-foreground text-center">
         <MicOff className="h-6 w-6" />
         <span>Trình duyệt của bạn không hỗ trợ ghi âm hoặc quyền bị từ chối.</span>
-        {errorMsg && <span className="text-destructive">{errorMsg}</span>}
+        <span className="text-destructive">Vui lòng cấp quyền micro để ghi âm (hoặc đính kèm file thay thế).</span>
       </div>
     );
   }
@@ -251,15 +241,6 @@ export function AudioRecorderField({ eventId, clientRequestId, onUploadSuccess, 
             <span className="text-sm">Đang tải lên... {progress}%</span>
             <Button type="button" variant="ghost" size="sm" className="mt-2 text-destructive" onClick={handleCancel}>
               Hủy tải lên
-            </Button>
-          </div>
-        )}
-
-        {status === "error" && (
-          <div className="flex flex-col items-center gap-2 text-sm">
-            <span className="text-destructive text-center">{errorMsg}</span>
-            <Button type="button" variant="outline" size="sm" onClick={() => setStatus("idle")}>
-              Thử lại
             </Button>
           </div>
         )}

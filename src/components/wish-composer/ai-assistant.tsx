@@ -1,10 +1,11 @@
 "use client"
-import { useState } from "react"
-import { Sparkles, Loader2, ChevronDown, ChevronUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { requestAiSuggestions } from "@/features/wishes/ai"
+import { ChevronDown, ChevronUp, Loader2, Sparkles } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
 
 export function AiWishAssistant({
   eventId,
@@ -20,17 +21,14 @@ export function AiWishAssistant({
   const [relationship, setRelationship] = useState("")
   const [loading, setLoading] = useState(false)
   const [suggestions, setSuggestions] = useState<string[]>([])
-  const [error, setError] = useState<string | null>(null)
-
   const handleGenerate = async () => {
     setLoading(true)
-    setError(null)
     try {
       const results = await requestAiSuggestions(eventId, prompt, draftSenderName, relationship)
       setSuggestions(results)
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : "Đã xảy ra lỗi."
-      setError(errorMsg)
+      toast.error(errorMsg)
     } finally {
       setLoading(false)
     }
@@ -95,9 +93,6 @@ export function AiWishAssistant({
               )}
             </Button>
           </div>
-          {error && (
-            <p className="text-sm text-destructive mt-2" role="alert">{error}</p>
-          )}
           {suggestions.length > 0 && (
             <div className="space-y-2 mt-4" role="region" aria-label="Kết quả gợi ý">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-2">Các gợi ý:</p>

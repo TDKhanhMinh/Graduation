@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { archiveEvent } from "@/features/events/actions"
 import { useRouter } from "next/navigation"
 
+import { toast } from "sonner"
+
 export function ArchiveEventControl({ eventId, isArchived }: { eventId: string, isArchived: boolean }) {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -14,10 +16,11 @@ export function ArchiveEventControl({ eventId, isArchived }: { eventId: string, 
       startTransition(async () => {
         try {
           await archiveEvent(eventId)
+          toast.success("Đã lưu trữ sự kiện thành công.")
           router.push("/dashboard")
         } catch (error) {
           console.error(error)
-          alert("Có lỗi xảy ra khi lưu trữ sự kiện.")
+          toast.error("Có lỗi xảy ra khi lưu trữ sự kiện.")
         }
       })
     }

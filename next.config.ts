@@ -2,19 +2,28 @@ import type { NextConfig } from "next";
 
 const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline';
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com;
     style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data: https://*.supabase.co;
+    img-src 'self' blob: data: https://*.supabase.co https://res.cloudinary.com;
     font-src 'self';
     object-src 'none';
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'none';
-    connect-src 'self' https://*.supabase.co;
+    frame-src 'self' https://challenges.cloudflare.com;
+    connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.cloudinary.com;
 `
 
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      }
+    ],
+  },
   async headers() {
     return [
       {

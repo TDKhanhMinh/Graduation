@@ -1,13 +1,13 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useEffect } from "react"
 import { EventActionState } from "@/features/events/actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useFormStatus } from "react-dom"
+import { toast } from "sonner"
 
 interface EventFormProps {
   action: (state: EventActionState, payload: FormData) => Promise<EventActionState>
@@ -33,19 +33,17 @@ function SubmitButton({ label }: { label: string }) {
 export function EventForm({ action, initialData, submitLabel = "Lưu sự kiện" }: EventFormProps) {
   const [state, formAction] = useActionState(action, {})
 
+  useEffect(() => {
+    if (state.error) {
+      toast.error(state.error)
+    }
+    if (state.message) {
+      toast.success(state.message)
+    }
+  }, [state])
+
   return (
     <form action={formAction} className="space-y-6 max-w-2xl">
-      {state.error && (
-        <Alert variant="destructive">
-          <AlertDescription>{state.error}</AlertDescription>
-        </Alert>
-      )}
-
-      {state.message && (
-        <Alert className="border-green-500 text-green-700">
-          <AlertDescription>{state.message}</AlertDescription>
-        </Alert>
-      )}
 
       <div className="space-y-4">
         <div className="grid gap-2">

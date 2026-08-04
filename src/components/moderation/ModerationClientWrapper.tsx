@@ -8,6 +8,7 @@ import { ModerationQueue } from "./ModerationQueue"
 import { BulkActionBar } from "./BulkActionBar"
 import { type ModerationWish } from "@/features/wishes/moderation-dal"
 import { type ModerationAction } from "@/features/wishes/moderation-schema"
+import { toast } from "sonner"
 
 export function ModerationClientWrapper({
   eventId,
@@ -57,8 +58,9 @@ export function ModerationClientWrapper({
 
       if (result.success) {
         setSelectedIds([]) // Reset selection on success
+        toast.success(`Đã xử lý thành công ${selectedIds.length} lời chúc`)
       } else {
-        alert(result.error) // Simple error handling, can be replaced with toast
+        toast.error(result.error || "Có lỗi xảy ra, vui lòng thử lại")
       }
     })
   }

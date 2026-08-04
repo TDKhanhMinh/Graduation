@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from "react"
 import { CheckCircle2, ChevronLeft, Loader2, Send, X } from "lucide-react"
 
 import { submitWish, SubmitWishError } from "@/features/wishes/client"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -109,10 +110,7 @@ export function WishComposer({
       !draft.deviceKey
     ) {
       if (!captchaToken) {
-        setResult({
-          type: "error",
-          message: "Hãy hoàn tất CAPTCHA trước khi gửi.",
-        })
+        toast.error("Hãy hoàn tất CAPTCHA trước khi gửi.")
       }
       return
     }
@@ -144,10 +142,10 @@ export function WishComposer({
               status: 0,
               retryable: true,
             })
-      setResult({
-        type: "error",
-        message: submitError.message,
-        retryAfterSeconds: submitError.retryAfterSeconds,
+      toast.error(submitError.message, {
+        description: submitError.retryAfterSeconds 
+          ? `Có thể thử lại sau khoảng ${submitError.retryAfterSeconds} giây.` 
+          : undefined
       })
     } finally {
       setCaptchaToken(null)
@@ -401,21 +399,6 @@ export function WishComposer({
                     onTokenChange={handleCaptchaToken}
                   />
                 </div>
-
-                {result?.type === "error" ? (
-                  <div
-                    className="mt-4 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
-                    role="alert"
-                    aria-live="assertive"
-                  >
-                    <p>{result.message}</p>
-                    {result.retryAfterSeconds ? (
-                      <p className="mt-1">
-                        Có thể thử lại sau khoảng {result.retryAfterSeconds} giây.
-                      </p>
-                    ) : null}
-                  </div>
-                ) : null}
 
                 <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
                   <Button
