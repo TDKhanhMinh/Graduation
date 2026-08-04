@@ -3,13 +3,13 @@
 import { useState, useRef, useEffect } from "react";
 import { Mic, Square, Trash2, Loader2, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { uploadMedia } from "@/features/media/client";
+import { uploadPreparedMedia, type UploadedMedia } from "@/features/media/client";
 import { toast } from "sonner";
 
 interface Props {
   eventId: string;
   clientRequestId: string;
-  onUploadSuccess: (path: string) => void;
+  onUploadSuccess: (media: UploadedMedia) => void;
   onRemove: () => void;
   disabled?: boolean;
 }
@@ -156,13 +156,21 @@ export function AudioRecorderField({ eventId, clientRequestId, onUploadSuccess, 
       const ext = mimeType.split(';')[0].split('/')[1] || "webm";
       const file = new File([blob], `audio_${Date.now()}.${ext}`, { type: mimeType });
       
-      const cloudinaryUrl = await uploadMedia(file, (p) => {
-        if (mountedRef.current) setProgress(p);
-      }, xhrRef);
+      const uploaded = await uploadPreparedMedia({
+        file,
+        eventId,
+        clientRequestId,
+        mediaType: "audio",
+        durationMs: recordingTime * 1000,
+        onProgress: (percent) => {
+          if (mountedRef.current) setProgress(percent);
+        },
+        xhrRef,
+      });
 
       if (mountedRef.current) {
         setStatus("idle"); // or uploaded state
-        onUploadSuccess(cloudinaryUrl);
+        onUploadSuccess(uploaded);
         xhrRef.current = null;
       }
     } catch (err: unknown) {

@@ -11,8 +11,18 @@ export type WishDraft = {
   senderName: string
   clientRequestId: string
   deviceKey: string
-  mediaPath?: string
+  media?: WishDraftMedia
   senderAvatarPath?: string
+}
+
+export type WishDraftMedia = {
+  path: string
+  type: "image" | "audio"
+  mimeType: string
+  sizeBytes: number
+  durationMs?: number
+  width?: number
+  height?: number
 }
 
 export type StoredWishDraft = WishDraft & {
@@ -23,7 +33,7 @@ export type WishDraftAction =
   | { type: "hydrate"; draft: WishDraft }
   | { type: "content"; value: string }
   | { type: "senderName"; value: string }
-  | { type: "mediaPath"; value?: string }
+  | { type: "media"; value?: WishDraftMedia }
   | { type: "senderAvatarPath"; value?: string }
   | { type: "newDraft"; clientRequestId: string }
 
@@ -45,8 +55,8 @@ export function wishDraftReducer(
       return { ...state, content: action.value }
     case "senderName":
       return { ...state, senderName: action.value }
-    case "mediaPath":
-      return { ...state, mediaPath: action.value }
+    case "media":
+      return { ...state, media: action.value }
     case "senderAvatarPath":
       return { ...state, senderAvatarPath: action.value }
     case "newDraft":
@@ -54,7 +64,7 @@ export function wishDraftReducer(
         ...state,
         content: "",
         senderName: "",
-        mediaPath: undefined,
+        media: undefined,
         senderAvatarPath: undefined,
         clientRequestId: action.clientRequestId,
       }
@@ -89,7 +99,16 @@ export function parseStoredWishDraft(
       content: typeof parsed.content === "string" ? parsed.content : "",
       senderName:
         typeof parsed.senderName === "string" ? parsed.senderName : "",
-      mediaPath: typeof parsed.mediaPath === "string" ? parsed.mediaPath : undefined,
+      media:
+        parsed.media &&
+        typeof parsed.media === "object" &&
+        parsed.media !== null &&
+        typeof parsed.media.path === "string" &&
+        (parsed.media.type === "image" || parsed.media.type === "audio") &&
+        typeof parsed.media.mimeType === "string" &&
+        typeof parsed.media.sizeBytes === "number"
+          ? parsed.media
+          : undefined,
       senderAvatarPath: typeof parsed.senderAvatarPath === "string" ? parsed.senderAvatarPath : undefined,
       clientRequestId:
         typeof parsed.clientRequestId === "string" &&
@@ -111,7 +130,7 @@ export const serializeWishDraft = (draft: WishDraft): StoredWishDraft => ({
   version: WISH_DRAFT_VERSION,
   content: draft.content,
   senderName: draft.senderName,
-  mediaPath: draft.mediaPath,
+  media: draft.media,
   senderAvatarPath: draft.senderAvatarPath,
   clientRequestId: draft.clientRequestId,
   // Keep the device identifier in runtime state only; it must not be persisted

@@ -1,5 +1,5 @@
 -- Create wish_reactions table
-create table public.wish_reactions (
+create table if not exists public.wish_reactions (
   id uuid primary key default gen_random_uuid(),
   wish_id uuid not null references public.wishes(id) on delete cascade,
   actor_id uuid references auth.users(id) on delete cascade,

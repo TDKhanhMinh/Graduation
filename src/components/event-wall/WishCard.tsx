@@ -1,18 +1,16 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import type { PublicWish } from "@/features/wishes/dal"
 import { PublicMediaRenderer } from "./PublicMediaRenderer"
+import { PublicAvatar } from "./PublicAvatar"
 import { ReactionBar } from "./reaction-bar"
 
-import Image from "next/image"
 
 export function WishCard({ wish }: { wish: PublicWish }) {
   return (
     <Card className={`overflow-hidden transition-all hover:shadow-md ${wish.is_pinned ? 'border-primary shadow-sm' : ''}`}>
       <CardHeader className="p-4 pb-2 flex flex-row items-center gap-3 space-y-0">
         {wish.sender_avatar_path ? (
-          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full overflow-hidden bg-muted">
-            <Image src={wish.sender_avatar_path} alt={wish.sender_name} fill className="object-cover" />
-          </div>
+          <PublicAvatar wishId={wish.id} path={wish.sender_avatar_path} alt={wish.sender_name} />
         ) : (
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
             {wish.sender_name.charAt(0).toUpperCase()}
@@ -38,7 +36,7 @@ export function WishCard({ wish }: { wish: PublicWish }) {
       </CardHeader>
       <CardContent className="p-4 pt-2">
         <p className="text-sm whitespace-pre-wrap">{wish.content}</p>
-        {wish.media && <PublicMediaRenderer media={wish.media} />}
+        {wish.media && <PublicMediaRenderer wishId={wish.id} media={wish.media} />}
         <ReactionBar initialCounts={wish.reactions || []} wishId={wish.id} />
       </CardContent>
     </Card>

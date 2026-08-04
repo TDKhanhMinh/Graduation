@@ -5,7 +5,15 @@ export type SubmitWishInput = {
   content: string
   captchaToken: string
   deviceKey: string
-  mediaPath?: string
+  media?: {
+    path: string
+    type: "image" | "audio"
+    mimeType: string
+    sizeBytes: number
+    durationMs?: number
+    width?: number
+    height?: number
+  }
   senderAvatarPath?: string
 }
 

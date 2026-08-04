@@ -9,68 +9,41 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      export_jobs: {
+      cleanup_run_logs: {
         Row: {
+          error_details: string | null
           id: string
-          event_id: string
-          owner_id: string
-          idempotency_key: string | null
-          status: 'queued' | 'processing' | 'completed' | 'failed'
-          snapshot: Json | null
-          token: string
-          output_path: string | null
-          retry_count: number
-          claimed_at: string | null
-          claimed_by: string | null
-          created_at: string
-          updated_at: string
+          orphans_deleted_bytes: number
+          orphans_deleted_count: number
+          rejected_deleted_bytes: number
+          rejected_deleted_count: number
+          run_ended_at: string | null
+          run_started_at: string
+          status: string
         }
         Insert: {
+          error_details?: string | null
           id?: string
-          event_id: string
-          owner_id: string
-          idempotency_key?: string | null
-          status?: 'queued' | 'processing' | 'completed' | 'failed'
-          snapshot?: Json | null
-          token: string
-          output_path?: string | null
-          retry_count?: number
-          claimed_at?: string | null
-          claimed_by?: string | null
-          created_at?: string
-          updated_at?: string
+          orphans_deleted_bytes?: number
+          orphans_deleted_count?: number
+          rejected_deleted_bytes?: number
+          rejected_deleted_count?: number
+          run_ended_at?: string | null
+          run_started_at?: string
+          status: string
         }
         Update: {
+          error_details?: string | null
           id?: string
-          event_id?: string
-          owner_id?: string
-          idempotency_key?: string | null
-          status?: 'queued' | 'processing' | 'completed' | 'failed'
-          snapshot?: Json | null
-          token?: string
-          output_path?: string | null
-          retry_count?: number
-          claimed_at?: string | null
-          claimed_by?: string | null
-          created_at?: string
-          updated_at?: string
+          orphans_deleted_bytes?: number
+          orphans_deleted_count?: number
+          rejected_deleted_bytes?: number
+          rejected_deleted_count?: number
+          run_ended_at?: string | null
+          run_started_at?: string
+          status?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "export_jobs_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "export_jobs_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
+        Relationships: []
       }
       events: {
         Row: {
@@ -85,6 +58,9 @@ export type Database = {
           event_date: string | null
           id: string
           max_wish_length: number
+          media_quota_bytes: number
+          media_reserved_bytes: number
+          media_usage_bytes: number
           owner_id: string
           settings: Json
           slug: string
@@ -106,6 +82,9 @@ export type Database = {
           event_date?: string | null
           id?: string
           max_wish_length?: number
+          media_quota_bytes?: number
+          media_reserved_bytes?: number
+          media_usage_bytes?: number
           owner_id: string
           settings?: Json
           slug: string
@@ -127,6 +106,9 @@ export type Database = {
           event_date?: string | null
           id?: string
           max_wish_length?: number
+          media_quota_bytes?: number
+          media_reserved_bytes?: number
+          media_usage_bytes?: number
           owner_id?: string
           settings?: Json
           slug?: string
@@ -137,6 +119,62 @@ export type Database = {
           visibility?: string
         }
         Relationships: []
+      }
+      media_upload_sessions: {
+        Row: {
+          asset_role: string
+          client_request_id: string
+          consumed_at: string | null
+          created_at: string
+          event_id: string
+          expires_at: string
+          id: string
+          max_size_bytes: number
+          media_type: string
+          mime_type: string
+          reservation_bytes: number | null
+          storage_bucket: string
+          storage_path: string
+        }
+        Insert: {
+          asset_role: string
+          client_request_id: string
+          consumed_at?: string | null
+          created_at?: string
+          event_id: string
+          expires_at: string
+          id?: string
+          max_size_bytes: number
+          media_type: string
+          mime_type: string
+          reservation_bytes?: number | null
+          storage_bucket?: string
+          storage_path: string
+        }
+        Update: {
+          asset_role?: string
+          client_request_id?: string
+          consumed_at?: string | null
+          created_at?: string
+          event_id?: string
+          expires_at?: string
+          id?: string
+          max_size_bytes?: number
+          media_type?: string
+          mime_type?: string
+          reservation_bytes?: number | null
+          storage_bucket?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_upload_sessions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       moderation_audit_logs: {
         Row: {
@@ -217,6 +255,41 @@ export type Database = {
         }
         Relationships: []
       }
+      realtime_wall_events: {
+        Row: {
+          action: string
+          created_at: string
+          event_id: string
+          id: number
+          payload: Json | null
+          wish_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          event_id: string
+          id?: never
+          payload?: Json | null
+          wish_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          event_id?: string
+          id?: never
+          payload?: Json | null
+          wish_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "realtime_wall_events_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wish_media: {
         Row: {
           created_at: string
@@ -264,14 +337,14 @@ export type Database = {
           {
             foreignKeyName: "wish_media_wish_id_fkey"
             columns: ["wish_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "public_wishes_view"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "wish_media_wish_id_fkey"
             columns: ["wish_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "wishes"
             referencedColumns: ["id"]
           },
@@ -393,9 +466,9 @@ export type Database = {
           event_id: string | null
           id: string | null
           is_pinned: boolean | null
+          media: Json | null
           sender_avatar_path: string | null
           sender_name: string | null
-          media: Json | null
         }
         Relationships: [
           {
@@ -409,6 +482,29 @@ export type Database = {
       }
     }
     Functions: {
+      create_media_upload_session: {
+        Args: {
+          p_asset_role: string
+          p_client_request_id: string
+          p_event_id: string
+          p_expires_at: string
+          p_max_size_bytes: number
+          p_media_type: string
+          p_mime_type: string
+          p_storage_bucket: string
+          p_storage_path: string
+        }
+        Returns: string
+      }
+      get_media_to_cleanup: {
+        Args: never
+        Returns: {
+          cleanup_type: string
+          media_id: string
+          size_bytes: number
+          storage_path: string
+        }[]
+      }
       moderate_wishes: {
         Args: {
           p_action: string
@@ -425,28 +521,76 @@ export type Database = {
           wish_id: string
         }[]
       }
-      submit_wish_transaction: {
+      submit_wish_transaction:
+        | {
+            Args: {
+              p_client_request_id: string
+              p_content: string
+              p_device_hash: string
+              p_device_limit?: number
+              p_event_id: string
+              p_event_limit?: number
+              p_ip_hash: string
+              p_ip_limit?: number
+              p_media_duration_ms?: number
+              p_media_height?: number
+              p_media_mime_type?: string
+              p_media_path?: string
+              p_media_size_bytes?: number
+              p_media_type?: string
+              p_media_width?: number
+              p_sender_name: string
+              p_window_seconds?: number
+            }
+            Returns: {
+              created_at: string
+              max_wish_length: number
+              moderation_status: string
+              result_code: string
+              retry_after_seconds: number
+              was_duplicate: boolean
+              wish_id: string
+            }[]
+          }
+        | {
+            Args: {
+              p_client_request_id: string
+              p_content: string
+              p_device_hash: string
+              p_device_limit?: number
+              p_event_id: string
+              p_event_limit?: number
+              p_ip_hash: string
+              p_ip_limit?: number
+              p_media_duration_ms?: number
+              p_media_height?: number
+              p_media_mime_type?: string
+              p_media_path?: string
+              p_media_size_bytes?: number
+              p_media_type?: string
+              p_media_width?: number
+              p_sender_avatar_path: string
+              p_sender_name: string
+              p_window_seconds?: number
+            }
+            Returns: {
+              created_at: string
+              max_wish_length: number
+              moderation_status: string
+              result_code: string
+              retry_after_seconds: number
+              was_duplicate: boolean
+              wish_id: string
+            }[]
+          }
+      toggle_wish_reaction: {
         Args: {
-          p_client_request_id: string
-          p_content: string
-          p_device_hash: string
-          p_device_limit?: number
-          p_event_id: string
-          p_event_limit?: number
-          p_ip_hash: string
-          p_ip_limit?: number
-          p_sender_name: string
-          p_window_seconds?: number
+          p_actor_id: string
+          p_actor_key_hash: string
+          p_emoji: string
+          p_wish_id: string
         }
-        Returns: {
-          created_at: string
-          max_wish_length: number
-          moderation_status: string
-          result_code: string
-          retry_after_seconds: number
-          was_duplicate: boolean
-          wish_id: string
-        }[]
+        Returns: boolean
       }
     }
     Enums: {

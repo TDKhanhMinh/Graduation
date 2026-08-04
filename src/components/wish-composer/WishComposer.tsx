@@ -46,7 +46,7 @@ export function WishComposer({
   const openButtonRef = useRef<HTMLButtonElement>(null)
   const contentRef = useRef<HTMLTextAreaElement>(null)
   const inFlightRef = useRef(false)
-  const { draft, hydrated, setContent, setSenderName, setMediaPath, setSenderAvatarPath, beginNewDraft } =
+  const { draft, hydrated, setContent, setSenderName, setMedia, setSenderAvatarPath, beginNewDraft } =
     useWishDraft(eventId)
 
   const [step, setStep] = useState<1 | 2>(1)
@@ -127,7 +127,7 @@ export function WishComposer({
         content: draft.content.trim(),
         captchaToken,
         deviceKey: draft.deviceKey,
-        mediaPath: draft.mediaPath,
+        media: draft.media,
         senderAvatarPath: draft.senderAvatarPath,
       })
 
@@ -297,16 +297,15 @@ export function WishComposer({
                 <div className="mt-4">
                   <Label className="mb-2 block">Đính kèm ảnh hoặc ghi âm (Tùy chọn)</Label>
                   <div className="flex flex-col gap-4">
-                    {(!draft.mediaPath || !draft.mediaPath.match(/\.(webm|mp4|ogg|aac|wav)$/i)) && (
+                    {!draft.media && (
                       <ImageUploadField
                         eventId={eventId}
                         clientRequestId={draft.clientRequestId}
-                        onUploadSuccess={(path) => setMediaPath(path)}
-                        onRemove={() => setMediaPath(undefined)}
-                        disabled={!!draft.mediaPath}
+                        onUploadSuccess={(media) => setMedia(media)}
+                        onRemove={() => setMedia(undefined)}
                       />
                     )}
-                    {!draft.mediaPath && (
+                    {!draft.media && (
                       <div className="relative">
                         <div className="absolute inset-0 flex items-center">
                           <span className="w-full border-t" />
@@ -316,17 +315,16 @@ export function WishComposer({
                         </div>
                       </div>
                     )}
-                    {(!draft.mediaPath || draft.mediaPath.match(/\.(webm|mp4|ogg|aac|wav)$/i)) && (
+                    {(!draft.media || draft.media.type === "audio") && (
                       <AudioRecorderField
                         eventId={eventId}
                         clientRequestId={draft.clientRequestId}
-                        onUploadSuccess={(path) => setMediaPath(path)}
-                        onRemove={() => setMediaPath(undefined)}
-                        disabled={!!draft.mediaPath}
+                        onUploadSuccess={(media) => setMedia(media)}
+                        onRemove={() => setMedia(undefined)}
                       />
                     )}
                   </div>
-                  {draft.mediaPath && (
+                  {draft.media && (
                     <p className="mt-2 text-xs font-medium text-green-600">Đã đính kèm file thành công.</p>
                   )}
                 </div>
@@ -371,7 +369,7 @@ export function WishComposer({
                   <ImageUploadField
                     eventId={eventId}
                     clientRequestId={draft.clientRequestId}
-                    onUploadSuccess={(path) => setSenderAvatarPath(path)}
+                    onUploadSuccess={(media) => setSenderAvatarPath(media.path)}
                     onRemove={() => setSenderAvatarPath(undefined)}
                     isAvatar
                   />

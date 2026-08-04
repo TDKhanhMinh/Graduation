@@ -1,71 +1,68 @@
-  "use client"
+"use client";
 
-import { createClient } from "@/lib/supabase/client"
-import Image from "next/image"
-import { useEffect, useState } from "react"
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
 type MediaProps = {
+  wishId: string;
   media: {
-    path: string
-    type: 'image' | 'audio'
-    mime_type: string
-  }
-}
+    path: string;
+    type: "image" | "audio";
+    mime_type: string;
+  };
+};
 
-export function PublicMediaRenderer({ media }: MediaProps) {
-  const [url, setUrl] = useState<string | null>(null)
-  const [error, setError] = useState(false)
-  const supabase = createClient()
+type Resolution = {
+  key: string;
+  url: string | null;
+  error: boolean;
+};
+
+export function PublicMediaRenderer({ wishId, media }: MediaProps) {
+  const mediaKey = wishId + ':' + media.path;
+  const [resolution, setResolution] = useState<Resolution | null>(null);
 
   useEffect(() => {
-    let active = true
-    async function loadUrl() {
-      // If the path is already a full URL (like Cloudinary), use it directly
-      if (media.path.startsWith('http://') || media.path.startsWith('https://')) {
-        if (active) setUrl(media.path)
-        return
-      }
+    let active = true;
 
-      // Legacy fallback: Create signed URL from Supabase valid for 2 hours
-      const { data, error } = await supabase
-        .storage
-        .from('event-media-private')
-        .createSignedUrl(media.path, 7200)
+    void fetch("/api/media/public-url", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ wishId, path: media.path, kind: "media" }),
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Media unavailable");
+        const body = await response.json() as { signedUrl?: string };
+        if (!body.signedUrl) throw new Error("Media unavailable");
+        if (active) setResolution({ key: mediaKey, url: body.signedUrl, error: false });
+      })
+      .catch(() => {
+        if (active) setResolution({ key: mediaKey, url: null, error: true });
+      });
 
-      if (error || !data) {
-        console.error("Failed to load media URL", error)
-        if (active) setError(true)
-      } else {
-        if (active) setUrl(data.signedUrl)
-      }
-    }
-    loadUrl()
-    return () => { active = false }
-  }, [media.path, supabase])
+    return () => {
+      active = false;
+    };
+  }, [media.path, mediaKey, wishId]);
 
-  if (error) return <div className="text-sm text-red-500 italic p-2 border rounded-md">Failed to load media</div>
-  if (!url) return <div className="animate-pulse bg-muted rounded-md h-32 w-full mt-2" />
+  const currentResolution = resolution?.key === mediaKey ? resolution : null;
+  const url = currentResolution?.url ?? null;
+  const error = currentResolution?.error ?? false;
 
-  if (media.type === 'image') {
+  if (error) return <div className="rounded-md border p-2 text-sm italic text-red-500">Media unavailable</div>;
+  if (!url) return <div className="mt-2 h-32 w-full animate-pulse rounded-md bg-muted" />;
+
+  if (media.type === "image") {
     return (
-      <div className="relative mt-2 w-full pt-[56.25%] rounded-md overflow-hidden bg-muted">
-        <Image 
-          src={url} 
-          alt="User uploaded media" 
-          fill 
-          className="object-contain"
-        />
+      <div className="relative mt-2 w-full overflow-hidden rounded-md bg-muted pt-[56.25%]">
+        <Image src={url} alt="User uploaded media" fill className="object-contain" />
       </div>
-    )
+    );
   }
 
-  if (media.type === 'audio') {
-    return (
-      <div className="mt-2 w-full bg-muted/30 p-2 rounded-md">
-        <audio src={url} controls className="h-10 w-full" preload="none" />
-      </div>
-    )
-  }
-
-  return null
+  return (
+    <div className="mt-2 w-full rounded-md bg-muted/30 p-2">
+      <audio src={url} controls className="h-10 w-full" preload="none" />
+    </div>
+  );
 }

@@ -8,6 +8,7 @@ import {
   EMPTY_WISH_DRAFT,
   parseStoredWishDraft,
   serializeWishDraft,
+  type WishDraftMedia,
   wishDraftReducer,
 } from "./draft"
 
@@ -57,7 +58,7 @@ export function useWishDraft(eventId: string) {
     setContent: (value: string) => dispatch({ type: "content", value }),
     setSenderName: (value: string) =>
       dispatch({ type: "senderName", value }),
-    setMediaPath: (value?: string) => dispatch({ type: "mediaPath", value }),
+    setMedia: (value?: WishDraftMedia) => dispatch({ type: "media", value }),
     setSenderAvatarPath: (value?: string) => dispatch({ type: "senderAvatarPath", value }),
     beginNewDraft,
   }

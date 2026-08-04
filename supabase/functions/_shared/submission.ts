@@ -1,6 +1,23 @@
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const URL_PATTERN = /\b(?:https?:\/\/|www\.)[^\s<>{}[\]]+/gi;
+const MEDIA_PATH_PATTERN =
+  /^[0-9a-f-]{36}\/[0-9a-f-]{36}\/(?:avatar_)?[0-9a-f-]{36}\.(?:jpg|jpeg|png|webp|heic|mp3|mp4|m4a|webm|aac|wav|ogg)$/i;
+const IMAGE_MIME_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/heic',
+]);
+const AUDIO_MIME_TYPES = new Set([
+  'audio/mpeg',
+  'audio/mp4',
+  'audio/webm',
+  'audio/aac',
+  'audio/wav',
+  'audio/ogg',
+  'audio/x-m4a',
+]);
 
 const SERVER_OWNED_FIELDS = new Set([
   'status',
@@ -23,6 +40,7 @@ const ALLOWED_FIELDS = new Set([
   'captchaToken',
   'deviceKey',
   'media',
+  'senderAvatarPath',
 ]);
 
 export type SubmitWishRequest = {
@@ -41,6 +59,7 @@ export type SubmitWishRequest = {
     width?: number;
     height?: number;
   };
+  senderAvatarPath?: string;
 };
 
 export type SubmissionValidationIssue = {
@@ -129,22 +148,62 @@ export const parseSubmitWishRequest = (input: unknown): SubmissionParseResult =>
     return { success: false, issues };
   }
 
-  let mediaParsed = undefined;
-  if (input.media && isRecord(input.media)) {
-    const m = input.media as Record<string, unknown>;
-    if (typeof m.path !== 'string' || typeof m.type !== 'string' || typeof m.mimeType !== 'string' || typeof m.sizeBytes !== 'number') {
+  let mediaParsed: SubmitWishRequest['media'];
+  if (input.media !== undefined) {
+    if (!isRecord(input.media)) {
       addIssue(issues, 'media', 'INVALID_MEDIA', 'Media object is missing required fields.');
     } else {
-      mediaParsed = {
-        path: m.path as string,
-        type: m.type as 'image' | 'audio',
-        mimeType: m.mimeType as string,
-        sizeBytes: m.sizeBytes as number,
-        durationMs: typeof m.durationMs === 'number' ? m.durationMs : undefined,
-        width: typeof m.width === 'number' ? m.width : undefined,
-        height: typeof m.height === 'number' ? m.height : undefined,
-      };
+      const m = input.media;
+      const mediaType = m.type === 'image' || m.type === 'audio' ? m.type : null;
+      const mimeType = typeof m.mimeType === 'string' ? m.mimeType.toLowerCase() : '';
+      const sizeBytes = typeof m.sizeBytes === 'number' ? m.sizeBytes : 0;
+      const allowedMime = mediaType === 'image'
+        ? IMAGE_MIME_TYPES.has(mimeType)
+        : mediaType === 'audio'
+          ? AUDIO_MIME_TYPES.has(mimeType)
+          : false;
+      const maxBytes = mediaType === 'image' ? 5 * 1024 * 1024 : 8 * 1024 * 1024;
+      const durationMs = typeof m.durationMs === 'number' ? m.durationMs : undefined;
+      const dimensionsValid =
+        (m.width === undefined || (typeof m.width === 'number' && Number.isInteger(m.width) && m.width > 0 && m.width <= 10000)) &&
+        (m.height === undefined || (typeof m.height === 'number' && Number.isInteger(m.height) && m.height > 0 && m.height <= 10000));
+
+      if (
+        typeof m.path !== 'string' ||
+        !MEDIA_PATH_PATTERN.test(m.path) ||
+        !mediaType ||
+        !allowedMime ||
+        !Number.isInteger(sizeBytes) ||
+        sizeBytes <= 0 ||
+        sizeBytes > maxBytes ||
+        (mediaType === 'audio' && (durationMs === undefined || !Number.isInteger(durationMs) || durationMs < 1 || durationMs > 90000)) ||
+        (mediaType === 'image' && durationMs !== undefined) ||
+        !dimensionsValid
+      ) {
+        addIssue(issues, 'media', 'INVALID_MEDIA', 'Media metadata or path is invalid.');
+      } else {
+        mediaParsed = {
+          path: m.path,
+          type: mediaType,
+          mimeType,
+          sizeBytes,
+          durationMs,
+          width: typeof m.width === 'number' ? m.width : undefined,
+          height: typeof m.height === 'number' ? m.height : undefined,
+        };
+      }
     }
+  }
+
+  const senderAvatarPath = input.senderAvatarPath === undefined
+    ? undefined
+    : normalizedString(input.senderAvatarPath);
+  if (senderAvatarPath !== undefined && !MEDIA_PATH_PATTERN.test(senderAvatarPath)) {
+    addIssue(issues, 'senderAvatarPath', 'INVALID_MEDIA', 'Avatar path is invalid.');
+  }
+
+  if (mediaParsed?.path === senderAvatarPath) {
+    addIssue(issues, 'media', 'INVALID_MEDIA', 'Media and avatar must use separate upload sessions.');
   }
 
   if (issues.length > 0) {
@@ -161,6 +220,7 @@ export const parseSubmitWishRequest = (input: unknown): SubmissionParseResult =>
       captchaToken,
       deviceKey,
       media: mediaParsed,
+      senderAvatarPath,
     },
   };
 };

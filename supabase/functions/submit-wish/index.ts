@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { verifyCaptcha } from '../_shared/captcha.ts';
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import { createRequestContext, logger, requestDurationMs } from '../_shared/logger.ts';
+import { validateUploadedMedia } from '../_shared/media.ts';
 import { getClientIp, hashIdentifier } from '../_shared/security.ts';
 import { parseSubmitWishRequest } from '../_shared/submission.ts';
 
@@ -168,6 +169,41 @@ Deno.serve(async (req) => {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
+    if (parsed.data.media) {
+      const mediaValidation = await validateUploadedMedia(
+        supabase,
+        parsed.data.media.path,
+        parsed.data.media.type,
+        parsed.data.media.mimeType,
+      );
+      if (!mediaValidation.valid) {
+        resultCode = mediaValidation.code;
+        return errorResponse(
+          mediaValidation.code,
+          'Uploaded media could not be verified.',
+          400,
+          context.requestId,
+        );
+      }
+    }
+
+    if (parsed.data.senderAvatarPath) {
+      const avatarValidation = await validateUploadedMedia(
+        supabase,
+        parsed.data.senderAvatarPath,
+        'image',
+      );
+      if (!avatarValidation.valid) {
+        resultCode = avatarValidation.code;
+        return errorResponse(
+          avatarValidation.code,
+          'Uploaded avatar could not be verified.',
+          400,
+          context.requestId,
+        );
+      }
+    }
+
     const { data, error } = await supabase.rpc('submit_wish_transaction', {
       p_event_id: parsed.data.eventId,
       p_client_request_id: parsed.data.clientRequestId,
@@ -182,6 +218,7 @@ Deno.serve(async (req) => {
       p_media_duration_ms: parsed.data.media?.durationMs || null,
       p_media_width: parsed.data.media?.width || null,
       p_media_height: parsed.data.media?.height || null,
+      p_sender_avatar_path: parsed.data.senderAvatarPath || null,
     });
 
     if (error || !Array.isArray(data) || data.length !== 1) {
