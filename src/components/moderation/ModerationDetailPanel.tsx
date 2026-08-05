@@ -18,7 +18,7 @@ export function ModerationDetailPanel({ wish }: { wish: ModerationWish | null })
   }
 
   return (
-    <Card className="min-w-0">
+    <Card className="min-w-0 border-primary/20 shadow-md">
       <CardHeader>
         <CardTitle className="truncate">{wish.sender_name}</CardTitle>
         <CardDescription>
@@ -30,7 +30,7 @@ export function ModerationDetailPanel({ wish }: { wish: ModerationWish | null })
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="rounded-xl border bg-surface-sunken p-4">
+        <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4">
           <p className="whitespace-pre-wrap break-words text-sm leading-6">
             {wish.content || <span className="italic text-muted-foreground">No content</span>}
           </p>

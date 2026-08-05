@@ -1,17 +1,20 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { AlertCircle, CheckCircle2, RefreshCcw, Wifi, WifiOff } from "lucide-react"
+import { AlertCircle, CheckCircle2, LayoutGrid, Maximize2, RefreshCcw, Smartphone, Wifi, WifiOff } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { FeedbackState } from "@/components/ui/feedback-state"
 import { type PublicWish } from "@/features/wishes/dal"
 import { type RealtimeWallEvent, useRealtimeWallEvents } from "@/features/wishes/realtime"
+import { cn } from "@/lib/utils"
 
 import { WishCard } from "./WishCard"
 
 type WallFilter = "all" | "pinned" | "media"
 type WallSort = "newest" | "oldest"
+type WallLayout = "spotlight" | "grid" | "photo-focus"
+type WallAspect = "wide" | "portrait"
 
 export function RealtimeWall({
   eventId,
@@ -27,6 +30,8 @@ export function RealtimeWall({
   const [refetchError, setRefetchError] = useState(false)
   const [filter, setFilter] = useState<WallFilter>("all")
   const [sort, setSort] = useState<WallSort>("newest")
+  const [layout, setLayout] = useState<WallLayout>("spotlight")
+  const [aspect, setAspect] = useState<WallAspect>("wide")
   const wishesLengthRef = useRef(initialWishes.length)
 
   useEffect(() => {
@@ -95,12 +100,22 @@ export function RealtimeWall({
       data-testid="realtime-wall"
       data-connection-status={status}
     >
-      <div className="mb-4 flex flex-col gap-3 rounded-xl border bg-card p-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-[var(--event-border)] bg-[var(--event-surface)] p-3 shadow-sm sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-wrap gap-3">
-          <label className="flex min-w-40 flex-col gap-1 text-sm"><span className="font-medium">Filter wishes</span><select value={filter} onChange={(event) => setFilter(event.target.value as WallFilter)} className="min-h-(--control-min-size) rounded-lg border bg-background px-3"><option value="all">All wishes</option><option value="pinned">Pinned</option><option value="media">With media</option></select></label>
-          <label className="flex min-w-40 flex-col gap-1 text-sm"><span className="font-medium">Sort</span><select value={sort} onChange={(event) => setSort(event.target.value as WallSort)} className="min-h-(--control-min-size) rounded-lg border bg-background px-3"><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select></label>
+          <label className="flex min-w-40 flex-col gap-1 text-sm"><span className="font-medium">Filter wishes</span><select value={filter} onChange={(event) => setFilter(event.target.value as WallFilter)} className="min-h-(--control-min-size) rounded-xl border-[var(--event-border)] bg-background/70 px-3"><option value="all">All wishes</option><option value="pinned">Pinned</option><option value="media">With media</option></select></label>
+          <label className="flex min-w-40 flex-col gap-1 text-sm"><span className="font-medium">Sort</span><select value={sort} onChange={(event) => setSort(event.target.value as WallSort)} className="min-h-(--control-min-size) rounded-xl border-[var(--event-border)] bg-background/70 px-3"><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select></label>
         </div>
         {filter !== "all" || sort !== "newest" ? <Button type="button" variant="ghost" onClick={() => { setFilter("all"); setSort("newest") }}>Reset filters</Button> : null}
+      </div>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--event-border)] bg-[var(--event-surface)] px-3 py-2.5" data-testid="wall-customizer">
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Bố cục public wall">
+          <span className="px-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Layout</span>
+          {(["spotlight", "grid", "photo-focus"] as const).map((value) => <Button key={value} type="button" size="sm" variant={layout === value ? "default" : "ghost"} onClick={() => setLayout(value)} aria-pressed={layout === value}>{value === "spotlight" ? "Spotlight" : value === "grid" ? <><LayoutGrid aria-hidden="true" />Grid</> : "Photo focus"}</Button>)}
+        </div>
+        <div className="flex items-center gap-2" role="group" aria-label="Tỷ lệ hiển thị public wall">
+          <Button type="button" size="sm" variant={aspect === "wide" ? "soft" : "ghost"} onClick={() => setAspect("wide")} aria-pressed={aspect === "wide"}><Maximize2 aria-hidden="true" />16:9</Button>
+          <Button type="button" size="sm" variant={aspect === "portrait" ? "soft" : "ghost"} onClick={() => setAspect("portrait")} aria-pressed={aspect === "portrait"}><Smartphone aria-hidden="true" />9:16</Button>
+        </div>
       </div>
       {showConnectionNotice ? (
         <div
@@ -171,10 +186,12 @@ export function RealtimeWall({
           className="min-h-52"
         />
       ) : (
-        <div className="columns-1 min-w-0 gap-4 md:columns-2 lg:columns-3 min-[1440px]:columns-4">
-          {visibleWishes.map((wish) => (
-            <WishCard key={wish.id} wish={wish} className="mb-4" />
-          ))}
+        <div className={cn("min-w-0", aspect === "portrait" ? "max-h-[70vh] overflow-y-auto rounded-2xl border border-[var(--event-border)] bg-black/5 p-[4vw]" : "rounded-2xl border border-[var(--event-border)] bg-black/5 p-[4vw]")} data-wall-layout={layout} data-wall-aspect={aspect}>
+          <div className={cn(layout === "grid" && "grid gap-4 md:grid-cols-2 lg:grid-cols-3", layout === "photo-focus" && "grid gap-4 sm:grid-cols-2 lg:grid-cols-3", layout === "spotlight" && "grid gap-5 lg:grid-cols-3")}>
+            {visibleWishes.map((wish, index) => (
+              <WishCard key={wish.id} wish={wish} className={cn(layout === "spotlight" && index === 0 && "lg:col-span-2", layout === "photo-focus" && "min-h-64")} />
+            ))}
+          </div>
         </div>
       )}
 

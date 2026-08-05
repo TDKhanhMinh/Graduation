@@ -83,8 +83,8 @@ export default async function PublicEventPage({ params }: Props) {
   const wishes = await getApprovedWishesPage(event.id, 20)
 
   return (
-    <div className="min-h-screen bg-surface-sunken">
-      <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <div className="event-theme min-h-screen pb-24 text-[var(--event-text)] sm:pb-0" data-event-theme={event.theme_key}>
+      <header className="sticky top-0 z-10 border-b border-[var(--event-border)] bg-[var(--event-surface)] backdrop-blur-xl supports-[backdrop-filter]:bg-[var(--event-surface)]">
         <PageShell className="flex min-h-18 items-center justify-between gap-4 py-3">
           <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
@@ -104,7 +104,7 @@ export default async function PublicEventPage({ params }: Props) {
 
       <main id="main-content">
         <PageShell className="space-y-8 py-6 sm:py-8">
-          <section aria-labelledby="event-hero-title" className="overflow-hidden rounded-[2rem] border bg-card shadow-sm">
+          <section aria-labelledby="event-hero-title" className="overflow-hidden rounded-[2rem] border border-[var(--event-border)] bg-[var(--event-surface)] shadow-[0_28px_70px_-48px_var(--event-primary)]">
             <div className="grid min-h-[520px] lg:grid-cols-[3fr_2fr]">
               <div className="flex flex-col justify-center gap-6 p-6 sm:p-10 lg:p-14">
                 <StatusBadge tone="info" className="w-fit">A digital yearbook</StatusBadge>
@@ -133,14 +133,14 @@ export default async function PublicEventPage({ params }: Props) {
                 <div className="flex flex-wrap items-center gap-3">
                   <Link
                     href="#composer-heading"
-                    className={buttonVariants({ size: "lg", className: "min-h-(--control-min-size)" })}
+                    className={buttonVariants({ size: "lg", className: "min-h-(--control-min-size) bg-[var(--event-primary)] text-[var(--event-on-primary)] hover:opacity-90" })}
                   >
                     Send a wish
                   </Link>
                   <CopyEventLinkButton url={canonicalUrl} />
                 </div>
               </div>
-              <div className="relative min-h-64 overflow-hidden bg-[radial-gradient(circle_at_20%_20%,oklch(0.85_0.12_80),transparent_45%),linear-gradient(135deg,oklch(0.25_0.08_280),oklch(0.62_0.16_25))] lg:min-h-full">
+              <div className="relative min-h-64 overflow-hidden bg-[radial-gradient(circle_at_20%_20%,var(--event-secondary),transparent_45%),linear-gradient(135deg,var(--event-primary),var(--event-secondary))] lg:min-h-full">
                 {coverUrl ? (
                   <Image
                     src={coverUrl}
@@ -203,7 +203,8 @@ export default async function PublicEventPage({ params }: Props) {
             />
           </section>
         </PageShell>
-      </main>
-    </div>
+      </main>      <div className="fixed inset-x-3 bottom-3 z-20 sm:hidden">
+        <Link href="#composer-heading" className={buttonVariants({ size: "lg", className: "w-full rounded-2xl bg-[var(--event-primary)] text-[var(--event-on-primary)] shadow-xl hover:opacity-90" })}>Gửi lời chúc</Link>
+      </div>    </div>
   )
 }

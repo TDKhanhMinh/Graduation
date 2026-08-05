@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 
+import { ModerationMediaGallery } from "@/components/media/ModerationMediaGallery"
 import { AuditHistory } from "@/components/moderation/AuditHistory"
 import { ModerationClientWrapper } from "@/components/moderation/ModerationClientWrapper"
 import { FeedbackState } from "@/components/ui/feedback-state"
@@ -25,7 +26,7 @@ export default async function ModerationPage({
   ])
 
   return (
-    <div className="min-w-0 space-y-6 pb-10">
+    <div className="min-w-0 space-y-7 pb-10">
       <SectionHeading
         title="Kiểm duyệt lời chúc"
         description="Lọc, xem preview an toàn và xử lý từng hoặc nhiều lời chúc."
@@ -40,8 +41,8 @@ export default async function ModerationPage({
           <Suspense fallback={<FeedbackState status="loading" title="Đang tải lịch sử" />}>
             <AuditHistory logs={auditLogs} />
           </Suspense>
-        </div>
-      </div>
+        </div>      </div>
+      <ModerationMediaGallery wishes={wishes} />
     </div>
   )
 }

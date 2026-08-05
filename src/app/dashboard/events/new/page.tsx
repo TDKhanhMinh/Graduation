@@ -2,6 +2,7 @@ import { ChevronLeft } from "lucide-react"
 import Link from "next/link"
 
 import { createEvent } from "@/features/events/actions"
+import { EventCreationPreview } from "@/components/events/event-creation-preview"
 import { EventForm } from "@/components/events/EventForm"
 import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -31,11 +32,14 @@ export default function NewEventPage() {
         }
       />
 
-      <Card>
-        <CardContent className="pt-6">
-          <EventForm action={createEvent} submitLabel="Tạo sự kiện" />
-        </CardContent>
-      </Card>
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <Card>
+          <CardContent className="pt-6">
+            <EventForm action={createEvent} submitLabel="Tạo sự kiện" />
+          </CardContent>
+        </Card>
+        <EventCreationPreview />
+      </div>
     </div>
   )
 }

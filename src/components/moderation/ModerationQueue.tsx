@@ -50,7 +50,7 @@ export function ModerationQueue({
 
   return (
     <div className="min-w-0">
-      <div className="hidden overflow-hidden rounded-xl border bg-card lg:block">
+      <div className="hidden overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm lg:block">
         <Table>
           <TableHeader>
             <TableRow>
@@ -103,7 +103,7 @@ export function ModerationQueue({
       </div>
 
       <div className="grid gap-3 lg:hidden">
-        <div className="flex items-center justify-between rounded-lg border bg-card px-3 py-3">
+        <div className="flex items-center justify-between rounded-2xl border border-border/80 bg-card px-3 py-3 shadow-sm">
           <label className="flex min-h-(--control-min-size) items-center gap-3 text-sm font-medium">
             <Checkbox checked={isAllSelected} onCheckedChange={onSelectAll} aria-label="Chọn tất cả lời chúc" />
             Chọn tất cả trên trang
@@ -113,7 +113,7 @@ export function ModerationQueue({
         {wishes.map((wish) => (
           <article
             key={wish.id}
-            className="min-w-0 rounded-xl border bg-card p-4"
+            className="min-w-0 rounded-2xl border border-border/80 bg-card p-4 shadow-sm transition-colors focus-within:border-primary/40 hover:border-primary/30"
             data-state={selectedWishId === wish.id ? "inspected" : selectedIds.includes(wish.id) ? "selected" : undefined}
             tabIndex={0}
             role="button"

@@ -54,6 +54,13 @@ Tokens live in src/app/globals.css so they load from the root layout for every A
 | --card-padding | Desktop card content padding | 1.25rem-1.5rem; compact only on narrow screens |
 | --control-min-size | Minimum touch target | Target 2.75rem for primary/icon controls |
 
+The visual refresh adds a Memory Bloom layer without changing the existing semantic contract:
+
+- Product UI brand tokens are exposed as brand-* and memory-* utilities. Violet is reserved for primary actions and active states; pink, peach and gold are accents.
+- Event Experience UI is scoped by .event-theme and data-event-theme values (graduation, editorial, minimal). Event variables must not be applied to dashboard surfaces.
+- Event components should use var(--event-*) through event variants rather than hard-coded event colors.
+- Motion durations use --motion-fast, --motion-base and --motion-soft; reduced-motion remains mandatory.
+
 Dark mode overrides semantic tokens in .dark. Reduced-motion behavior is defined globally with prefers-reduced-motion.
 
 ## Shared primitive contract

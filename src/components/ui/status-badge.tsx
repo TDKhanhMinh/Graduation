@@ -4,6 +4,9 @@ import { cn } from "@/lib/utils"
 
 const statusClasses = {
   neutral: "bg-muted text-muted-foreground",
+  brand: "bg-primary/12 text-primary",
+  memory: "bg-memory-pink/15 text-[color-mix(in_oklch,var(--memory-pink),black_35%)]",
+  gold: "bg-memory-gold/20 text-[color-mix(in_oklch,var(--memory-gold),black_48%)]",
   info: "bg-status-info/15 text-status-info",
   success: "bg-status-success/15 text-status-success",
   warning: "bg-status-warning/15 text-status-warning",

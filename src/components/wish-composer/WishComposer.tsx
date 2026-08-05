@@ -214,7 +214,7 @@ export function WishComposer({
 
       <dialog
         ref={dialogRef}
-        className="m-auto max-h-[85dvh] w-[calc(100%-1rem)] max-w-[68.75rem] rounded-2xl border bg-background p-0 text-foreground shadow-2xl backdrop:bg-black/50 sm:w-full"
+        className="m-0 min-h-dvh max-h-dvh w-full max-w-[68.75rem] rounded-none border-0 bg-background p-0 text-foreground shadow-2xl backdrop:bg-black/50 sm:m-auto sm:min-h-0 sm:max-h-[85dvh] sm:w-[calc(100%-1rem)] sm:rounded-3xl sm:border"
         aria-labelledby="wish-composer-title"
         aria-describedby="wish-composer-description"
         onClose={restoreOpenButtonFocus}
@@ -223,8 +223,8 @@ export function WishComposer({
         }}
         data-testid="wish-composer-dialog"
       >
-        <div className="flex max-h-[85dvh] flex-col">
-          <header className="space-y-4 border-b px-5 py-4">
+        <div className="flex max-h-dvh flex-col sm:max-h-[85dvh]">
+          <header className="space-y-4 border-b border-[var(--event-border)] bg-[var(--event-surface)] px-5 py-4 sm:px-7">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <p id="wish-composer-description" className="text-xs text-muted-foreground">
@@ -249,7 +249,7 @@ export function WishComposer({
             <StepIndicator step={step} />
           </header>
 
-          <div className="min-h-0 overflow-y-auto px-5 py-5 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)] lg:gap-8 lg:px-8 lg:py-7">
+          <div className="min-h-0 overflow-y-auto px-5 py-5 sm:px-7 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)] lg:gap-8 lg:px-8 lg:py-7">
             <div className="min-w-0">
             {pending ? (
               <div className="mb-4 flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm text-primary" role="status" aria-live="polite">
@@ -305,7 +305,7 @@ export function WishComposer({
                     }}
                     aria-describedby="wish-content-help wish-content-counter"
                     aria-invalid={Boolean(contentError) || counterInvalid}
-                    className="min-h-40 w-full resize-y rounded-lg border border-input bg-transparent px-3 py-2 text-base outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-focus/50 aria-invalid:border-destructive"
+                    className="min-h-40 w-full resize-y rounded-2xl border border-input bg-background/60 px-3 py-2 text-base outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-focus/50 aria-invalid:border-destructive"
                     placeholder="Viết lời chúc chân thành của bạn…"
                     required
                   />

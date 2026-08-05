@@ -47,7 +47,7 @@ export function AuthForm({ action, googleAction, mode, nextPath }: AuthFormProps
             <Label htmlFor="displayName">Tên hiển thị</Label>
             <Input
               autoComplete="name"
-              className="h-11"
+              className="h-11 rounded-xl border-border/80 bg-background/70"
               id="displayName"
               maxLength={100}
               minLength={2}
@@ -62,7 +62,7 @@ export function AuthForm({ action, googleAction, mode, nextPath }: AuthFormProps
           <Label htmlFor="email">Email</Label>
           <Input
             autoComplete="email"
-            className="h-11"
+            className="h-11 rounded-xl border-border/80 bg-background/70"
             id="email"
             name="email"
             required
@@ -76,7 +76,7 @@ export function AuthForm({ action, googleAction, mode, nextPath }: AuthFormProps
           <Label htmlFor="password">Mật khẩu</Label>
           <Input
             autoComplete={isSignUp ? "new-password" : "current-password"}
-            className="h-11"
+            className="h-11 rounded-xl border-border/80 bg-background/70"
             id="password"
             minLength={8}
             name="password"
@@ -95,7 +95,7 @@ export function AuthForm({ action, googleAction, mode, nextPath }: AuthFormProps
         {state.error ? (
           <p
             id={errorId}
-            className="rounded-lg border border-status-danger/30 bg-status-danger/10 px-3 py-2 text-sm text-status-danger"
+            className="rounded-xl border border-status-danger/30 bg-status-danger/10 px-3 py-2 text-sm text-status-danger"
             role="alert"
           >
             {state.error}
@@ -104,7 +104,7 @@ export function AuthForm({ action, googleAction, mode, nextPath }: AuthFormProps
 
         {state.message ? (
           <p
-            className="rounded-lg border border-status-success/30 bg-status-success/10 px-3 py-2 text-sm text-status-success"
+            className="rounded-xl border border-status-success/30 bg-status-success/10 px-3 py-2 text-sm text-status-success"
             role="status"
           >
             {state.message}
@@ -148,7 +148,7 @@ export function AuthForm({ action, googleAction, mode, nextPath }: AuthFormProps
         {googleState.error ? (
           <p
             id={googleErrorId}
-            className="mb-3 rounded-lg border border-status-danger/30 bg-status-danger/10 px-3 py-2 text-sm text-status-danger"
+            className="mb-3 rounded-xl border border-status-danger/30 bg-status-danger/10 px-3 py-2 text-sm text-status-danger"
             role="alert"
           >
             {googleState.error}

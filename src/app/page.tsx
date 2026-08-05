@@ -8,7 +8,6 @@ import {
   Users,
   GraduationCap,
   Heart,
-  Image as ImageIcon,
   MonitorPlay,
   Rocket,
   User,
@@ -16,6 +15,8 @@ import {
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
+import { MemoriaLogo } from "@/components/brand/memoria-logo"
+import { SparkleDecoration } from "@/components/brand/sparkle-decoration"
 import { PageShell } from "@/components/ui/page-shell"
 import { verifySession } from "@/lib/auth/dal"
 
@@ -105,21 +106,25 @@ export default async function Home() {
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden bg-surface-sunken text-foreground">
-      <header className="sticky inset-x-0 top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <header className="sticky inset-x-0 top-0 z-50 border-b border-border/80 bg-background/85 backdrop-blur-xl supports-[backdrop-filter]:bg-background/75">
         <PageShell className="flex h-16 items-center justify-between gap-4">
           <Link
             href="/"
-            className="flex min-h-[44px] items-center gap-2 rounded-lg font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/50"
+            aria-label="Memoria - Trang chủ"
+            className="rounded-xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/50"
           >
-            <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Sparkles aria-hidden="true" className="size-4" />
-            </span>
-            <span>Memoria</span>
+            <MemoriaLogo />
           </Link>
+
+          <nav aria-label="Điều hướng chính" className="hidden items-center gap-1 md:flex">
+            <a href="#how-it-works" className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/8 hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/50">Cách hoạt động</a>
+            <a href="#features" className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/8 hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/50">Tính năng</a>
+            <a href="#use-cases" className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/8 hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/50">Mẫu sự kiện</a>
+          </nav>
 
           {session ? (
             <Link href="/dashboard">
-              <Button variant="secondary" className="min-h-[44px]">Dashboard</Button>
+              <Button variant="soft" className="min-h-[44px]">Dashboard</Button>
             </Link>
           ) : (
             <div className="flex items-center gap-2">
@@ -136,20 +141,21 @@ export default async function Home() {
 
       <main id="main-content" className="flex-1">
         {/* HERO SECTION */}
-        <section className="relative overflow-hidden py-16 sm:py-24 lg:py-32">
+        <section className="relative isolate overflow-hidden py-16 sm:py-24 lg:py-32">
           {/* Background glows */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[40rem] overflow-hidden opacity-40"
           >
-            <div className="absolute -left-24 top-0 size-96 rounded-full bg-status-success/20 blur-[120px]" />
-            <div className="absolute right-0 top-24 size-80 rounded-full bg-status-info/20 blur-[100px]" />
+            <div className="absolute -left-24 top-0 size-96 rounded-full bg-primary/20 blur-[120px]" />
+            <div className="absolute right-0 top-24 size-80 rounded-full bg-memory-pink/20 blur-[100px]" />
           </div>
 
           <PageShell>
+                        <SparkleDecoration className="-right-4 top-16 hidden md:block" />
             <div className="grid items-center gap-12 lg:grid-cols-[1fr_0.85fr] lg:gap-20">
               <div className="space-y-8 text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 rounded-full border border-status-success/30 bg-status-success/10 px-3 py-1.5 text-sm font-medium text-status-success transition-colors hover:bg-status-success/20 cursor-default">
+                <div className="inline-flex cursor-default items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/12">
                   <Sparkles aria-hidden="true" className="size-4" />
                   <span>Nền tảng lưu giữ kỷ niệm thế hệ mới</span>
                 </div>
@@ -157,7 +163,7 @@ export default async function Home() {
                 <div className="space-y-5">
                   <h1 className="font-heading text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl">
                     Lưu giữ mọi{" "}
-                    <span className="text-status-success">khoảnh khắc đẹp</span>
+                    <span className="text-primary">khoảnh khắc đẹp</span>
                   </h1>
                   <p className="mx-auto max-w-xl text-base leading-7 text-muted-foreground sm:text-lg lg:mx-0">
                     Tạo không gian số tương tác cho sự kiện của bạn. Thu thập lời
@@ -187,49 +193,47 @@ export default async function Home() {
 
               {/* Mockup UI */}
               <div className="mx-auto w-full max-w-lg lg:max-w-none">
-                <div className="relative overflow-hidden rounded-3xl border bg-surface-elevated shadow-2xl">
-                  {/* Browser Window Header */}
-                  <div className="flex items-center justify-between border-b bg-surface-sunken px-6 py-4">
-                    <div className="flex items-center gap-4">
-                      <div className="flex gap-2">
-                        <span className="size-3 rounded-full bg-status-danger" />
-                        <span className="size-3 rounded-full bg-status-warning" />
-                        <span className="size-3 rounded-full bg-status-success" />
+                <div className="relative overflow-hidden rounded-[2rem] border border-primary/15 bg-card shadow-[0_30px_80px_-42px_var(--brand-700)]">
+                  <div className="flex items-center justify-between border-b border-border/70 bg-background/80 px-4 py-3 sm:px-6">
+                    <div className="flex items-center gap-3">
+                      <div className="flex gap-1.5" aria-hidden="true">
+                        <span className="size-2.5 rounded-full bg-memory-pink" />
+                        <span className="size-2.5 rounded-full bg-memory-peach" />
+                        <span className="size-2.5 rounded-full bg-memory-gold" />
                       </div>
-                      <div className="h-6 w-32 rounded-md bg-muted-foreground/10 sm:w-48" />
+                      <span className="text-xs font-medium text-muted-foreground sm:text-sm">Memoria · Public Wall</span>
                     </div>
+                    <span className="rounded-full bg-status-success/10 px-2.5 py-1 text-[10px] font-semibold text-status-success sm:text-xs">Đang nhận lời chúc</span>
                   </div>
-                  
-                  {/* App Content Simulation */}
-                  <div className="relative h-[400px] w-full bg-background p-6">
-                    {/* Simulated big image placeholder */}
-                    <div className="absolute inset-0 bg-muted/30">
-                       <div className="absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 text-muted-foreground/40">
-                         <ImageIcon className="size-24" />
-                       </div>
+
+                  <div className="relative min-h-[400px] overflow-hidden bg-[radial-gradient(circle_at_75%_20%,var(--memory-peach)_0,transparent_28%),linear-gradient(145deg,var(--brand-50),var(--background)_62%)] p-5 sm:p-7">
+                    <div className="mx-auto max-w-sm text-center">
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">A day to remember</p>
+                      <h2 className="mt-3 font-heading text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Minh &amp; Quân</h2>
+                      <p className="mt-2 text-sm text-muted-foreground">Một ngày thật đẹp, được viết tiếp bởi những lời chúc của bạn.</p>
+                      <div className="mx-auto mt-5 h-1 w-16 rounded-full bg-memory-pink/70" />
                     </div>
-                    
-                    {/* Simulated floating message */}
-                    <div className="absolute bottom-6 left-6 max-w-[80%] rounded-2xl border bg-background/90 p-4 shadow-lg backdrop-blur sm:bottom-12 sm:left-12 sm:p-5">
-                      <div className="flex items-start gap-4">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                          <User className="size-5" />
-                        </div>
+
+                    <div className="absolute bottom-7 left-5 max-w-[78%] rounded-2xl border border-white/70 bg-background/90 p-4 shadow-lg backdrop-blur sm:bottom-9 sm:left-8 sm:max-w-[70%]">
+                      <div className="flex items-start gap-3">
+                        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><User className="size-4" /></div>
                         <div className="space-y-1">
-                          <p className="font-medium text-sm sm:text-base">Minh Quân</p>
-                          <p className="text-sm text-muted-foreground sm:text-base">
-                            Chúc hai bạn trăm năm hạnh phúc! 🎉
-                          </p>
+                          <p className="text-sm font-semibold">Minh Quân</p>
+                          <p className="text-xs leading-5 text-muted-foreground sm:text-sm">Chúc hai bạn trăm năm hạnh phúc! 🎉</p>
                         </div>
                       </div>
                     </div>
 
-                    {/* Notification pill */}
-                    <div className="absolute right-6 top-6 animate-pulse rounded-full border bg-background/90 px-4 py-2 text-sm font-medium shadow-sm backdrop-blur">
-                      <div className="flex items-center gap-2 text-status-danger">
-                        <Heart className="size-4 fill-status-danger" />
-                        <span>+12 reaction</span>
+                    <div className="absolute right-5 top-24 rounded-2xl border border-white/70 bg-background/90 p-3 shadow-lg backdrop-blur sm:right-8 sm:top-28">
+                      <div className="flex items-center gap-2 text-status-danger"><Heart className="size-4 fill-status-danger" /><span className="text-xs font-semibold">12 lời chúc mới</span></div>
+                      <div className="mt-3 grid grid-cols-3 gap-1" aria-label="Ảnh kỷ niệm xem trước">
+                        <span className="aspect-square rounded-md bg-memory-pink/30" /><span className="aspect-square rounded-md bg-memory-peach/50" /><span className="aspect-square rounded-md bg-primary/20" />
                       </div>
+                    </div>
+
+                    <div className="absolute bottom-7 right-5 hidden w-20 rounded-xl border border-white/70 bg-background/90 p-2 shadow-lg backdrop-blur sm:block">
+                      <QrCode className="mx-auto size-10 text-foreground" />
+                      <p className="mt-1 text-center text-[9px] font-medium text-muted-foreground">Quét để gửi</p>
                     </div>
                   </div>
                 </div>
@@ -239,7 +243,7 @@ export default async function Home() {
         </section>
 
         {/* HOW IT WORKS SECTION */}
-        <section className="border-t bg-background py-16 sm:py-24 lg:py-32">
+        <section id="how-it-works" className="scroll-mt-20 border-t bg-background py-16 sm:py-24 lg:py-32">
           <PageShell>
             <div className="mx-auto mb-16 max-w-2xl text-center">
               <h2 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
@@ -274,7 +278,7 @@ export default async function Home() {
         </section>
 
         {/* FEATURES SECTION */}
-        <section className="border-t bg-surface-sunken py-16 sm:py-24 lg:py-32">
+        <section id="features" className="scroll-mt-20 border-t bg-surface-sunken py-16 sm:py-24 lg:py-32">
           <PageShell>
             <div className="mx-auto mb-16 max-w-2xl text-center">
               <h2 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
@@ -288,7 +292,7 @@ export default async function Home() {
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {features.map(({ Icon, title, description, tone, surface }) => (
                 <article
-                  className="group relative flex flex-col items-start overflow-hidden rounded-3xl border bg-surface-elevated p-8 shadow-sm transition-all hover:shadow-md hover:ring-1 hover:ring-border"
+                  className="group relative flex flex-col items-start overflow-hidden rounded-2xl border border-border/80 bg-card p-7 shadow-sm transition-all motion-safe:hover:-translate-y-0.5 hover:shadow-md hover:ring-1 hover:ring-primary/15 sm:p-8"
                   key={title}
                 >
                   <div className={`mb-6 flex size-14 items-center justify-center rounded-2xl ${surface} ${tone} transition-transform group-hover:scale-110 group-hover:rotate-3`}>
@@ -305,7 +309,7 @@ export default async function Home() {
         </section>
 
         {/* USE CASES SECTION */}
-        <section className="border-t bg-background py-16 sm:py-24 lg:py-32">
+        <section id="use-cases" className="scroll-mt-20 border-t bg-background py-16 sm:py-24 lg:py-32">
           <PageShell>
             <div className="mx-auto mb-16 max-w-2xl text-center">
               <h2 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
@@ -320,7 +324,7 @@ export default async function Home() {
               {useCases.map((useCase) => (
                 <div 
                   key={useCase.title}
-                  className="group relative overflow-hidden rounded-3xl border bg-surface-elevated p-6 sm:p-8 transition-colors hover:bg-surface-sunken"
+                  className="group relative overflow-hidden rounded-2xl border border-border/80 bg-card p-6 transition-all hover:-translate-y-0.5 hover:bg-surface-sunken hover:shadow-md sm:p-8"
                 >
                   <div className={`absolute inset-0 bg-gradient-to-br ${useCase.color} opacity-0 transition-opacity group-hover:opacity-100`} />
                   <div className="relative z-10">
@@ -339,7 +343,7 @@ export default async function Home() {
         {/* CTA SECTION */}
         <section className="border-t bg-surface-sunken py-16 sm:py-24 lg:py-32">
           <PageShell>
-            <div className="relative overflow-hidden rounded-3xl bg-primary px-6 py-16 sm:px-12 sm:py-20 lg:px-16 lg:py-24">
+            <div className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,var(--brand-700),var(--brand-500))] px-6 py-16 sm:px-12 sm:py-20 lg:px-16 lg:py-24">
               {/* Background pattern */}
               <div className="absolute inset-0 opacity-10">
                 <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
@@ -352,6 +356,7 @@ export default async function Home() {
                 </svg>
               </div>
 
+              <SparkleDecoration className="right-8 top-8 text-white/70" />
               <div className="relative z-10 mx-auto max-w-2xl text-center">
                 <h2 className="font-heading text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl lg:text-5xl">
                   Sẵn sàng lưu giữ mọi khoảnh khắc?
@@ -390,11 +395,8 @@ export default async function Home() {
         <PageShell>
           <div className="grid gap-12 sm:grid-cols-2 md:grid-cols-4 lg:gap-8">
             <div className="space-y-4 md:col-span-2">
-              <Link href="/" className="flex items-center gap-2 font-semibold">
-                <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Sparkles className="size-4" />
-                </span>
-                <span className="text-lg">Memoria</span>
+              <Link href="/" aria-label="Memoria - Trang chủ" className="rounded-xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/50">
+                <MemoriaLogo />
               </Link>
               <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
                 Nền tảng lưu giữ kỷ niệm thế hệ mới, mang đến trải nghiệm tương tác tuyệt vời cho mọi sự kiện của bạn.
@@ -404,18 +406,18 @@ export default async function Home() {
             <div className="space-y-4">
               <h4 className="font-semibold">Sản phẩm</h4>
               <ul className="space-y-3 text-sm text-muted-foreground">
-                <li><Link href="#" className="min-h-[44px] inline-flex items-center hover:text-foreground">Tính năng</Link></li>
-                <li><Link href="#" className="min-h-[44px] inline-flex items-center hover:text-foreground">Bảng giá</Link></li>
-                <li><Link href="#" className="min-h-[44px] inline-flex items-center hover:text-foreground">Hướng dẫn</Link></li>
+                <li><a href="#features" className="inline-flex min-h-[44px] items-center hover:text-foreground">Tính năng</a></li>
+                <li><span className="inline-flex min-h-[44px] items-center text-muted-foreground/70">Bảng giá</span></li>
+                <li><a href="#how-it-works" className="inline-flex min-h-[44px] items-center hover:text-foreground">Hướng dẫn</a></li>
               </ul>
             </div>
             
             <div className="space-y-4">
               <h4 className="font-semibold">Công ty</h4>
               <ul className="space-y-3 text-sm text-muted-foreground">
-                <li><Link href="#" className="min-h-[44px] inline-flex items-center hover:text-foreground">Về chúng tôi</Link></li>
-                <li><Link href="#" className="min-h-[44px] inline-flex items-center hover:text-foreground">Điều khoản</Link></li>
-                <li><Link href="#" className="min-h-[44px] inline-flex items-center hover:text-foreground">Bảo mật</Link></li>
+                <li><span className="inline-flex min-h-[44px] items-center text-muted-foreground/70">Về chúng tôi</span></li>
+                <li><span className="inline-flex min-h-[44px] items-center text-muted-foreground/70">Điều khoản</span></li>
+                <li><span className="inline-flex min-h-[44px] items-center text-muted-foreground/70">Bảo mật</span></li>
               </ul>
             </div>
           </div>

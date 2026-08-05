@@ -24,7 +24,7 @@ export function DashboardNav({ mobile = false }: { mobile?: boolean }) {
 
   return (
     <nav aria-label="Điều hướng dashboard">
-      <ul className={cn(mobile ? "grid grid-cols-2" : "space-y-1")}>
+      <ul className={cn(mobile ? "grid grid-cols-2 gap-1 p-2" : "space-y-1")}>
         {items.map(({ href, label, Icon }) => {
           const isActive = href === "/dashboard" ? pathname === href || pathname.startsWith("/dashboard/events/") : pathname === href
 
@@ -34,12 +34,10 @@ export function DashboardNav({ mobile = false }: { mobile?: boolean }) {
                 href={href}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "flex min-h-(--control-min-size) items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/50",
-                  mobile
-                    ? "justify-center border-r border-border last:border-r-0"
-                    : "w-full hover:bg-muted",
+                  "flex min-h-(--control-min-size) items-center gap-3 rounded-xl px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/50",
+                  mobile ? "justify-center px-2" : "w-full hover:bg-muted/70",
                   isActive
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    ? "bg-primary/10 text-primary hover:bg-primary/15"
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >

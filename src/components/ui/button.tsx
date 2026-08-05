@@ -17,6 +17,11 @@ const buttonVariants = cva(
           "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
+        soft: "bg-primary/10 text-primary hover:bg-primary/15 aria-expanded:bg-primary/15",
+        event:
+          "bg-[var(--event-primary)] text-[var(--event-on-primary)] hover:bg-[color-mix(in_oklch,var(--event-primary),black_8%)] focus-visible:ring-[var(--event-primary)]/35",
+        "event-outline":
+          "border-[var(--event-border)] bg-[var(--event-surface)] text-[var(--event-text)] hover:bg-[var(--event-primary)]/10 focus-visible:ring-[var(--event-primary)]/35",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

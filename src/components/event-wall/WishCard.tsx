@@ -13,7 +13,7 @@ export function WishCard({ wish, className }: { wish: PublicWish; className?: st
   return (
     <Card
       className={cn(
-        "min-w-0 break-inside-avoid overflow-hidden transition-shadow hover:shadow-md",
+        "min-w-0 break-inside-avoid overflow-hidden rounded-[1.5rem] border-[var(--event-border)] bg-[var(--event-surface)] shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md",
         wish.is_pinned && "border-primary/50 shadow-sm",
         className
       )}
@@ -25,7 +25,7 @@ export function WishCard({ wish, className }: { wish: PublicWish; className?: st
         ) : (
           <span
             aria-hidden="true"
-            className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted font-semibold"
+            className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--event-secondary)]/35 font-semibold text-[var(--event-primary)]"
           >
             {wish.sender_name.charAt(0).toUpperCase()}
           </span>
@@ -53,7 +53,7 @@ export function WishCard({ wish, className }: { wish: PublicWish; className?: st
         ) : null}
       </CardHeader>
       <CardContent className="min-w-0 px-4 pb-4 pt-2">
-        <p className="break-words whitespace-pre-wrap text-sm leading-6">{wish.content}</p>
+        <p className="break-words whitespace-pre-wrap text-sm leading-7">{wish.content}</p>
         {wish.media ? <PublicMediaRenderer wishId={wish.id} media={wish.media} /> : null}
         <ReactionBar initialCounts={wish.reactions || []} wishId={wish.id} />
       </CardContent>

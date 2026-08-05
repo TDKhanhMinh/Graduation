@@ -31,7 +31,7 @@ export function ModerationFilters({
   }, [])
 
   return (
-    <fieldset className="space-y-4 rounded-xl border bg-surface-sunken/50 p-4">
+    <fieldset className="space-y-4 rounded-2xl border border-border/80 bg-card p-4 shadow-sm sm:p-5">
       <legend className="sr-only">Bộ lọc kiểm duyệt</legend>
       <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_12rem_12rem_12rem_auto] lg:items-end">
         <div className="grid min-w-0 gap-2">
@@ -46,7 +46,7 @@ export function ModerationFilters({
               if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
               searchTimeoutRef.current = setTimeout(() => onFilterChange("search", value), 300)
             }}
-            className="min-h-(--control-min-size)"
+            className="min-h-(--control-min-size) rounded-xl border-border/80 bg-background/70"
           />
         </div>
 
@@ -56,7 +56,7 @@ export function ModerationFilters({
             value={currentStatus || "all"}
             onValueChange={(value: string | null) => onFilterChange("status", value === "all" || !value ? "" : value)}
           >
-            <SelectTrigger id="moderation-status" className="min-h-(--control-min-size) w-full">
+            <SelectTrigger id="moderation-status" className="min-h-(--control-min-size) w-full rounded-xl border-border/80 bg-background/70">
               <SelectValue placeholder="Tất cả trạng thái" />
             </SelectTrigger>
             <SelectContent>
@@ -76,7 +76,7 @@ export function ModerationFilters({
             type="date"
             value={currentDateFrom}
             onChange={(event) => onFilterChange("dateFrom", event.target.value)}
-            className="min-h-(--control-min-size)"
+            className="min-h-(--control-min-size) rounded-xl border-border/80 bg-background/70"
           />
         </div>
         <div className="grid gap-2">
@@ -86,7 +86,7 @@ export function ModerationFilters({
             type="date"
             value={currentDateTo}
             onChange={(event) => onFilterChange("dateTo", event.target.value)}
-            className="min-h-(--control-min-size)"
+            className="min-h-(--control-min-size) rounded-xl border-border/80 bg-background/70"
           />
         </div>
         <Button
@@ -94,7 +94,7 @@ export function ModerationFilters({
           variant="outline"
           onClick={onClearFilters}
           disabled={!hasFilters}
-          className="min-h-(--control-min-size)"
+          className="min-h-(--control-min-size) rounded-xl border-border/80 bg-background/70"
         >
           Xóa lọc
         </Button>

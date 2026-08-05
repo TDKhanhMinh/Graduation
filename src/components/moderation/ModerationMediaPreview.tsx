@@ -39,14 +39,14 @@ export function ModerationMediaPreview({ media }: MediaProps) {
 
   if (media.media_type === "image") {
     return (
-      <div className="relative mt-2 aspect-video w-full max-w-xs overflow-hidden rounded-lg bg-surface-sunken">
+      <div className="relative mt-2 aspect-video w-full max-w-xs overflow-hidden rounded-2xl border border-border/80 bg-surface-sunken">
         <Image src={url} alt="Xem trước media riêng tư" fill sizes="320px" className="object-contain" onError={() => setErrorPath(media.storage_path)} />
       </div>
     )
   }
 
   return (
-    <div className="mt-2 w-full max-w-xs rounded-lg border bg-surface-sunken p-2">
+    <div className="mt-2 w-full max-w-xs rounded-2xl border border-border/80 bg-surface-sunken p-2">
       <audio src={url} controls className="h-10 w-full" preload="none" aria-label="Nghe preview audio riêng tư" onError={() => setErrorPath(media.storage_path)} />
     </div>
   )
