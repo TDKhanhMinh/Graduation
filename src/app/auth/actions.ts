@@ -63,6 +63,34 @@ export async function signIn(
   redirect(next);
 }
 
+export async function signInWithGoogle(
+  _state: AuthActionState,
+  formData: FormData,
+): Promise<AuthActionState> {
+  const next = getSafeNextPath(formData.get("next") as string | null);
+  const callbackUrl = new URL("/auth/callback", getSiteUrl());
+  callbackUrl.searchParams.set("next", next);
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: callbackUrl.toString(),
+      queryParams: {
+        prompt: "select_account",
+      },
+    },
+  });
+
+  if (error || !data.url) {
+    return {
+      error: "Không thể bắt đầu đăng nhập bằng Google. Vui lòng thử lại sau.",
+    };
+  }
+
+  redirect(data.url);
+}
+
 export async function signUp(
   _state: AuthActionState,
   formData: FormData,
@@ -113,7 +141,11 @@ export async function signOut() {
   }
 
   const supabase = await createClient();
-  await supabase.auth.signOut();
+  // A dashboard logout should only end this browser session. Supabase's
+  // default scope is global, which would also sign the user out on other
+  // devices and tabs.
+  await supabase.auth.signOut({ scope: "local" });
+  revalidatePath("/", "layout");
   redirect("/auth/login");
 }
 

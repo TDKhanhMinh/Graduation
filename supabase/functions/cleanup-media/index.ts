@@ -2,11 +2,18 @@ import { serve } from "https://deno.land/std@0.192.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.44.0";
 
 const BUCKET = 'event-media-private';
+const CLEANUP_SECRET_HEADER = 'x-cleanup-secret';
 
 serve(async (req) => {
   // We expect this to be triggered via pg_cron or HTTP POST
   if (req.method !== 'POST') {
     return new Response("Method not allowed", { status: 405 });
+  }
+
+  const expectedSecret = Deno.env.get('CLEANUP_MEDIA_CRON_SECRET') ?? '';
+  const providedSecret = req.headers.get(CLEANUP_SECRET_HEADER) ?? '';
+  if (!expectedSecret || providedSecret !== expectedSecret) {
+    return new Response("Unauthorized", { status: 401 });
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";

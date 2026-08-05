@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-import { signIn } from "@/app/auth/actions"
+import { signIn, signInWithGoogle } from "@/app/auth/actions"
 import { AuthPageShell } from "@/components/auth/auth-page-shell"
 import { AuthForm } from "@/components/auth/auth-form"
 import { getSafeNextPath } from "@/utils/url"
@@ -40,6 +40,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     >
       <AuthForm
         action={signIn}
+        googleAction={signInWithGoogle}
         mode="sign-in"
         nextPath={getSafeNextPath(next ?? null)}
       />

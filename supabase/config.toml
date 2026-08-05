@@ -412,7 +412,7 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 # pg-delta is the schema diff engine for db diff / db pull / db remote commit.
 # Set enabled = false to fall back to the legacy migra engine.
 [experimental.pgdelta]
-enabled = true
+enabled = false
 # Directory under `supabase/` where declarative files are written.
 # declarative_schema_path = "./database"
 # JSON string passed through to pg-delta SQL formatting.
@@ -431,7 +431,8 @@ entrypoint = "./functions/create-upload-session/index.ts"
 
 [functions.cleanup-media]
 enabled = true
-verify_jwt = false
+# Cleanup is additionally protected by CLEANUP_MEDIA_CRON_SECRET.
+verify_jwt = true
 import_map = "./functions/cleanup-media/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx

@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-import { signUp } from "@/app/auth/actions"
+import { signInWithGoogle, signUp } from "@/app/auth/actions"
 import { AuthPageShell } from "@/components/auth/auth-page-shell"
 import { AuthForm } from "@/components/auth/auth-form"
 
@@ -21,7 +21,11 @@ export default function SignUpPage() {
         </p>
       }
     >
-      <AuthForm action={signUp} mode="sign-up" />
+      <AuthForm
+        action={signUp}
+        googleAction={signInWithGoogle}
+        mode="sign-up"
+      />
     </AuthPageShell>
   )
 }

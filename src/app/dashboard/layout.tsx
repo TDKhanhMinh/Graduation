@@ -3,10 +3,10 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { ReactNode } from "react"
 
+import { signOut } from "@/app/auth/actions"
 import { DashboardNav } from "@/components/dashboard/dashboard-nav"
 import { IconButton } from "@/components/ui/icon-button"
 import { PageShell } from "@/components/ui/page-shell"
-import { signOut } from "@/app/auth/actions"
 import { verifySession } from "@/lib/auth/dal"
 
 export default async function DashboardLayout({
@@ -40,7 +40,7 @@ export default async function DashboardLayout({
             </Link>
 
             <form action={signOut}>
-              <IconButton label="Đăng xuất" variant="ghost">
+              <IconButton type="submit" label="Đăng xuất" variant="ghost">
                 <LogOut aria-hidden="true" />
               </IconButton>
             </form>
