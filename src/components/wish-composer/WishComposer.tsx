@@ -4,6 +4,7 @@ import { CheckCircle2, ChevronLeft, LoaderCircle, Send, X } from "lucide-react"
 import { useCallback, useRef, useState } from "react"
 import { toast } from "sonner"
 
+import { CelebrationConfetti } from "@/components/effects/celebration-confetti"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -214,7 +215,7 @@ export function WishComposer({
 
       <dialog
         ref={dialogRef}
-        className="m-0 min-h-dvh max-h-dvh w-full max-w-[68.75rem] rounded-none border-0 bg-background p-0 text-foreground shadow-2xl backdrop:bg-black/50 sm:m-auto sm:min-h-0 sm:max-h-[85dvh] sm:w-[calc(100%-1rem)] sm:rounded-3xl sm:border"
+        className="m-0 min-h-dvh max-h-dvh w-full max-w-[68.75rem] rounded-none border-0 bg-background p-0 text-foreground shadow-2xl backdrop:bg-black/50 sm:m-auto sm:min-h-0 sm:max-h-[85dvh] sm:w-[calc(100%-1rem)] sm:rounded-3xl sm:border relative"
         aria-labelledby="wish-composer-title"
         aria-describedby="wish-composer-description"
         onClose={restoreOpenButtonFocus}
@@ -223,6 +224,7 @@ export function WishComposer({
         }}
         data-testid="wish-composer-dialog"
       >
+        <CelebrationConfetti active={successfulResult} />
         <div className="flex max-h-dvh flex-col sm:max-h-[85dvh]">
           <header className="space-y-4 border-b border-[var(--event-border)] bg-[var(--event-surface)] px-5 py-4 sm:px-7">
             <div className="flex items-start justify-between gap-4">

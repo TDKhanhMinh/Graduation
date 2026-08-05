@@ -4,6 +4,10 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { CalendarDays } from "lucide-react"
 
+import { AmbientParticles } from "@/components/effects/ambient-particles"
+import { AuroraBackground } from "@/components/effects/aurora-background"
+import { FilmGrainOverlay } from "@/components/effects/film-grain-overlay"
+import { FloatingPhotoMemories } from "@/components/effects/floating-photo-memories"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { PageShell } from "@/components/ui/page-shell"
@@ -14,6 +18,7 @@ import { RealtimeWall } from "@/components/event-wall/RealtimeWall"
 import { WishComposer } from "@/components/wish-composer/WishComposer"
 import { getPublicEventBySlug } from "@/features/events/dal"
 import { getApprovedWishesPage } from "@/features/wishes/dal"
+import { getEventEffectConfig } from "@/components/effects/effect-presets"
 import { getSiteUrl } from "@/lib/supabase/env"
 
 type Props = {
@@ -81,6 +86,7 @@ export default async function PublicEventPage({ params }: Props) {
 
   const coverUrl = getCloudinaryCover(event.cover_path)
   const wishes = await getApprovedWishesPage(event.id, 20)
+  const effectConfig = getEventEffectConfig(event.theme_key, "low")
 
   return (
     <div className="event-theme min-h-screen pb-24 text-[var(--event-text)] sm:pb-0" data-event-theme={event.theme_key}>
@@ -104,8 +110,12 @@ export default async function PublicEventPage({ params }: Props) {
 
       <main id="main-content">
         <PageShell className="space-y-8 py-6 sm:py-8">
-          <section aria-labelledby="event-hero-title" className="overflow-hidden rounded-[2rem] border border-[var(--event-border)] bg-[var(--event-surface)] shadow-[0_28px_70px_-48px_var(--event-primary)]">
-            <div className="grid min-h-[520px] lg:grid-cols-[3fr_2fr]">
+          <section aria-labelledby="event-hero-title" className="relative isolate overflow-hidden rounded-[2rem] border border-[var(--event-border)] bg-[var(--event-surface)] shadow-[0_28px_70px_-48px_var(--event-primary)]">
+            <AuroraBackground preset={effectConfig.preset} intensity={effectConfig.intensity} className="z-0" />
+            <AmbientParticles preset={effectConfig.preset} intensity={effectConfig.intensity} className="z-0" />
+            <FloatingPhotoMemories featuredImage={coverUrl} />
+            <FilmGrainOverlay />
+            <div className="relative z-10 grid min-h-[520px] lg:grid-cols-[3fr_2fr]">
               <div className="flex flex-col justify-center gap-6 p-6 sm:p-10 lg:p-14">
                 <StatusBadge tone="info" className="w-fit">A digital yearbook</StatusBadge>
                 <div className="space-y-4">
@@ -196,6 +206,7 @@ export default async function PublicEventPage({ params }: Props) {
             <RealtimeWall
               eventId={event.id}
               initialWishes={wishes}
+              initialEffectPreset={effectConfig.preset}
               fetchWishesAction={async (eventId: string, limit: number) => {
                 "use server"
                 return getApprovedWishesPage(eventId, limit)

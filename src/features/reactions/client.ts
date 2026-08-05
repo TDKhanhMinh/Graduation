@@ -10,7 +10,7 @@ export type ReactionState = {
   error: string | null
 }
 
-export function useOptimisticReactions(initialCounts: ReactionCount[], wishId: string) {
+export function useOptimisticReactions(initialCounts: ReactionCount[], wishId: string, onSuccess?: (emoji: string, added: boolean) => void) {
   const [state, setState] = useState<ReactionState>(() => {
     const counts: Record<string, ReactionCount> = {}
     initialCounts.forEach((count) => {
@@ -61,6 +61,7 @@ export function useOptimisticReactions(initialCounts: ReactionCount[], wishId: s
       if (!response.ok) throw new Error("Failed to toggle reaction")
 
       const data = await response.json()
+      onSuccess?.(emoji, Boolean(data.added))
 
       setState((previous) => {
         const inflight = new Set(previous.inflight)
@@ -96,7 +97,7 @@ export function useOptimisticReactions(initialCounts: ReactionCount[], wishId: s
         }
       })
     }
-  }, [wishId])
+  }, [onSuccess, wishId])
 
   return {
     reactions: Object.values(state.counts).filter(

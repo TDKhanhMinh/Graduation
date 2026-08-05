@@ -1,10 +1,12 @@
 "use client"
 
 import { SmilePlus } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useOptimisticReactions } from "@/features/reactions/client"
+import { ReactionBurst } from "@/components/effects/reaction-burst"
 import type { ReactionCount } from "@/features/reactions/dal"
 import { cn } from "@/lib/utils"
 
@@ -13,15 +15,34 @@ const ALLOWED_EMOJIS = ["❤️", "👍", "🎉", "😂", "🔥", "👏"]
 export function ReactionBar({
   initialCounts,
   wishId,
+  enableBurst = true,
 }: {
   initialCounts: ReactionCount[]
   wishId: string
+  enableBurst?: boolean
 }) {
-  const { reactions, toggle, inflight, error } = useOptimisticReactions(initialCounts, wishId)
+  const [burst, setBurst] = useState<{ emoji: string; trigger: number } | null>(null)
+  const burstCounterRef = useRef(0)
+  const burstTimerRef = useRef<number | null>(null)
+  const handleReactionSuccess = useCallback((emoji: string, added: boolean) => {
+    if (!added || !enableBurst) return
+    burstCounterRef.current += 1
+    setBurst({ emoji, trigger: burstCounterRef.current })
+    if (burstTimerRef.current) window.clearTimeout(burstTimerRef.current)
+    burstTimerRef.current = window.setTimeout(() => setBurst(null), 1200)
+  }, [enableBurst])
+  const { reactions, toggle, inflight, error } = useOptimisticReactions(initialCounts, wishId, handleReactionSuccess)
+
+  useEffect(() => {
+    return () => {
+      if (burstTimerRef.current) window.clearTimeout(burstTimerRef.current)
+    }
+  }, [])
   const sortedReactions = [...reactions].sort((a, b) => b.count - a.count)
 
   return (
-    <div className="mt-4 min-w-0" aria-label="Tương tác lời chúc">
+    <div className="relative mt-4 min-w-0" aria-label="Tương tác lời chúc">
+      <ReactionBurst emoji={burst?.emoji ?? null} trigger={burst?.trigger ?? 0} />
       {error ? (
         <p
           className="mb-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs leading-5 text-destructive"

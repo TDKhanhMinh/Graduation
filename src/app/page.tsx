@@ -1,22 +1,30 @@
 import {
   ArrowRight,
-  MessageSquareHeart,
-  QrCode,
-  ShieldCheck,
-  Sparkles,
-  PartyPopper,
-  Users,
+  Camera,
+  Gift,
   GraduationCap,
   Heart,
+  MessageSquareHeart,
   MonitorPlay,
+  PartyPopper,
+  QrCode,
   Rocket,
+  ShieldCheck,
+  Sparkles,
   User,
+  Users,
 } from "lucide-react"
 import Link from "next/link"
 
-import { Button } from "@/components/ui/button"
 import { MemoriaLogo } from "@/components/brand/memoria-logo"
 import { SparkleDecoration } from "@/components/brand/sparkle-decoration"
+import { StickerIcon } from "@/components/brand/sticker-icon"
+import { AmbientParticles } from "@/components/effects/ambient-particles"
+import { AuroraBackground } from "@/components/effects/aurora-background"
+import { FilmGrainOverlay } from "@/components/effects/film-grain-overlay"
+import { FloatingPhotoMemories } from "@/components/effects/floating-photo-memories"
+import { LightTrail } from "@/components/effects/light-trail"
+import { Button } from "@/components/ui/button"
 import { PageShell } from "@/components/ui/page-shell"
 import { verifySession } from "@/lib/auth/dal"
 
@@ -142,6 +150,12 @@ export default async function Home() {
       <main id="main-content" className="flex-1">
         {/* HERO SECTION */}
         <section className="relative isolate overflow-hidden py-16 sm:py-24 lg:py-32">
+          <AuroraBackground preset="elegant" intensity="low" className="z-0" />
+          <AmbientParticles preset="elegant" intensity="low" className="z-0" />
+          <FloatingPhotoMemories />
+          <FilmGrainOverlay />
+          <LightTrail />
+
           {/* Background glows */}
           <div
             aria-hidden="true"
@@ -152,8 +166,20 @@ export default async function Home() {
           </div>
 
           <PageShell>
-                        <SparkleDecoration className="-right-4 top-16 hidden md:block" />
-            <div className="grid items-center gap-12 lg:grid-cols-[1fr_0.85fr] lg:gap-20">
+            <SparkleDecoration className="-right-4 top-16 hidden md:block" />
+            <StickerIcon
+              Icon={Heart}
+              tone="pink"
+              delay="short"
+              className="right-[7%] top-8 hidden sm:grid lg:right-[4%] lg:top-16"
+            />
+            <StickerIcon
+              Icon={Camera}
+              tone="peach"
+              delay="long"
+              className="bottom-20 left-[3%] hidden lg:grid"
+            />
+            <div className="relative z-10 grid items-center gap-12 lg:grid-cols-[1fr_0.85fr] lg:gap-20">
               <div className="space-y-8 text-center lg:text-left">
                 <div className="inline-flex cursor-default items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/12">
                   <Sparkles aria-hidden="true" className="size-4" />
@@ -192,7 +218,13 @@ export default async function Home() {
               </div>
 
               {/* Mockup UI */}
-              <div className="mx-auto w-full max-w-lg lg:max-w-none">
+              <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
+                <StickerIcon
+                  Icon={Gift}
+                  tone="gold"
+                  delay="long"
+                  className="-right-3 top-16 hidden sm:grid"
+                />
                 <div className="relative overflow-hidden rounded-[2rem] border border-primary/15 bg-card shadow-[0_30px_80px_-42px_var(--brand-700)]">
                   <div className="flex items-center justify-between border-b border-border/70 bg-background/80 px-4 py-3 sm:px-6">
                     <div className="flex items-center gap-3">
@@ -209,7 +241,7 @@ export default async function Home() {
                   <div className="relative min-h-[400px] overflow-hidden bg-[radial-gradient(circle_at_75%_20%,var(--memory-peach)_0,transparent_28%),linear-gradient(145deg,var(--brand-50),var(--background)_62%)] p-5 sm:p-7">
                     <div className="mx-auto max-w-sm text-center">
                       <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">A day to remember</p>
-                      <h2 className="mt-3 font-heading text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Minh &amp; Quân</h2>
+                      <h2 className="mt-3 font-heading text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Linh &amp; Quân</h2>
                       <p className="mt-2 text-sm text-muted-foreground">Một ngày thật đẹp, được viết tiếp bởi những lời chúc của bạn.</p>
                       <div className="mx-auto mt-5 h-1 w-16 rounded-full bg-memory-pink/70" />
                     </div>
@@ -278,7 +310,13 @@ export default async function Home() {
         </section>
 
         {/* FEATURES SECTION */}
-        <section id="features" className="scroll-mt-20 border-t bg-surface-sunken py-16 sm:py-24 lg:py-32">
+        <section id="features" className="relative scroll-mt-20 border-t bg-surface-sunken py-16 sm:py-24 lg:py-32">
+          <StickerIcon
+            Icon={Gift}
+            tone="peach"
+            delay="short"
+            className="right-[7%] top-16 hidden lg:grid"
+          />
           <PageShell>
             <div className="mx-auto mb-16 max-w-2xl text-center">
               <h2 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
@@ -357,6 +395,18 @@ export default async function Home() {
               </div>
 
               <SparkleDecoration className="right-8 top-8 text-white/70" />
+              <StickerIcon
+                Icon={Heart}
+                tone="pink"
+                delay="short"
+                className="bottom-10 left-8 hidden sm:grid"
+              />
+              <StickerIcon
+                Icon={Camera}
+                tone="gold"
+                delay="long"
+                className="right-10 top-20 hidden sm:grid"
+              />
               <div className="relative z-10 mx-auto max-w-2xl text-center">
                 <h2 className="font-heading text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl lg:text-5xl">
                   Sẵn sàng lưu giữ mọi khoảnh khắc?

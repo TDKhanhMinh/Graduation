@@ -10,6 +10,9 @@ import { type RealtimeWallEvent, useRealtimeWallEvents } from "@/features/wishes
 import { cn } from "@/lib/utils"
 
 import { WishCard } from "./WishCard"
+import { getEffectConfig, type EffectIntensity, type EffectPreset } from "@/components/effects/effect-config"
+import { MemoryConstellation } from "@/components/effects/memory-constellation"
+import { WishSpotlightEffect } from "@/components/effects/wish-spotlight-effect"
 
 type WallFilter = "all" | "pinned" | "media"
 type WallSort = "newest" | "oldest"
@@ -20,10 +23,12 @@ export function RealtimeWall({
   eventId,
   initialWishes,
   fetchWishesAction,
+  initialEffectPreset = "minimal",
 }: {
   eventId: string
   initialWishes: PublicWish[]
   fetchWishesAction: (eventId: string, limit: number) => Promise<PublicWish[]>
+  initialEffectPreset?: EffectPreset
 }) {
   const [wishes, setWishes] = useState<PublicWish[]>(initialWishes)
   const [isRefetching, setIsRefetching] = useState(false)
@@ -32,20 +37,43 @@ export function RealtimeWall({
   const [sort, setSort] = useState<WallSort>("newest")
   const [layout, setLayout] = useState<WallLayout>("spotlight")
   const [aspect, setAspect] = useState<WallAspect>("wide")
+  const [effectPreset, setEffectPreset] = useState<EffectPreset>(initialEffectPreset)
+  const [effectIntensity, setEffectIntensity] = useState<EffectIntensity>("low")
+  const effectConfig = getEffectConfig(effectPreset, effectIntensity)
   const wishesLengthRef = useRef(initialWishes.length)
+  const wishIdsRef = useRef(new Set(initialWishes.map((wish) => wish.id)))
+  const spotlightTimerRef = useRef<number | null>(null)
+  const [spotlightWishId, setSpotlightWishId] = useState<string | null>(null)
 
   useEffect(() => {
     wishesLengthRef.current = wishes.length
   }, [wishes.length])
 
+  useEffect(() => {
+    return () => {
+      if (spotlightTimerRef.current) window.clearTimeout(spotlightTimerRef.current)
+    }
+  }, [])
+
   const handleEvent = useCallback((event: RealtimeWallEvent) => {
-    setWishes((currentWishes) => {
-      if (event.action === "remove") {
-        return currentWishes.filter((wish) => wish.id !== event.wish_id)
+    if (event.action === "remove") {
+      wishIdsRef.current.delete(event.wish_id)
+      setWishes((currentWishes) => currentWishes.filter((wish) => wish.id !== event.wish_id))
+      return
+    }
+
+    if (event.action === "upsert" && event.payload) {
+      const nextWish = event.payload as PublicWish
+      const isNewWish = !wishIdsRef.current.has(event.wish_id)
+      wishIdsRef.current.add(event.wish_id)
+
+      if (isNewWish) {
+        setSpotlightWishId(event.wish_id)
+        if (spotlightTimerRef.current) window.clearTimeout(spotlightTimerRef.current)
+        spotlightTimerRef.current = window.setTimeout(() => setSpotlightWishId(null), 1900)
       }
 
-      if (event.action === "upsert" && event.payload) {
-        const nextWish = event.payload as PublicWish
+      setWishes((currentWishes) => {
         const exists = currentWishes.some((wish) => wish.id === event.wish_id)
         const updated = exists
           ? currentWishes.map((wish) => (wish.id === event.wish_id ? nextWish : wish))
@@ -55,10 +83,8 @@ export function RealtimeWall({
           if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         })
-      }
-
-      return currentWishes
-    })
+      })
+    }
   }, [])
 
   const handleReconnect = useCallback(async () => {
@@ -67,6 +93,7 @@ export function RealtimeWall({
 
     try {
       const freshWishes = await fetchWishesAction(eventId, Math.max(20, wishesLengthRef.current))
+      wishIdsRef.current = new Set(freshWishes.map((wish) => wish.id))
       setWishes(freshWishes)
     } catch (error) {
       console.error("Failed to refetch wishes on reconnect", error)
@@ -112,9 +139,23 @@ export function RealtimeWall({
           <span className="px-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Layout</span>
           {(["spotlight", "grid", "photo-focus"] as const).map((value) => <Button key={value} type="button" size="sm" variant={layout === value ? "default" : "ghost"} onClick={() => setLayout(value)} aria-pressed={layout === value}>{value === "spotlight" ? "Spotlight" : value === "grid" ? <><LayoutGrid aria-hidden="true" />Grid</> : "Photo focus"}</Button>)}
         </div>
-        <div className="flex items-center gap-2" role="group" aria-label="Tỷ lệ hiển thị public wall">
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Tỷ lệ hiển thị public wall">
           <Button type="button" size="sm" variant={aspect === "wide" ? "soft" : "ghost"} onClick={() => setAspect("wide")} aria-pressed={aspect === "wide"}><Maximize2 aria-hidden="true" />16:9</Button>
           <Button type="button" size="sm" variant={aspect === "portrait" ? "soft" : "ghost"} onClick={() => setAspect("portrait")} aria-pressed={aspect === "portrait"}><Smartphone aria-hidden="true" />9:16</Button>
+        </div>
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Hiệu ứng public wall">
+          <label className="flex items-center gap-2 text-xs font-medium">
+            <span>Theme</span>
+            <select value={effectPreset} onChange={(event) => setEffectPreset(event.target.value as EffectPreset)} className="min-h-(--control-min-size) rounded-xl border-[var(--event-border)] bg-background/70 px-2.5 text-sm">
+              {(["minimal", "elegant", "romantic", "celebration", "graduation"] as const).map((value) => <option key={value} value={value}>{value}</option>)}
+            </select>
+          </label>
+          <label className="flex items-center gap-2 text-xs font-medium">
+            <span>Intensity</span>
+            <select value={effectIntensity} onChange={(event) => setEffectIntensity(event.target.value as EffectIntensity)} className="min-h-(--control-min-size) rounded-xl border-[var(--event-border)] bg-background/70 px-2.5 text-sm">
+              {(["off", "low", "medium", "high"] as const).map((value) => <option key={value} value={value}>{value}</option>)}
+            </select>
+          </label>
         </div>
       </div>
       {showConnectionNotice ? (
@@ -186,10 +227,12 @@ export function RealtimeWall({
           className="min-h-52"
         />
       ) : (
-        <div className={cn("min-w-0", aspect === "portrait" ? "max-h-[70vh] overflow-y-auto rounded-2xl border border-[var(--event-border)] bg-black/5 p-[4vw]" : "rounded-2xl border border-[var(--event-border)] bg-black/5 p-[4vw]")} data-wall-layout={layout} data-wall-aspect={aspect}>
+        <div className={cn("relative min-w-0", aspect === "portrait" ? "max-h-[70vh] overflow-y-auto rounded-2xl border border-[var(--event-border)] bg-black/5 p-[4vw]" : "rounded-2xl border border-[var(--event-border)] bg-black/5 p-[4vw]")} data-wall-layout={layout} data-wall-aspect={aspect}>
+          <MemoryConstellation wishes={visibleWishes} preset={effectConfig.preset} intensity={effectConfig.intensity} className="z-0" />
+          <WishSpotlightEffect wishId={effectConfig.particles ? spotlightWishId : null} />
           <div className={cn(layout === "grid" && "grid gap-4 md:grid-cols-2 lg:grid-cols-3", layout === "photo-focus" && "grid gap-4 sm:grid-cols-2 lg:grid-cols-3", layout === "spotlight" && "grid gap-5 lg:grid-cols-3")}>
             {visibleWishes.map((wish, index) => (
-              <WishCard key={wish.id} wish={wish} className={cn(layout === "spotlight" && index === 0 && "lg:col-span-2", layout === "photo-focus" && "min-h-64")} />
+              <WishCard key={wish.id} wish={wish} reactionBurstEnabled={effectConfig.reactions && effectConfig.intensity !== "off"} isSpotlighted={spotlightWishId === wish.id} className={cn(layout === "spotlight" && index === 0 && "lg:col-span-2", layout === "photo-focus" && "min-h-64")} />
             ))}
           </div>
         </div>

@@ -9,15 +9,17 @@ import { PublicAvatar } from "./PublicAvatar"
 import { PublicMediaRenderer } from "./PublicMediaRenderer"
 import { ReactionBar } from "./reaction-bar"
 
-export function WishCard({ wish, className }: { wish: PublicWish; className?: string }) {
+export function WishCard({ wish, className, isSpotlighted = false, reactionBurstEnabled = true }: { wish: PublicWish; className?: string; isSpotlighted?: boolean; reactionBurstEnabled?: boolean }) {
   return (
     <Card
       className={cn(
         "min-w-0 break-inside-avoid overflow-hidden rounded-[1.5rem] border-[var(--event-border)] bg-[var(--event-surface)] shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md",
         wish.is_pinned && "border-primary/50 shadow-sm",
+        isSpotlighted && "wish-card-spotlight",
         className
       )}
       data-pinned={wish.is_pinned ? "true" : "false"}
+      data-spotlighted={isSpotlighted ? "true" : undefined}
     >
       <CardHeader className="flex min-w-0 flex-row items-center gap-3 space-y-0 px-4 pb-2 pt-4">
         {wish.sender_avatar_path ? (
@@ -55,7 +57,7 @@ export function WishCard({ wish, className }: { wish: PublicWish; className?: st
       <CardContent className="min-w-0 px-4 pb-4 pt-2">
         <p className="break-words whitespace-pre-wrap text-sm leading-7">{wish.content}</p>
         {wish.media ? <PublicMediaRenderer wishId={wish.id} media={wish.media} /> : null}
-        <ReactionBar initialCounts={wish.reactions || []} wishId={wish.id} />
+        <ReactionBar initialCounts={wish.reactions || []} wishId={wish.id} enableBurst={reactionBurstEnabled} />
       </CardContent>
     </Card>
   )

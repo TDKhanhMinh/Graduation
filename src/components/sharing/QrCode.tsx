@@ -7,6 +7,7 @@ import {
   QR_CODE_ERROR_MESSAGE,
 } from "@/features/sharing/qr"
 import { cn } from "@/lib/utils"
+import { QrScanHalo } from "@/components/effects/qr-scan-halo"
 
 type GeneratedQrState = {
   value: string
@@ -95,7 +96,8 @@ export function QrCode({
   }
 
   return (
-    <div className={cn("min-w-0 rounded-lg border bg-white p-3", className)}>
+    <div className={cn("relative min-w-0 rounded-lg border bg-white p-3", className)}>
+      <QrScanHalo />
       {/* eslint-disable-next-line @next/next/no-img-element -- QR data URL is generated client-side and should not be optimized */}
       <img
         src={generated.dataUrl}
