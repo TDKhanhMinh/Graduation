@@ -131,7 +131,7 @@ export function EventForm({
             id="title"
             name="title"
             defaultValue={initialData?.title}
-            placeholder="Ví dụ: Đám cưới Minh và Lan"
+            placeholder="Ví dụ: Kỷ niệm 10 năm ra trường"
             required
             aria-invalid={Boolean(state.fieldErrors?.title)}
             aria-describedby={state.fieldErrors?.title ? "title-help title-error" : "title-help"}
