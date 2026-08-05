@@ -66,6 +66,7 @@ export function getEffectConfig(
 export function getParticleCount(
   intensity: EffectIntensity,
   viewportWidth: number,
+  particleMultiplier: number = 1,
 ): number {
   if (intensity === "off") return 0
 
@@ -74,5 +75,5 @@ export function getParticleCount(
     ? EFFECT_PERFORMANCE_BUDGET.particles.mobile
     : EFFECT_PERFORMANCE_BUDGET.particles.desktop
 
-  return counts[intensity]
+  return Math.floor(counts[intensity] * particleMultiplier)
 }

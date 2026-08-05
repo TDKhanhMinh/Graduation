@@ -24,6 +24,13 @@ export type EventInput = z.infer<typeof eventSchema>;
 
 export const appearanceSchema = z.object({
   theme_key: z.enum(['graduation', 'editorial', 'minimal']),
+  experience_preset: z.enum(['minimal', 'elegant', 'romantic', 'graduation', 'celebration', 'galaxy']).default('minimal'),
+  effect_intensity: z.enum(['off', 'low', 'medium', 'high']).default('low'),
+  effect_quality: z.enum(['auto', 'low', 'medium', 'high']).default('auto'),
+  wall_layout: z.enum(['spotlight', 'grid', 'photo-focus']).default('spotlight'),
+  qr_visible: z.boolean().default(true),
+  qr_cta: z.string().trim().min(1).max(80).default('Send a wish'),
+  animation_speed: z.enum(['slow', 'normal', 'fast']).default('normal'),
   cover_path: z
     .string()
     .trim()

@@ -1,6 +1,6 @@
 "use client"
 
-import { LayoutDashboard, Palette, QrCode, Settings, ShieldCheck, Download } from "lucide-react"
+import { Clapperboard, LayoutDashboard, Palette, QrCode, Settings, ShieldCheck, Download } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -11,6 +11,7 @@ const items = [
   { segment: "/moderation", label: "Kiểm duyệt", Icon: ShieldCheck, available: true },
   { segment: "/settings", label: "Cài đặt", Icon: Settings, available: true },
   { segment: "/appearance", label: "Giao diện", Icon: Palette, available: true },
+  { segment: "/director", label: "Director", Icon: Clapperboard, available: true },
   { segment: "/sharing", label: "Chia sẻ & QR", Icon: QrCode, available: true },
   { segment: "/export", label: "Xuất dữ liệu", Icon: Download, available: false },
 ] as const

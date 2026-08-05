@@ -113,7 +113,7 @@ export function EventForm({ action, initialData, submitLabel = "Lưu sự kiện
         <div className="grid gap-5 sm:grid-cols-2">
           <div className="grid gap-2">
             <Label htmlFor="visibility">Chế độ hiển thị</Label>
-            <Select name="visibility" defaultValue={initialData?.visibility || "unlisted"}>
+            <Select key={`visibility-${initialData?.visibility || "unlisted"}`} name="visibility" defaultValue={initialData?.visibility || "unlisted"}>
               <SelectTrigger id="visibility" className="h-11 w-full rounded-xl border-border/80 bg-background/70" aria-invalid={Boolean(state.fieldErrors?.visibility)} aria-describedby={state.fieldErrors?.visibility ? "visibility-help visibility-error" : "visibility-help"}><SelectValue placeholder="Chọn chế độ hiển thị" /></SelectTrigger>
               <SelectContent><SelectItem value="private">Riêng tư</SelectItem><SelectItem value="unlisted">Không liệt kê, cần link</SelectItem><SelectItem value="public">Công khai</SelectItem></SelectContent>
             </Select>
@@ -122,7 +122,7 @@ export function EventForm({ action, initialData, submitLabel = "Lưu sự kiện
           </div>
           <div className="grid gap-2">
             <Label htmlFor="submission_mode">Nhận lời chúc</Label>
-            <Select name="submission_mode" defaultValue={initialData?.submission_mode || "open"}>
+            <Select key={`submission_mode-${initialData?.submission_mode || "open"}`} name="submission_mode" defaultValue={initialData?.submission_mode || "open"}>
               <SelectTrigger id="submission_mode" className="h-11 w-full rounded-xl border-border/80 bg-background/70" aria-invalid={Boolean(state.fieldErrors?.submission_mode)} aria-describedby={state.fieldErrors?.submission_mode ? "submission-mode-help submission-mode-error" : "submission-mode-help"}><SelectValue placeholder="Chọn chế độ nhận lời chúc" /></SelectTrigger>
               <SelectContent><SelectItem value="open">Mở, tự động đăng</SelectItem><SelectItem value="approval_required">Cần duyệt trước</SelectItem><SelectItem value="closed">Đóng nhận lời chúc</SelectItem></SelectContent>
             </Select>

@@ -15,6 +15,13 @@ export type PublicEvent = Pick<
   | 'event_date'
   | 'cover_path'
   | 'theme_key'
+  | 'experience_preset'
+  | 'effect_intensity'
+  | 'effect_quality'
+  | 'wall_layout'
+  | 'qr_visible'
+  | 'qr_cta'
+  | 'animation_speed'
   | 'visibility'
   | 'submission_mode'
   | 'max_wish_length'
@@ -23,7 +30,7 @@ export type PublicEvent = Pick<
 >
 
 const PUBLIC_EVENT_SELECT =
-  'id,slug,title,description,event_date,cover_path,theme_key,visibility,submission_mode,max_wish_length,archived_at,allow_ai'
+  'id,slug,title,description,event_date,cover_path,theme_key,experience_preset,effect_intensity,effect_quality,wall_layout,qr_visible,qr_cta,animation_speed,visibility,submission_mode,max_wish_length,archived_at,allow_ai'
 
 export const getOwnedEvents = cache(async (): Promise<Event[]> => {
   const session = await verifySession()

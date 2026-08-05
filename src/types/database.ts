@@ -56,6 +56,13 @@ export type Database = {
           deleted_at: string | null
           description: string | null
           event_date: string | null
+          experience_preset: string
+          effect_intensity: string
+          effect_quality: string
+          wall_layout: string
+          qr_visible: boolean
+          qr_cta: string
+          animation_speed: string
           id: string
           max_wish_length: number
           media_quota_bytes: number
@@ -80,6 +87,13 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           event_date?: string | null
+          experience_preset?: string
+          effect_intensity?: string
+          effect_quality?: string
+          wall_layout?: string
+          qr_visible?: boolean
+          qr_cta?: string
+          animation_speed?: string
           id?: string
           max_wish_length?: number
           media_quota_bytes?: number
@@ -104,6 +118,13 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           event_date?: string | null
+          experience_preset?: string
+          effect_intensity?: string
+          effect_quality?: string
+          wall_layout?: string
+          qr_visible?: boolean
+          qr_cta?: string
+          animation_speed?: string
           id?: string
           max_wish_length?: number
           media_quota_bytes?: number

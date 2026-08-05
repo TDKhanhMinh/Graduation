@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 
 import { EFFECT_PERFORMANCE_BUDGET } from "./effect-config"
 import { ReducedMotionFallback } from "./reduced-motion-fallback"
+import { useOptionalEffectState } from "./effect-provider"
 
 export type CanvasDraw = (
   context: CanvasRenderingContext2D,
@@ -35,6 +36,7 @@ export function CanvasSurface({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const drawRef = useRef(draw)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const effectState = useOptionalEffectState()
 
   useEffect(() => {
     drawRef.current = draw
@@ -51,7 +53,7 @@ export function CanvasSurface({
 
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas || !enabled || paused || prefersReducedMotion) return
+    if (!canvas || !enabled || paused || prefersReducedMotion || effectState?.reducedMotion || effectState?.isVisible === false) return
 
     const context = canvas.getContext("2d")
     if (!context) return
@@ -68,7 +70,7 @@ export function CanvasSurface({
       const bounds = canvas.getBoundingClientRect()
       width = Math.max(1, bounds.width)
       height = Math.max(1, bounds.height)
-      pixelRatio = Math.min(window.devicePixelRatio || 1, EFFECT_PERFORMANCE_BUDGET.maxDevicePixelRatio)
+      pixelRatio = Math.min(window.devicePixelRatio || 1, EFFECT_PERFORMANCE_BUDGET.maxDevicePixelRatio, effectState?.qualityBudget.maxPixelRatio ?? EFFECT_PERFORMANCE_BUDGET.maxDevicePixelRatio)
       canvas.width = Math.floor(width * pixelRatio)
       canvas.height = Math.floor(height * pixelRatio)
       context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
@@ -119,7 +121,7 @@ export function CanvasSurface({
       resizeObserver.disconnect()
       document.removeEventListener("visibilitychange", handleVisibilityChange)
     }
-  }, [duration, enabled, paused, prefersReducedMotion])
+  }, [duration, enabled, effectState?.isVisible, effectState?.qualityBudget.maxPixelRatio, effectState?.reducedMotion, paused, prefersReducedMotion])
 
   return (
     <div
@@ -127,7 +129,7 @@ export function CanvasSurface({
       className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)}
     >
       <canvas ref={canvasRef} className="size-full" />
-      {prefersReducedMotion ? fallback ?? <ReducedMotionFallback /> : null}
+      {prefersReducedMotion || effectState?.reducedMotion ? fallback ?? <ReducedMotionFallback /> : null}
     </div>
   )
 }

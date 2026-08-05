@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 
 import { CanvasSurface } from "./canvas-surface"
+import { useOptionalEffectState } from "./effect-provider"
 import { getEffectConfig, getParticleCount, type EffectIntensity, type EffectPreset } from "./effect-config"
 
 type Particle = {
@@ -43,7 +44,8 @@ export function AmbientParticles({
 }) {
   const [viewportWidth, setViewportWidth] = useState(1024)
   const config = getEffectConfig(preset, intensity)
-  const particleCount = getParticleCount(config.intensity, viewportWidth)
+  const effectState = useOptionalEffectState()
+  const particleCount = getParticleCount(config.intensity, viewportWidth, effectState?.qualityBudget.particleMultiplier ?? 1)
   const particles = useMemo(() => createParticles(particleCount), [particleCount])
 
   useEffect(() => {
@@ -56,7 +58,7 @@ export function AmbientParticles({
   return (
     <CanvasSurface
       className={className}
-      enabled={config.particles && particleCount > 0}
+      enabled={config.particles && particleCount > 0 && effectState?.qualityBudget.animationsEnabled !== false}
       draw={(context, size, elapsed) => {
         for (const particle of particles) {
           const drift = Math.sin(elapsed * particle.speed + particle.phase) * particle.drift

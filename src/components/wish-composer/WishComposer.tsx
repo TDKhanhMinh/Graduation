@@ -251,7 +251,7 @@ export function WishComposer({
             <StepIndicator step={step} />
           </header>
 
-          <div className="min-h-0 overflow-y-auto px-5 py-5 sm:px-7 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)] lg:gap-8 lg:px-8 lg:py-7">
+          <div className="min-h-0 overflow-x-hidden overflow-y-auto px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-5 sm:px-7 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)] lg:gap-8 lg:px-8 lg:py-7">
             <div className="min-w-0">
             {pending ? (
               <div className="mb-4 flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm text-primary" role="status" aria-live="polite">

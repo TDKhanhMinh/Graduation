@@ -33,6 +33,13 @@ export default async function EventAppearancePage({
         eventDescription={event.description || ""}
         initialTheme={event.theme_key}
         initialCover={event.cover_path}
+        initialExperiencePreset={event.experience_preset}
+        initialEffectIntensity={event.effect_intensity as "off" | "low" | "medium" | "high"}
+        initialEffectQuality={event.effect_quality as "auto" | "low" | "medium" | "high"}
+        initialWallLayout={event.wall_layout as "spotlight" | "grid" | "photo-focus"}
+        initialQrVisible={event.qr_visible}
+        initialQrCta={event.qr_cta}
+        initialAnimationSpeed={event.animation_speed as "slow" | "normal" | "fast"}
       />
     </div>
   )

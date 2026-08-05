@@ -156,6 +156,13 @@ export async function updateEventAppearance(
   void prevState
   const validated = appearanceSchema.safeParse({
     theme_key: formData.get("theme_key"),
+    experience_preset: formData.get("experience_preset") || undefined,
+    effect_intensity: formData.get("effect_intensity") || undefined,
+    effect_quality: formData.get("effect_quality") || undefined,
+    wall_layout: formData.get("wall_layout") || undefined,
+    qr_visible: formData.getAll("qr_visible").includes("true"),
+    qr_cta: String(formData.get("qr_cta") || "Send a wish"),
+    animation_speed: formData.get("animation_speed") || undefined,
     cover_path: String(formData.get("cover_path") || ""),
   })
 
@@ -171,6 +178,13 @@ export async function updateEventAppearance(
     .from("events")
     .update({
       theme_key: validated.data.theme_key,
+      experience_preset: validated.data.experience_preset,
+      effect_intensity: validated.data.effect_intensity,
+      effect_quality: validated.data.effect_quality,
+      wall_layout: validated.data.wall_layout,
+      qr_visible: validated.data.qr_visible,
+      qr_cta: validated.data.qr_cta,
+      animation_speed: validated.data.animation_speed,
       cover_path: validated.data.cover_path || null,
       updated_at: new Date().toISOString(),
     })

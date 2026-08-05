@@ -18,7 +18,8 @@ import { RealtimeWall } from "@/components/event-wall/RealtimeWall"
 import { WishComposer } from "@/components/wish-composer/WishComposer"
 import { getPublicEventBySlug } from "@/features/events/dal"
 import { getApprovedWishesPage } from "@/features/wishes/dal"
-import { getEventEffectConfig } from "@/components/effects/effect-presets"
+import { EffectProvider, type EffectQuality } from "@/components/effects/effect-provider"
+import { getEffectConfig, type EffectIntensity } from "@/components/effects/effect-config"
 import { getSiteUrl } from "@/lib/supabase/env"
 
 type Props = {
@@ -86,10 +87,11 @@ export default async function PublicEventPage({ params }: Props) {
 
   const coverUrl = getCloudinaryCover(event.cover_path)
   const wishes = await getApprovedWishesPage(event.id, 20)
-  const effectConfig = getEventEffectConfig(event.theme_key, "low")
+  const effectConfig = getEffectConfig(event.experience_preset, event.effect_intensity as EffectIntensity)
 
   return (
-    <div className="event-theme min-h-screen pb-24 text-[var(--event-text)] sm:pb-0" data-event-theme={event.theme_key}>
+    <EffectProvider preset={effectConfig.preset} intensity={effectConfig.intensity} quality={event.effect_quality as EffectQuality}>
+      <div className="event-theme min-h-screen overflow-x-clip pb-[calc(6rem+env(safe-area-inset-bottom))] text-[var(--event-text)] sm:pb-0" data-event-theme={event.theme_key}>
       <header className="sticky top-0 z-10 border-b border-[var(--event-border)] bg-[var(--event-surface)] backdrop-blur-xl supports-[backdrop-filter]:bg-[var(--event-surface)]">
         <PageShell className="flex min-h-18 items-center justify-between gap-4 py-3">
           <div className="min-w-0">
@@ -206,7 +208,6 @@ export default async function PublicEventPage({ params }: Props) {
             <RealtimeWall
               eventId={event.id}
               initialWishes={wishes}
-              initialEffectPreset={effectConfig.preset}
               fetchWishesAction={async (eventId: string, limit: number) => {
                 "use server"
                 return getApprovedWishesPage(eventId, limit)
@@ -214,8 +215,9 @@ export default async function PublicEventPage({ params }: Props) {
             />
           </section>
         </PageShell>
-      </main>      <div className="fixed inset-x-3 bottom-3 z-20 sm:hidden">
+      </main>      <div className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-20 sm:hidden">
         <Link href="#composer-heading" className={buttonVariants({ size: "lg", className: "w-full rounded-2xl bg-[var(--event-primary)] text-[var(--event-on-primary)] shadow-xl hover:opacity-90" })}>Gửi lời chúc</Link>
       </div>    </div>
+    </EffectProvider>
   )
 }
