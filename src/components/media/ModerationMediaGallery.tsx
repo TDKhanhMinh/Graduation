@@ -56,11 +56,12 @@ export function ModerationMediaGallery({ wishes }: { wishes: ModerationWish[] })
           </div>
 
           {selected ? (
-          <aside className="min-w-0 rounded-2xl border border-primary/15 bg-primary/5 p-4" aria-label="Chi tiết media đã chọn">
-            <div className="flex items-start justify-between gap-3">
+            <aside className="min-w-0 rounded-2xl border border-primary/15 bg-primary/5 p-4" aria-label="Chi tiết media đã chọn">
+              <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Tệp đã chọn</p>
-                <h3 className="mt-1 truncate font-semibold">{selected.senderName}</h3></div><Button type="button" size="icon" variant="ghost" onClick={() => setSelectedId(null)} aria-label="Bỏ chọn media"><X aria-hidden="true" /></Button></div><div className="mt-4"><ModerationMediaPreview media={selected} /></div><dl className="mt-4 space-y-2 text-xs"><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Loại</dt><dd className="font-medium">{selected.media_type}</dd></div><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Trạng thái wish</dt><dd className="font-medium">{selected.moderationStatus}</dd></div><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Kích thước</dt><dd className="font-medium">{selected.width && selected.height ? `${selected.width} × ${selected.height}` : "Không có metadata"}</dd></div><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Thời gian</dt><dd className="font-medium">{selected.duration_ms ? `${Math.round(selected.duration_ms / 1000)}s` : "—"}</dd></div></dl></aside> : null}
+                <h3 className="mt-1 truncate font-semibold">{selected.senderName}</h3></div><Button type="button" size="icon" variant="ghost" onClick={() => setSelectedId(null)} aria-label="Bỏ chọn media"><X aria-hidden="true" /></Button></div><div className="mt-4"><ModerationMediaPreview media={selected} /></div><dl className="mt-4 space-y-2 text-xs"><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Loại</dt><dd className="font-medium">{selected.media_type}</dd></div><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Trạng thái wish</dt><dd className="font-medium">{selected.moderationStatus}</dd></div><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Kích thước</dt><dd className="font-medium">{selected.width && selected.height ? `${selected.width} × ${selected.height}` : "Không có metadata"}</dd></div><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Thời gian</dt><dd className="font-medium">{selected.duration_ms ? `${Math.round(selected.duration_ms / 1000)}s` : "—"}</dd></div></dl></aside>
+          ) : null}
         </div>
       )}
     </section>
