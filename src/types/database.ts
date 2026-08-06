@@ -68,6 +68,9 @@ export type Database = {
           media_quota_bytes: number
           media_reserved_bytes: number
           media_usage_bytes: number
+          poster_quota_bytes: number
+          poster_reserved_bytes: number
+          poster_usage_bytes: number
           owner_id: string
           settings: Json
           slug: string
@@ -99,6 +102,9 @@ export type Database = {
           media_quota_bytes?: number
           media_reserved_bytes?: number
           media_usage_bytes?: number
+          poster_quota_bytes?: number
+          poster_reserved_bytes?: number
+          poster_usage_bytes?: number
           owner_id: string
           settings?: Json
           slug: string
@@ -130,6 +136,9 @@ export type Database = {
           media_quota_bytes?: number
           media_reserved_bytes?: number
           media_usage_bytes?: number
+          poster_quota_bytes?: number
+          poster_reserved_bytes?: number
+          poster_usage_bytes?: number
           owner_id?: string
           settings?: Json
           slug?: string
@@ -141,6 +150,171 @@ export type Database = {
         }
         Relationships: []
       }
+      poster_documents: {
+        Row: {
+          id: string
+          event_id: string
+          document_version: number
+          template_id: string
+          template_version: number
+          ratio: string
+          document_json: Json
+          revision: number
+          thumbnail_path: string | null
+          export_path: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          document_version?: number
+          template_id: string
+          template_version: number
+          ratio: string
+          document_json: Json
+          revision?: number
+          thumbnail_path?: string | null
+          export_path?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          document_version?: number
+          template_id?: string
+          template_version?: number
+          ratio?: string
+          document_json?: Json
+          revision?: number
+          thumbnail_path?: string | null
+          export_path?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poster_documents_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poster_assets: {
+        Row: {
+          id: string
+          document_id: string
+          event_id: string
+          asset_id: string
+          asset_role: string
+          storage_bucket: string
+          storage_path: string
+          mime_type: string
+          size_bytes: number
+          width: number | null
+          height: number | null
+          metadata: Json
+          processing_status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          document_id: string
+          event_id: string
+          asset_id: string
+          asset_role: string
+          storage_bucket?: string
+          storage_path: string
+          mime_type: string
+          size_bytes: number
+          width?: number | null
+          height?: number | null
+          metadata?: Json
+          processing_status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          document_id?: string
+          event_id?: string
+          asset_id?: string
+          asset_role?: string
+          storage_bucket?: string
+          storage_path?: string
+          mime_type?: string
+          size_bytes?: number
+          width?: number | null
+          height?: number | null
+          metadata?: Json
+          processing_status?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poster_assets_document_id_event_id_fkey"
+            columns: ["document_id", "event_id"]
+            isOneToOne: false
+            referencedRelation: "poster_documents"
+            referencedColumns: ["id", "event_id"]
+          },
+        ]
+      }
+      poster_asset_upload_sessions: {
+        Row: {
+          id: string
+          document_id: string
+          event_id: string
+          asset_id: string
+          storage_bucket: string
+          storage_path: string
+          mime_type: string
+          max_size_bytes: number
+          reservation_bytes: number
+          created_at: string
+          expires_at: string
+          consumed_at: string | null
+        }
+        Insert: {
+          id?: string
+          document_id: string
+          event_id: string
+          asset_id: string
+          storage_bucket?: string
+          storage_path: string
+          mime_type: string
+          max_size_bytes: number
+          reservation_bytes?: number
+          created_at?: string
+          expires_at: string
+          consumed_at?: string | null
+        }
+        Update: {
+          id?: string
+          document_id?: string
+          event_id?: string
+          asset_id?: string
+          storage_bucket?: string
+          storage_path?: string
+          mime_type?: string
+          max_size_bytes?: number
+          reservation_bytes?: number
+          created_at?: string
+          expires_at?: string
+          consumed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poster_asset_upload_sessions_document_id_event_id_fkey"
+            columns: ["document_id", "event_id"]
+            isOneToOne: false
+            referencedRelation: "poster_documents"
+            referencedColumns: ["id", "event_id"]
+          },
+        ]
+      },
       media_upload_sessions: {
         Row: {
           asset_role: string
@@ -517,6 +691,25 @@ export type Database = {
         }
         Returns: string
       }
+      create_poster_asset_upload_session: {
+        Args: {
+          p_asset_id: string
+          p_document_id: string
+          p_event_id: string
+          p_expires_at: string
+          p_max_size_bytes: number
+          p_mime_type: string
+          p_storage_path: string
+        }
+        Returns: string
+      }
+      get_poster_assets_to_cleanup: {
+        Args: never
+        Returns: {
+          size_bytes: number
+          storage_path: string
+        }[]
+      },
       get_media_to_cleanup: {
         Args: never
         Returns: {
@@ -745,4 +938,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

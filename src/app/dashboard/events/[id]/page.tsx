@@ -3,7 +3,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { CapabilityCard } from "@/components/dashboard/capability-card"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SectionHeading } from "@/components/ui/section-heading"
 import { StatusBadge } from "@/components/ui/status-badge"
@@ -39,10 +39,8 @@ export default async function EventOverviewPage({
           <CardContent className="space-y-4">
             <StatusBadge tone="info">{event.visibility}</StatusBadge>
             <p className="truncate text-sm text-muted-foreground">{publicUrl}</p>
-            <Link href={publicUrl} target="_blank" rel="noreferrer">
-              <Button variant="outline" className="min-h-(--control-min-size) w-full">
-                Mở trang sự kiện
-              </Button>
+            <Link href={publicUrl} target="_blank" rel="noreferrer" className={buttonVariants({ variant: "outline", className: "min-h-(--control-min-size) w-full" })}>
+              Mở trang sự kiện
             </Link>
           </CardContent>
         </Card>
@@ -67,11 +65,9 @@ export default async function EventOverviewPage({
                   ? "Lời chúc cần được duyệt trước khi hiển thị."
                   : "Sự kiện đã dừng nhận lời chúc mới."}
             </p>
-            <Link href={"/dashboard/events/" + event.id + "/settings"}>
-              <Button variant="secondary" className="min-h-(--control-min-size) w-full">
-                <Settings aria-hidden="true" />
-                Mở cài đặt
-              </Button>
+            <Link href={"/dashboard/events/" + event.id + "/settings"} className={buttonVariants({ variant: "secondary", className: "min-h-(--control-min-size) w-full" })}>
+              <Settings aria-hidden="true" />
+              Mở cài đặt
             </Link>
           </CardContent>
         </Card>

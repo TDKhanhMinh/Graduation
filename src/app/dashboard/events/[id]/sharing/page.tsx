@@ -4,7 +4,7 @@ import { notFound } from "next/navigation"
 
 import { EventSharingActions } from "@/components/sharing/EventSharingActions"
 import { QrCode } from "@/components/sharing/QrCode"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { SectionHeading } from "@/components/ui/section-heading"
 import { StatusBadge } from "@/components/ui/status-badge"
@@ -38,11 +38,9 @@ export default async function EventSharingPage({
         title="Chia sẻ & QR"
         description="Tạo mã QR và chia sẻ đường dẫn công khai của sự kiện."
         actions={
-          <Link href={publicUrl} target="_blank" rel="noreferrer">
-            <Button variant="outline" className="min-h-(--control-min-size)">
-              <ExternalLink aria-hidden="true" />
-              Mở trang công khai
-            </Button>
+          <Link href={publicUrl} target="_blank" rel="noreferrer" className={buttonVariants({ variant: "outline", className: "min-h-(--control-min-size)" })}>
+            <ExternalLink aria-hidden="true" />
+            Mở trang công khai
           </Link>
         }
       />
@@ -94,11 +92,9 @@ export default async function EventSharingPage({
                 Khi thay đổi cấu hình sự kiện, hãy dùng lại đường dẫn này để bảo đảm khách mời mở đúng trang.
               </p>
             </div>
-            <Link href={"/dashboard/events/" + event.id + "/settings"}>
-              <Button variant="secondary" className="min-h-(--control-min-size) w-full">
-                <Settings aria-hidden="true" />
-                Mở cài đặt sự kiện
-              </Button>
+            <Link href={"/dashboard/events/" + event.id + "/settings"} className={buttonVariants({ variant: "secondary", className: "min-h-(--control-min-size) w-full" })}>
+              <Settings aria-hidden="true" />
+              Mở cài đặt sự kiện
             </Link>
             <div className="flex items-start gap-2 rounded-lg border border-border/70 bg-surface-sunken/50 p-3 text-xs leading-5 text-muted-foreground">
               <Link2 aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
