@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useTransition } from "react"
 import { toast } from "sonner"
 
 import { archiveEvent } from "@/features/events/actions"
@@ -14,7 +14,6 @@ export function ArchiveEventControl({
   isArchived: boolean
 }) {
   const [isPending, startTransition] = useTransition()
-  const [feedback, setFeedback] = useState<"success" | "error" | null>(null)
 
   const handleArchive = () => {
     if (
@@ -25,15 +24,12 @@ export function ArchiveEventControl({
       return
     }
 
-    setFeedback(null)
     startTransition(async () => {
       try {
         await archiveEvent(eventId)
-        setFeedback("success")
         toast.success("Đã lưu trữ sự kiện thành công.")
       } catch (error) {
         console.error(error)
-        setFeedback("error")
         toast.error("Có lỗi xảy ra khi lưu trữ sự kiện.")
       }
     })
@@ -47,16 +43,6 @@ export function ArchiveEventControl({
           Sự kiện sẽ bị vô hiệu hóa, không nhận thêm lời chúc và ẩn khỏi danh sách
           hoạt động.
         </p>
-        {feedback === "success" ? (
-          <p className="mt-2 text-sm text-status-success" role="status">
-            Đã lưu trữ sự kiện.
-          </p>
-        ) : null}
-        {feedback === "error" ? (
-          <p className="mt-2 text-sm text-status-danger" role="alert">
-            Không thể lưu trữ sự kiện. Vui lòng thử lại.
-          </p>
-        ) : null}
       </div>
       <Button
         variant="destructive"

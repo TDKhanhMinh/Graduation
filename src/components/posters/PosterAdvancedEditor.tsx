@@ -2,6 +2,7 @@
 
 import { Copy, Download, Group, Lock, Redo2, Save, Ungroup, Undo2, Unlock } from "lucide-react"
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { savePosterDocument } from "@/app/dashboard/events/[id]/poster-studio/actions"
@@ -126,7 +127,6 @@ export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision
   const [editorState, setEditorState] = useState<PosterEditorState>(() => createPosterEditorState(initialDocument))
   const [dragPreview, setDragPreview] = useState<DragPreview | null>(null)
   const [saveStatus, setSaveStatus] = useState<"local" | "saving" | "saved" | "conflict">("local")
-  const [message, setMessage] = useState("")
   const [qrDataUrl, setQrDataUrl] = useState("")
   const [fontReady, setFontReady] = useState(false)
   const [exportStatus, setExportStatus] = useState<"idle" | "exporting" | "error">("idle")
@@ -151,7 +151,7 @@ export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision
     void import("@/features/sharing/qr").then(({ createQrDataUrl }) => createQrDataUrl(editorState.document.content.publicUrl, 256)).then((value) => {
       if (!cancelled) setQrDataUrl(value)
     }).catch(() => {
-      if (!cancelled) setMessage("QR generation is temporarily unavailable.")
+      if (!cancelled) toast.error("QR generation is temporarily unavailable.")
     })
     return () => { cancelled = true }
   }, [editorState.document.content.publicUrl])
@@ -169,11 +169,11 @@ export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision
           const result = posterDocumentSchema.safeParse(JSON.parse(raw))
           if (active && result.success && result.data.metadata.eventId === eventId) {
             setEditorState(createPosterEditorState(result.data))
-            setMessage("Recovered the latest local editor draft.")
+            toast.success("Recovered the latest local editor draft.")
           }
         }
       } catch {
-        if (active) setMessage("Local draft recovery was unavailable; using the saved document.")
+        if (active) toast.error("Local draft recovery was unavailable; using the saved document.")
       } finally {
         if (active) hydratedRef.current = true
       }
@@ -194,13 +194,13 @@ export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision
         if (result.success) {
           revisionRef.current = result.revision
           setSaveStatus("saved")
-          setMessage("Autosaved the poster document.")
+          toast.success("Autosaved the poster document.", { id: "poster-autosave" })
         } else if (result.conflict) {
           setSaveStatus("conflict")
-          setMessage("Another session changed this poster. Reload before saving again.")
+          toast.error("Another session changed this poster. Reload before saving again.")
         } else {
           setSaveStatus("local")
-          setMessage("Saved locally. Server persistence will retry when available.")
+          toast.info("Saved locally. Server persistence will retry when available.")
         }
       })
     }, SAVE_DELAY_MS)
@@ -288,7 +288,7 @@ export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision
 
   async function exportPng() {
     if (!svgRef.current || !exportReady) {
-      setMessage("Export is waiting for fonts and QR readiness.")
+      toast.error("Export is waiting for fonts and QR readiness.")
       return
     }
     setExportStatus("exporting")
@@ -325,10 +325,10 @@ export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision
       anchor.click()
       URL.revokeObjectURL(downloadUrl)
       setExportStatus("idle")
-      setMessage("Advanced Editor PNG exported at " + canvas.width + " x " + canvas.height + ".")
+      toast.success("Advanced Editor PNG exported at " + canvas.width + " x " + canvas.height + ".")
     } catch {
       setExportStatus("error")
-      setMessage("Advanced Editor PNG export failed. Try again when the preview is ready.")
+      toast.error("Advanced Editor PNG export failed. Try again when the preview is ready.")
     } finally {
       URL.revokeObjectURL(svgUrl)
     }
@@ -444,7 +444,6 @@ export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision
             <p>Capability: {capabilities.advancedEditor ? "Advanced Editor" : "Quick Create"}</p>
             <p>Document version: {editorState.document.version}</p>
             <p>Elements: {editorState.document.elements.length}</p>
-            {message ? <p className="mt-2 text-foreground">{message}</p> : null}
           </div>
         </aside>
       </div>

@@ -2,6 +2,7 @@
 
 import { Download, ImagePlus, RefreshCcw } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { createQrDataUrl } from "@/features/sharing/qr"
@@ -148,7 +149,6 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
   const [logoFailed, setLogoFailed] = useState(false)
   const [qrDataUrl, setQrDataUrl] = useState("")
   const [fontReady, setFontReady] = useState(false)
-  const [message, setMessage] = useState("")
   const [imageError, setImageError] = useState("")
   const svgRef = useRef<SVGSVGElement>(null)
 
@@ -197,7 +197,7 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
     void createQrDataUrl(publicUrl, 256).then((value) => {
       if (!cancelled) setQrDataUrl(value)
     }).catch(() => {
-      if (!cancelled) setMessage("QR generation is temporarily unavailable.")
+      if (!cancelled) toast.error("QR generation is temporarily unavailable.")
     })
     return () => { cancelled = true }
   }, [publicUrl])
@@ -216,9 +216,11 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
       setImageFailed(false)
     setLogoFailed(false)
       setCropPreset("center")
-      setMessage(`Image prepared locally at ${prepared.width} x ${prepared.height}.`)
+      toast.success(`Image prepared locally at ${prepared.width} x ${prepared.height}.`)
     } catch (error) {
-      setImageError(error instanceof Error ? error.message : "The selected image could not be prepared.")
+      const errorMessage = error instanceof Error ? error.message : "The selected image could not be prepared."
+      setImageError(errorMessage)
+      toast.error(errorMessage)
     }
   }
 
@@ -229,9 +231,11 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
       setPreparedLogo(prepared)
       setLogoDataUrl(prepared.dataUrl)
       setLogoFailed(false)
-      setMessage(`Logo prepared locally at ${prepared.width} x ${prepared.height}.`)
+      toast.success(`Logo prepared locally at ${prepared.width} x ${prepared.height}.`)
     } catch (error) {
-      setImageError(error instanceof Error ? error.message : "The selected logo could not be prepared.")
+      const errorMessage = error instanceof Error ? error.message : "The selected logo could not be prepared."
+      setImageError(errorMessage)
+      toast.error(errorMessage)
     }
   }
   function resetDraft() {
@@ -251,13 +255,13 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
     setImageFailed(false)
     setLogoFailed(false)
     setImageError("")
-    setMessage("Draft reset to the event defaults.")
+    toast.success("Draft reset to the event defaults.")
   }
 
   async function exportPng() {
     if (!svgRef.current || !posterDocument || titleError) return
     if (!qualityGate.success) {
-      setMessage(qualityGate.errors.join(" "))
+      toast.error(qualityGate.errors.join(" "))
       return
     }
     if (globalThis.document.fonts?.ready) await globalThis.document.fonts.ready
@@ -293,9 +297,9 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
       anchor.download = posterExportFilename(posterDocument.content.title, posterDocument.ratio as "4:5" | "9:16")
       anchor.click()
       URL.revokeObjectURL(downloadUrl)
-      setMessage(`PNG exported at ${canvas.width} x ${canvas.height}.`)
+      toast.success(`PNG exported at ${canvas.width} x ${canvas.height}.`)
     } catch {
-      setMessage("PNG export failed. Try again when the preview is ready.")
+      toast.error("PNG export failed. Try again when the preview is ready.")
     } finally {
       URL.revokeObjectURL(svgUrl)
     }
@@ -381,7 +385,6 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
           <p>QR: {qrDataUrl ? "ready" : "generating"}</p>
           <p>Export gate: {qualityGate.success ? "ready" : "waiting"}</p>
           {!qualityGate.success ? <p className="mt-1 text-destructive">{qualityGate.errors.join(" ")}</p> : null}
-          {message ? <p className="mt-1 font-medium text-foreground">{message}</p> : null}
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button type="button" variant="outline" className="min-h-11 flex-1" onClick={resetDraft}><RefreshCcw aria-hidden="true" />Reset</Button>
@@ -399,7 +402,7 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
         </div>
         <div className="mx-auto max-h-[75vh] w-full max-w-[42rem] overflow-auto rounded-2xl border border-border/80 bg-[#21182b] p-3 shadow-lg sm:p-5">
           <div className="mx-auto max-h-[68vh] w-full" style={{ aspectRatio: ratio === "4:5" ? "4 / 5" : "9 / 16" }}>
-            {posterDocument && template ? <PosterPreview document={posterDocument} imageDataUrl={imageFailed ? "" : imageDataUrl} logoDataUrl={logoFailed ? "" : logoDataUrl} qrDataUrl={qrDataUrl} svgRef={svgRef} palette={template.palette} cropPreset={cropPreset} onImageError={() => { setImageFailed(true); setMessage("Image failed to render; using the template background fallback.") }} onLogoError={() => { setLogoFailed(true); setMessage("Logo failed to render; using the poster without a logo.") }} /> : <div className="flex h-full items-center justify-center rounded-xl bg-muted p-6 text-center text-sm text-muted-foreground">Enter an event title to preview the poster.</div>}
+            {posterDocument && template ? <PosterPreview document={posterDocument} imageDataUrl={imageFailed ? "" : imageDataUrl} logoDataUrl={logoFailed ? "" : logoDataUrl} qrDataUrl={qrDataUrl} svgRef={svgRef} palette={template.palette} cropPreset={cropPreset} onImageError={() => { setImageFailed(true); toast.error("Image failed to render; using the template background fallback.") }} onLogoError={() => { setLogoFailed(true); toast.error("Logo failed to render; using the poster without a logo.") }} /> : <div className="flex h-full items-center justify-center rounded-xl bg-muted p-6 text-center text-sm text-muted-foreground">Enter an event title to preview the poster.</div>}
           </div>
         </div>
       </section>

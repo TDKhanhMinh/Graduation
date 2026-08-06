@@ -2,6 +2,7 @@
 
 import { LoaderCircle, Mic, MicOff, RefreshCcw, Square, Trash2, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { uploadPreparedMedia, type UploadedMedia } from "@/features/media/client"
@@ -108,7 +109,9 @@ export function AudioRecorderField({ eventId, clientRequestId, onUploadSuccess, 
     } catch (caught: unknown) {
       stopStream()
       setStatus("idle")
-      setError(caught instanceof Error ? caught.message : "Không thể truy cập micro.")
+      const message = caught instanceof Error ? caught.message : "Không thể truy cập micro."
+      setError(message)
+      toast.error(message)
     }
   }
 
@@ -159,17 +162,19 @@ export function AudioRecorderField({ eventId, clientRequestId, onUploadSuccess, 
       setStatus("uploaded")
       setError(null)
       onUploadSuccess(uploaded)
+      toast.success("Đã đính kèm bản ghi âm.")
     } catch (caught: unknown) {
       if (!mountedRef.current) return
       xhrRef.current = null
       setStatus("preview")
-      setError(
+      const message =
         caught instanceof Error && caught.message === "Upload cancelled"
           ? "Đã hủy tải lên. Bạn có thể thử lại."
           : caught instanceof Error
             ? caught.message
             : "Không thể tải bản ghi âm lên."
-      )
+      setError(message)
+      toast.error(message)
     }
   }
 

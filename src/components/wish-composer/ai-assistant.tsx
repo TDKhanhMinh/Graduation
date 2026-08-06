@@ -2,6 +2,7 @@
 
 import { ChevronDown, ChevronUp, LoaderCircle, Sparkles } from "lucide-react"
 import { useState } from "react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,8 +29,11 @@ export function AiWishAssistant({ eventId, draftSenderName, onSuggestionSelect }
     try {
       const results = await requestAiSuggestions(eventId, prompt, draftSenderName, relationship)
       setSuggestions(results)
+      toast.success("Đã tạo gợi ý lời chúc.")
     } catch (caught: unknown) {
-      setError(caught instanceof Error ? caught.message : "Đã xảy ra lỗi khi tạo gợi ý.")
+      const message = caught instanceof Error ? caught.message : "Đã xảy ra lỗi khi tạo gợi ý."
+      setError(message)
+      toast.error(message)
     } finally {
       setLoading(false)
     }

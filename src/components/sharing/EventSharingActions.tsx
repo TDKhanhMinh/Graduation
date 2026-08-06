@@ -1,25 +1,19 @@
 "use client"
 
 import {
-  Check,
   Copy,
   Download,
   Printer,
   Share2,
 } from "lucide-react"
 import { useState } from "react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
   buildQrFilename,
   createQrDataUrl,
-  QR_CODE_ERROR_MESSAGE,
 } from "@/features/sharing/qr"
-
-type Feedback = {
-  tone: "success" | "error"
-  message: string
-} | null
 
 type EventSharingActionsProps = {
   title: string
@@ -56,25 +50,20 @@ export function EventSharingActions({
   url,
 }: EventSharingActionsProps) {
   const [pending, setPending] = useState<"share" | "copy" | "download" | null>(null)
-  const [feedback, setFeedback] = useState<Feedback>(null)
 
   const runAction = async (
     action: "share" | "copy" | "download",
     operation: () => Promise<string>,
   ) => {
     setPending(action)
-    setFeedback(null)
 
     try {
-      setFeedback({ tone: "success", message: await operation() })
+      toast.success(await operation())
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {
         return
       }
-      setFeedback({
-        tone: "error",
-        message: "Không thể hoàn tất thao tác. Vui lòng thử lại.",
-      })
+      toast.error("Không thể hoàn tất thao tác. Vui lòng thử lại.")
     } finally {
       setPending(null)
     }
@@ -108,9 +97,8 @@ export function EventSharingActions({
     })
 
   const print = () => {
-    setFeedback(null)
     window.print()
-    setFeedback({ tone: "success", message: "Đã mở hộp thoại in." })
+    toast.success("Đã mở hộp thoại in.")
   }
 
   const isPending = pending !== null
@@ -135,7 +123,7 @@ export function EventSharingActions({
           onClick={() => void copy()}
           disabled={isPending}
         >
-          {feedback?.message.startsWith("Đã sao chép") ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+          <Copy aria-hidden="true" />
           Sao chép liên kết
         </Button>
         <Button
@@ -162,15 +150,6 @@ export function EventSharingActions({
       {pending ? (
         <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
           {pending === "download" ? "Đang chuẩn bị tệp QR…" : "Đang xử lý…"}
-        </p>
-      ) : null}
-      {feedback ? (
-        <p
-          className={feedback.tone === "error" ? "text-sm text-status-danger" : "text-sm text-status-success"}
-          role={feedback.tone === "error" ? "alert" : "status"}
-          aria-live="polite"
-        >
-          {feedback.message || QR_CODE_ERROR_MESSAGE}
         </p>
       ) : null}
     </div>

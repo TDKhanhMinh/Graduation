@@ -1,7 +1,8 @@
 "use client"
 
-import { ImagePlus, LoaderCircle, RefreshCcw, X } from "lucide-react"
+import { LoaderCircle, ImagePlus, RefreshCcw, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -48,6 +49,7 @@ export function CloudinaryCoverUpload({ value, onChange, disabled = false }: Clo
     if (validationError) {
       setError(validationError)
       setState("error")
+      toast.error(validationError)
       return
     }
 
@@ -96,11 +98,14 @@ export function CloudinaryCoverUpload({ value, onChange, disabled = false }: Clo
       if (mountedRef.current) {
         setState("ready")
         setProgress(100)
+        toast.success("Ảnh cover đã tải lên Cloudinary. Hãy lưu thay đổi để áp dụng.")
       }
     } catch (caught: unknown) {
       if (!mountedRef.current) return
       setState("error")
-      setError(caught instanceof Error ? caught.message : "Could not upload cover.")
+      const errorMessage = caught instanceof Error ? caught.message : "Could not upload cover."
+      setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       xhrRef.current = null
     }
@@ -114,6 +119,7 @@ export function CloudinaryCoverUpload({ value, onChange, disabled = false }: Clo
     if (validationError) {
       setError(validationError)
       setState("error")
+      toast.error(validationError)
       return
     }
 
@@ -126,7 +132,9 @@ export function CloudinaryCoverUpload({ value, onChange, disabled = false }: Clo
     } catch (caught: unknown) {
       if (!mountedRef.current) return
       setState("error")
-      setError(caught instanceof Error ? caught.message : "Could not prepare cover.")
+      const errorMessage = caught instanceof Error ? caught.message : "Could not prepare cover."
+      setError(errorMessage)
+      toast.error(errorMessage)
     }
   }
 
@@ -192,8 +200,6 @@ export function CloudinaryCoverUpload({ value, onChange, disabled = false }: Clo
         ) : null}
       </div>
       <p id="cover-help" className="text-xs leading-5 text-muted-foreground">JPEG, PNG hoặc WebP, tối đa 5 MB. Ảnh được lưu tại Cloudinary; Supabase chỉ lưu URL.</p>
-      {error ? <p className="rounded-lg bg-status-danger/10 px-3 py-2 text-sm text-status-danger" role="alert">{error}</p> : null}
-      {state === "ready" ? <p className="text-sm text-status-success" role="status" aria-live="polite">Ảnh cover đã tải lên Cloudinary. Hãy lưu thay đổi để áp dụng.</p> : null}
     </div>
   )
 }

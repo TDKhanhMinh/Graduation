@@ -3,6 +3,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { CapabilityCard } from "@/components/dashboard/capability-card"
+import { ActionToast } from "@/components/ui/action-toast"
 import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SectionHeading } from "@/components/ui/section-heading"
@@ -11,10 +12,13 @@ import { getOwnedEventById } from "@/features/events/dal"
 
 export default async function EventOverviewPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ created?: string }>
 }) {
   const { id } = await params
+  const { created } = await searchParams
   const event = await getOwnedEventById(id)
 
   if (!event) {
@@ -25,6 +29,7 @@ export default async function EventOverviewPage({
 
   return (
     <div className="space-y-8">
+      {created === "1" ? <ActionToast message="Đã tạo sự kiện thành công." queryKey="created" /> : null}
       <SectionHeading
         title="Tổng quan sự kiện"
         description="Theo dõi trạng thái hiển thị và luồng nhận lời chúc."

@@ -2,6 +2,7 @@
 
 import { ImagePlus, LoaderCircle, RefreshCcw, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { prepareImage, uploadPreparedMedia, type UploadedMedia } from "@/features/media/client"
@@ -64,14 +65,18 @@ export function ImageUploadField({
       setUploading(false)
       xhrRef.current = null
       onUploadSuccess(uploaded)
+      toast.success(isAvatar ? "Đã tải ảnh đại diện." : "Đã tải ảnh lên.")
     } catch (caught: unknown) {
       if (!mountedRef.current) return
       setUploading(false)
       xhrRef.current = null
       if (caught instanceof Error && caught.message === "Upload cancelled") {
         setError("Đã hủy tải lên. Bạn có thể thử lại hoặc xóa ảnh.")
+        toast.error("Đã hủy tải lên. Bạn có thể thử lại hoặc xóa ảnh.")
       } else {
-        setError(caught instanceof Error ? caught.message : "Không thể tải ảnh lên.")
+        const message = caught instanceof Error ? caught.message : "Không thể tải ảnh lên."
+        setError(message)
+        toast.error(message)
       }
     }
   }
@@ -82,6 +87,7 @@ export function ImageUploadField({
 
     if (!selectedFile.type.startsWith("image/")) {
       setError("Vui lòng chọn tệp hình ảnh.")
+      toast.error("Vui lòng chọn tệp hình ảnh.")
       return
     }
 
@@ -96,7 +102,9 @@ export function ImageUploadField({
       await uploadFile(preparedFile)
     } catch (caught: unknown) {
       if (mountedRef.current) {
-        setError(caught instanceof Error ? caught.message : "Không thể đọc ảnh.")
+        const message = caught instanceof Error ? caught.message : "Không thể đọc ảnh."
+        setError(message)
+        toast.error(message)
         setUploading(false)
       }
     }

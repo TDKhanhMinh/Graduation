@@ -82,7 +82,7 @@ export async function createEvent(
   }
 
   revalidatePath("/dashboard")
-  redirect(`/dashboard/events/${data.id}`)
+  redirect(`/dashboard/events/${data.id}?created=1`)
 }
 
 export async function updateEvent(

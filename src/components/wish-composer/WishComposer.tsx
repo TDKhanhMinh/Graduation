@@ -146,7 +146,10 @@ export function WishComposer({
     setSubmitError(null)
 
     if (nextContentError || nextSenderError || !captchaToken || !draft.clientRequestId || !draft.deviceKey) {
-      if (!captchaToken) setSubmitError("Hãy hoàn tất CAPTCHA trước khi gửi.")
+      if (!captchaToken) {
+        setSubmitError("Hãy hoàn tất CAPTCHA trước khi gửi.")
+        toast.error("Hãy hoàn tất CAPTCHA trước khi gửi.")
+      }
       return
     }
 
@@ -166,6 +169,7 @@ export function WishComposer({
         senderAvatarPath: draft.senderAvatarPath,
       })
       setResult({ type: response.status, message: response.message })
+      toast.success(response.message)
       beginNewDraft()
     } catch (caught: unknown) {
       const submitErrorValue =
@@ -413,8 +417,6 @@ export function WishComposer({
                     onTokenChange={handleCaptchaToken}
                   />
                 </div>
-
-                {submitError ? <p className="mt-4 rounded-lg border border-status-danger/30 bg-status-danger/10 px-3 py-2 text-sm text-status-danger" role="alert" aria-live="assertive">{submitError}</p> : null}
 
                 <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
                   <Button type="button" variant="outline" onClick={() => setStep(1)} disabled={pending} className="min-h-(--control-min-size)">

@@ -1,9 +1,10 @@
 "use client"
 
-import Image from "next/image"
 import { Check, LoaderCircle, Maximize2, Monitor, Smartphone, Tv } from "lucide-react"
-import { useActionState, useState } from "react"
+import Image from "next/image"
+import { useActionState, useEffect, useState } from "react"
 import { useFormStatus } from "react-dom"
+import { toast } from "sonner"
 
 import { EFFECT_PRESETS, type EffectIntensity, type EffectPreset } from "@/components/effects/effect-config"
 import { Button } from "@/components/ui/button"
@@ -118,6 +119,11 @@ export function ThemeEditor({
   const coverIsCloudinary = isCloudinaryDeliveryUrl(cover)
   const previewTheme = presetThemeMap[experiencePreset]
 
+  useEffect(() => {
+    if (state.error) toast.error(state.error)
+    if (state.message) toast.success(state.message)
+  }, [state.error, state.message])
+
   return (
     <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(18rem,0.75fr)_minmax(0,1.55fr)]">
       <form
@@ -135,9 +141,6 @@ export function ThemeEditor({
             Preset điều khiển lớp hiển thị public; Product UI vẫn giữ token riêng.
           </p>
         </div>
-
-        {state.error ? <p className="rounded-xl border border-status-danger/30 bg-status-danger/10 px-3 py-2 text-sm text-status-danger" role="alert">{state.error}</p> : null}
-        {state.message ? <p className="rounded-xl border border-status-success/30 bg-status-success/10 px-3 py-2 text-sm text-status-success" role="status">{state.message}</p> : null}
 
         <fieldset className="space-y-3">
           <legend className="text-sm font-semibold">Experience preset</legend>

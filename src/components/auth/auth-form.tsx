@@ -1,7 +1,8 @@
 "use client"
 
 import { LoaderCircle } from "lucide-react"
-import { useActionState } from "react"
+import { useActionState, useEffect } from "react"
+import { toast } from "sonner"
 
 import type { AuthActionState } from "@/app/auth/actions"
 import { Button } from "@/components/ui/button"
@@ -32,6 +33,13 @@ export function AuthForm({ action, googleAction, mode, nextPath }: AuthFormProps
   const errorId = "auth-form-error"
   const googleErrorId = "google-auth-error"
   const anyPending = pending || googlePending
+
+  useEffect(() => {
+    if (state.error) toast.error(state.error)
+    if (state.message) toast.success(state.message)
+    if (googleState.error) toast.error(googleState.error)
+    if (googleState.message) toast.success(googleState.message)
+  }, [state.error, state.message, googleState.error, googleState.message])
 
   return (
     <div className="space-y-5">
@@ -92,25 +100,6 @@ export function AuthForm({ action, googleAction, mode, nextPath }: AuthFormProps
           ) : null}
         </div>
 
-        {state.error ? (
-          <p
-            id={errorId}
-            className="rounded-xl border border-status-danger/30 bg-status-danger/10 px-3 py-2 text-sm text-status-danger"
-            role="alert"
-          >
-            {state.error}
-          </p>
-        ) : null}
-
-        {state.message ? (
-          <p
-            className="rounded-xl border border-status-success/30 bg-status-success/10 px-3 py-2 text-sm text-status-success"
-            role="status"
-          >
-            {state.message}
-          </p>
-        ) : null}
-
         <Button
           className="min-h-(--control-min-size) w-full"
           disabled={anyPending}
@@ -145,15 +134,6 @@ export function AuthForm({ action, googleAction, mode, nextPath }: AuthFormProps
         aria-describedby={googleState.error ? googleErrorId : undefined}
       >
         {nextPath ? <input name="next" type="hidden" value={nextPath} /> : null}
-        {googleState.error ? (
-          <p
-            id={googleErrorId}
-            className="mb-3 rounded-xl border border-status-danger/30 bg-status-danger/10 px-3 py-2 text-sm text-status-danger"
-            role="alert"
-          >
-            {googleState.error}
-          </p>
-        ) : null}
         <Button
           className="min-h-(--control-min-size) w-full"
           disabled={anyPending}

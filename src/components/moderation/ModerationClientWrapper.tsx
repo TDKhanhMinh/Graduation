@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { toast } from "sonner"
 
 import { submitBulkModeration } from "@/app/dashboard/events/[id]/moderation/actions"
 import { Button } from "@/components/ui/button"
@@ -11,8 +12,6 @@ import { ModerationDetailPanel } from "./ModerationDetailPanel"
 import { BulkActionBar } from "./BulkActionBar"
 import type { ModerationWish } from "@/features/wishes/moderation-dal"
 import type { ModerationAction } from "@/features/wishes/moderation-schema"
-
-type Feedback = { type: "success" | "error"; message: string } | null
 
 export function ModerationClientWrapper({
   eventId,
@@ -29,7 +28,6 @@ export function ModerationClientWrapper({
 }) {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [isPending, startTransition] = useTransition()
-  const [feedback, setFeedback] = useState<Feedback>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const visibleSelectedIds = selectedIds.filter((id) => wishes.some((wish) => wish.id === id))
@@ -48,7 +46,6 @@ export function ModerationClientWrapper({
     if (visibleSelectedIds.length === 0) return
     if (action === "soft_delete" && !window.confirm("Bạn có chắc muốn xóa các lời chúc đã chọn? Thao tác này không thể hoàn tác trong giao diện.")) return
 
-    setFeedback(null)
     startTransition(async () => {
       try {
         const expectedVersions = wishes
@@ -57,16 +54,16 @@ export function ModerationClientWrapper({
         const result = await submitBulkModeration(eventId, { wishIds: visibleSelectedIds, action, expectedVersions })
 
         if (!result.success) {
-          setFeedback({ type: "error", message: result.error || "Không thể xử lý. Dữ liệu có thể đã thay đổi, vui lòng thử lại." })
+          toast.error(result.error || "Không thể xử lý. Dữ liệu có thể đã thay đổi, vui lòng thử lại.")
           return
         }
 
         setSelectedIds([])
-        setFeedback({ type: "success", message: `Đã xử lý ${visibleSelectedIds.length} lời chúc thành công.` })
+        toast.success(`Đã xử lý ${visibleSelectedIds.length} lời chúc thành công.`)
         router.refresh()
       } catch (error) {
         console.error(error)
-        setFeedback({ type: "error", message: "Không thể xử lý lúc này. Vui lòng thử lại." })
+        toast.error("Không thể xử lý lúc này. Vui lòng thử lại.")
       }
     })
   }
@@ -93,11 +90,6 @@ export function ModerationClientWrapper({
         onClearFilters={clearFilters}
       />
 
-      {feedback ? (
-        <div className={feedback.type === "error" ? "rounded-lg border border-status-danger/30 bg-status-danger/10 px-4 py-3 text-sm text-status-danger" : "rounded-lg border border-status-success/30 bg-status-success/10 px-4 py-3 text-sm text-status-success"} role={feedback.type === "error" ? "alert" : "status"} aria-live="polite">
-          {feedback.message}
-        </div>
-      ) : null}
 
       <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] lg:items-start">
         <ModerationQueue

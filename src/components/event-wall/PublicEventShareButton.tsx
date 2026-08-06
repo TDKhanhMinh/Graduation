@@ -2,6 +2,7 @@
 
 import { Check, Copy, QrCode as QrCodeIcon, Share2 } from "lucide-react"
 import { useState } from "react"
+import { toast } from "sonner"
 
 import { QrCode } from "@/components/sharing/QrCode"
 import { Button } from "@/components/ui/button"
@@ -35,22 +36,20 @@ type ShareEventButtonProps = {
 }
 
 export function ShareEventButton({ title, url }: ShareEventButtonProps) {
-  const [message, setMessage] = useState<string | null>(null)
-
   const share = async () => {
     try {
       if (navigator.share) {
         await navigator.share({ title, url })
-        setMessage("Đã mở tùy chọn chia sẻ.")
+        toast.success("Đã mở tùy chọn chia sẻ.")
       } else {
         await copyToClipboard(url)
-        setMessage("Trình duyệt chưa hỗ trợ chia sẻ trực tiếp; đã sao chép liên kết.")
+        toast.success("Trình duyệt chưa hỗ trợ chia sẻ trực tiếp; đã sao chép liên kết.")
       }
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {
         return
       }
-      setMessage("Không thể chia sẻ lúc này. Vui lòng thử lại.")
+      toast.error("Không thể chia sẻ lúc này. Vui lòng thử lại.")
     }
   }
 
@@ -63,16 +62,9 @@ export function ShareEventButton({ title, url }: ShareEventButtonProps) {
         aria-label="Chia sẻ sự kiện"
         className="min-h-(--control-min-size)"
       >
-        {message?.startsWith("Đã") || message?.startsWith("Trình") ? (
-          <Check aria-hidden="true" />
-        ) : (
-          <Share2 aria-hidden="true" />
-        )}
+        <Share2 aria-hidden="true" />
         <span className="hidden sm:inline">Chia sẻ</span>
       </Button>
-      <span className="sr-only" role="status" aria-live="polite">
-        {message}
-      </span>
     </div>
   )
 }
@@ -111,16 +103,17 @@ export function PublicQrButton({ url }: { url: string }) {
 }
 
 export function CopyEventLinkButton({ url }: { url: string }) {
-  const [message, setMessage] = useState<string | null>(null)
-  const copied = message === "Đã sao chép liên kết sự kiện."
+  const [copied, setCopied] = useState(false)
 
   const copy = async () => {
     try {
       await copyToClipboard(url)
-      setMessage("Đã sao chép liên kết sự kiện.")
-      window.setTimeout(() => setMessage(null), 2000)
+      setCopied(true)
+      toast.success("Đã sao chép liên kết sự kiện.")
+      window.setTimeout(() => setCopied(false), 2000)
     } catch {
-      setMessage("Không thể sao chép liên kết lúc này. Vui lòng thử lại.")
+      setCopied(false)
+      toast.error("Không thể sao chép liên kết lúc này. Vui lòng thử lại.")
     }
   }
 
@@ -136,9 +129,6 @@ export function CopyEventLinkButton({ url }: { url: string }) {
         {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
         <span className="hidden sm:inline">{copied ? "Đã sao chép" : "Sao chép link"}</span>
       </Button>
-      <span className="sr-only" role={message?.startsWith("Không") ? "alert" : "status"} aria-live="polite">
-        {message}
-      </span>
     </>
   )
 }

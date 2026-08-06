@@ -80,8 +80,6 @@ export function EventForm({ action, initialData, submitLabel = "Lưu sự kiện
         </div>
       </div>
 
-      {state.error && !state.fieldErrors ? <p className="rounded-xl border border-status-danger/30 bg-status-danger/10 px-3 py-2 text-sm text-status-danger" role="alert">{state.error}</p> : null}
-      {state.message ? <p className="rounded-xl border border-status-success/30 bg-status-success/10 px-3 py-2 text-sm text-status-success" role="status">{state.message}</p> : null}
 
       <fieldset className="space-y-5">
         <legend className="text-base font-semibold">Thông tin cơ bản</legend>
