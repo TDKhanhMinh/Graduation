@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { isCloudinaryDeliveryUrl } from '@/features/media/cloudinary-cover';
+
 export const normalizeSlug = (slug: string) => {
   return slug
     .toLowerCase()
@@ -35,5 +37,5 @@ export const appearanceSchema = z.object({
     .string()
     .trim()
     .max(500, 'Cover URL is too long.')
-    .refine((value) => value === '' || /^https:\/\/res\.cloudinary\.com\//.test(value), 'Cover must be a Cloudinary delivery URL.'),
+    .refine((value) => value === '' || isCloudinaryDeliveryUrl(value), 'Cover must be a Cloudinary delivery URL.'),
 });

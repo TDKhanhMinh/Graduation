@@ -1,15 +1,15 @@
-import type { ReactNode } from "react"
-import Link from "next/link"
 import { CalendarDays, ChevronDown, Compass, Send } from "lucide-react"
+import Link from "next/link"
+import type { ReactNode } from "react"
 
-import { StatusBadge } from "@/components/ui/status-badge"
 import { buttonVariants } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { StatusBadge } from "@/components/ui/status-badge"
 import {
   createWelcomeViewModel,
   formatWelcomeDate,
   getWelcomePresentation,
 } from "@/features/events/welcome"
+import { cn } from "@/lib/utils"
 
 import { PosterMedia } from "./poster-media"
 import { WelcomeCountdown } from "./welcome-countdown"
@@ -103,7 +103,7 @@ export function EventWelcome({
           </div>
           <Link
             href="#wall-heading"
-            className={cn("welcome-scroll-indicator inline-flex w-fit items-center gap-2 text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline")}
+            className={cn("welcome-scroll-indicator inline-flex w-fit items-center gap-2 text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline mt-20")}
             aria-label="Explore the event wall"
           >
             Scroll to explore

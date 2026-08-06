@@ -200,7 +200,7 @@ export async function updateEventAppearance(
 
   revalidatePath("/dashboard/events/" + eventId)
   revalidatePath("/dashboard/events/" + eventId + "/appearance")
-  // The public page reads the saved event projection on the next request.
+  revalidatePath("/(public)/e/[slug]", "page")
   return { message: "Appearance settings saved." }
 }
 

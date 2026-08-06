@@ -25,4 +25,15 @@ describe("appearance schema", () => {
     expect(appearanceSchema.safeParse({ theme_key: "graduation", experience_preset: "cinematic", cover_path: "" }).success).toBe(false)
     expect(appearanceSchema.safeParse({ theme_key: "graduation", effect_quality: "ultra", cover_path: "" }).success).toBe(false)
   })
+
+  it("accepts a Cloudinary delivery URL and rejects lookalike hosts", () => {
+    expect(appearanceSchema.safeParse({
+      theme_key: "graduation",
+      cover_path: "https://res.cloudinary.com/demo/image/upload/v1/cover.webp",
+    }).success).toBe(true)
+    expect(appearanceSchema.safeParse({
+      theme_key: "graduation",
+      cover_path: "https://res.cloudinary.com.attacker.example/cover.webp",
+    }).success).toBe(false)
+  })
 })

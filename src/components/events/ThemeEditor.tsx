@@ -9,6 +9,9 @@ import { EFFECT_PRESETS, type EffectIntensity, type EffectPreset } from "@/compo
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import type { EventActionState } from "@/features/events/actions"
+import { isCloudinaryDeliveryUrl } from "@/features/media/cloudinary-cover"
+
+import { CloudinaryCoverUpload } from "./cloudinary-cover-upload"
 
 type PreviewViewport = "desktop" | "tv" | "mobile" | "fullscreen"
 type ThemeKey = "graduation" | "editorial" | "minimal"
@@ -112,7 +115,7 @@ export function ThemeEditor({
   const [qrVisible, setQrVisible] = useState(initialQrVisible)
   const [qrCta, setQrCta] = useState(initialQrCta)
   const [animationSpeed, setAnimationSpeed] = useState<AnimationSpeed>(initialAnimationSpeed)
-  const coverIsCloudinary = /^https:\/\/res\.cloudinary\.com\//.test(cover)
+  const coverIsCloudinary = isCloudinaryDeliveryUrl(cover)
   const previewTheme = presetThemeMap[experiencePreset]
 
   return (
@@ -213,6 +216,7 @@ export function ThemeEditor({
         </div>
 
         <div className="grid gap-2">
+          <CloudinaryCoverUpload value={cover} onChange={(value) => { setCover(value); setIsDirty(true) }} />
           <Label htmlFor="cover_path">Cloudinary cover URL</Label>
           <input id="cover_path" name="cover_path" value={cover} onChange={(event) => setCover(event.target.value)} placeholder="https://res.cloudinary.com/..." className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40" aria-describedby="cover-help" />
           <p id="cover-help" className="text-xs leading-5 text-muted-foreground">Chỉ dùng delivery URL từ Cloudinary. Upload media chưa nằm trong task này.</p>

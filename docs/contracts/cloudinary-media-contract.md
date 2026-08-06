@@ -23,6 +23,12 @@ The currently supplied Cloudinary preset is:
 
 The preset is approved for both public submission uploads and Media Library uploads. It remains a public-delivery preset: it does not provide private moderation delivery or owner-only deletion. An asset uploaded with public delivery can be fetched by anyone who obtains its delivery URL.
 
+## Event cover upload
+
+Event cover images use the direct browser upload boundary with `resource_type: image`. The browser may send a validated JPEG, PNG, or WebP file up to 5 MiB to the configured Cloudinary upload endpoint and receives `secure_url`. The application stores only that URL in `public.events.cover_path`; the binary remains in Cloudinary.
+
+The owner-only Server Action remains responsible for accepting the returned URL and updating the event. It must validate the Cloudinary delivery host and the existing event ownership boundary before persisting the value. No API secret is required for this flow and no Supabase Storage bucket is involved.
+
 Cloudinary API secrets are server-only. The browser may receive the cloud name, API key, upload preset, and upload URL, but never the API secret.
 
 ## Upload boundary
