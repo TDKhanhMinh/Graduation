@@ -161,14 +161,14 @@ export async function updateEventAppearance(
     effect_quality: formData.get("effect_quality") || undefined,
     wall_layout: formData.get("wall_layout") || undefined,
     qr_visible: formData.getAll("qr_visible").includes("true"),
-    qr_cta: String(formData.get("qr_cta") || "Send a wish"),
+    qr_cta: String(formData.get("qr_cta") || "Gửi lời chúc"),
     animation_speed: formData.get("animation_speed") || undefined,
     cover_path: String(formData.get("cover_path") || ""),
   })
 
   if (!validated.success) {
     return {
-      error: "Appearance settings are invalid.",
+      error: "Cài đặt giao diện không hợp lệ.",
       fieldErrors: validated.error.flatten().fieldErrors,
     }
   }
@@ -195,13 +195,13 @@ export async function updateEventAppearance(
 
   if (error) {
     logger.error("Failed to update event appearance", error, { userId: session.userId, eventId })
-    return { error: "Could not save appearance settings." }
+    return { error: "Không thể lưu cài đặt giao diện." }
   }
 
   revalidatePath("/dashboard/events/" + eventId)
   revalidatePath("/dashboard/events/" + eventId + "/appearance")
   revalidatePath("/(public)/e/[slug]", "page")
-  return { message: "Appearance settings saved." }
+  return { message: "Đã lưu cài đặt giao diện." }
 }
 
 export async function archiveEvent(eventId: string) {

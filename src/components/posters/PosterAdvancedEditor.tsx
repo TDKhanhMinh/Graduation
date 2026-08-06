@@ -1,11 +1,11 @@
 "use client"
 
-import { Copy, Download, Group, Lock, Redo2, Save, Ungroup, Undo2, Unlock } from "lucide-react"
+import { Copy, Download, Group, Lock, Redo2, Save, Undo2, Ungroup, Unlock } from "lucide-react"
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react"
 import { toast } from "sonner"
 
-import { Button } from "@/components/ui/button"
 import { savePosterDocument } from "@/app/dashboard/events/[id]/poster-studio/actions"
+import { Button } from "@/components/ui/button"
 import {
   applyPosterEditorCommand,
   createPosterEditorState,
@@ -151,7 +151,7 @@ export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision
     void import("@/features/sharing/qr").then(({ createQrDataUrl }) => createQrDataUrl(editorState.document.content.publicUrl, 256)).then((value) => {
       if (!cancelled) setQrDataUrl(value)
     }).catch(() => {
-      if (!cancelled) toast.error("QR generation is temporarily unavailable.")
+      if (!cancelled) toast.error("Hiện chưa thể tạo mã QR.")
     })
     return () => { cancelled = true }
   }, [editorState.document.content.publicUrl])
@@ -169,11 +169,11 @@ export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision
           const result = posterDocumentSchema.safeParse(JSON.parse(raw))
           if (active && result.success && result.data.metadata.eventId === eventId) {
             setEditorState(createPosterEditorState(result.data))
-            toast.success("Recovered the latest local editor draft.")
+            toast.success("Đã khôi phục bản nháp cục bộ mới nhất.")
           }
         }
       } catch {
-        if (active) toast.error("Local draft recovery was unavailable; using the saved document.")
+        if (active) toast.error("Không thể khôi phục bản nháp cục bộ; đang dùng tài liệu đã lưu.")
       } finally {
         if (active) hydratedRef.current = true
       }
@@ -194,13 +194,13 @@ export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision
         if (result.success) {
           revisionRef.current = result.revision
           setSaveStatus("saved")
-          toast.success("Autosaved the poster document.", { id: "poster-autosave" })
+          toast.success("Đã tự động lưu tài liệu áp phích.", { id: "poster-autosave" })
         } else if (result.conflict) {
           setSaveStatus("conflict")
-          toast.error("Another session changed this poster. Reload before saving again.")
+          toast.error("Một phiên khác đã thay đổi áp phích này. Hãy tải lại trước khi lưu tiếp.")
         } else {
           setSaveStatus("local")
-          toast.info("Saved locally. Server persistence will retry when available.")
+          toast.info("Đã lưu cục bộ. Hệ thống sẽ thử lưu lên máy chủ lại khi có thể.")
         }
       })
     }, SAVE_DELAY_MS)
@@ -288,7 +288,7 @@ export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision
 
   async function exportPng() {
     if (!svgRef.current || !exportReady) {
-      toast.error("Export is waiting for fonts and QR readiness.")
+      toast.error("Đang chờ phông chữ và mã QR sẵn sàng để xuất.")
       return
     }
     setExportStatus("exporting")
@@ -305,18 +305,18 @@ export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision
       image.src = svgUrl
       await new Promise<void>((resolve, reject) => {
         image.onload = () => resolve()
-        image.onerror = () => reject(new Error("SVG export image failed to load"))
+        image.onerror = () => reject(new Error("Không thể tải ảnh xuất SVG"))
       })
       const scale = 2
       const canvas = globalThis.document.createElement("canvas")
       canvas.width = width * scale
       canvas.height = height * scale
       const context = canvas.getContext("2d")
-      if (!context) throw new Error("Canvas context unavailable")
+      if (!context) throw new Error("Không có ngữ cảnh canvas")
       context.scale(scale, scale)
       context.drawImage(image, 0, 0, width, height)
       const png = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"))
-      if (!png) throw new Error("PNG export failed")
+      if (!png) throw new Error("Xuất PNG thất bại")
       const title = editorState.document.content.title.normalize("NFKD").replace(/[^\w\s-]/g, "").trim().replace(/[\s_-]+/g, "-").toLowerCase() || "event"
       const downloadUrl = URL.createObjectURL(png)
       const anchor = globalThis.document.createElement("a")
@@ -364,7 +364,7 @@ export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision
               data-poster-editor-canvas
               viewBox={"0 0 " + dimensions.width + " " + dimensions.height}
               role="application"
-              aria-label="Advanced poster editor canvas"
+              aria-label="Vùng chỉnh sửa áp phích nâng cao"
               tabIndex={0}
               onKeyDown={handleKeyDown}
               className="mx-auto block h-auto max-h-[72vh] w-full outline-none focus-visible:ring-2 focus-visible:ring-focus"
@@ -388,62 +388,62 @@ export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision
               ))}
             </svg>
           </div>
-          <p className="mt-3 text-xs leading-5 text-muted-foreground">Shift-click to multi-select. Drag with the pointer or use arrow keys to move by the snap grid. Ctrl/Cmd+Z and Ctrl/Cmd+Y control history.</p>
+          <p className="mt-3 text-xs leading-5 text-muted-foreground">Giữ Shift và nhấp để chọn nhiều. Kéo bằng con trỏ hoặc dùng phím mũi tên để di chuyển theo lưới. Ctrl/Cmd+Z và Ctrl/Cmd+Y dùng để điều khiển lịch sử chỉnh sửa.</p>
         </div>
 
-        <aside className="min-w-0 space-y-4 rounded-2xl border border-border/80 bg-background p-4" aria-label="Editor properties">
+        <aside className="min-w-0 space-y-4 rounded-2xl border border-border/80 bg-background p-4" aria-label="Thuộc tính trình chỉnh sửa">
           <div className="flex flex-wrap gap-2">
-            <Button type="button" size="sm" onClick={() => void exportPng()} disabled={!exportReady || exportStatus === "exporting"}><Download className="size-4" />{exportStatus === "exporting" ? "Exporting..." : "Export PNG"}</Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => setEditorState((current) => undoPosterEditor(current))} disabled={!editorState.past.length} aria-label="Undo"><Undo2 className="size-4" /></Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => setEditorState((current) => redoPosterEditor(current))} disabled={!editorState.future.length} aria-label="Redo"><Redo2 className="size-4" /></Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => selectedElements.length ? dispatch({ type: "duplicate", ids: editorState.selectedIds }) : undefined} disabled={!selectedElements.length} aria-label="Duplicate selection"><Copy className="size-4" /></Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => selectedElements.length > 1 ? dispatch({ type: "group", ids: editorState.selectedIds }) : undefined} disabled={selectedElements.length < 2} aria-label="Group selection"><Group className="size-4" /></Button>
+            <Button type="button" size="sm" onClick={() => void exportPng()} disabled={!exportReady || exportStatus === "exporting"}><Download className="size-4" />{exportStatus === "exporting" ? "Đang xuất..." : "Xuất PNG"}</Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => setEditorState((current) => undoPosterEditor(current))} disabled={!editorState.past.length} aria-label="Hoàn tác"><Undo2 className="size-4" /></Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => setEditorState((current) => redoPosterEditor(current))} disabled={!editorState.future.length} aria-label="Làm lại"><Redo2 className="size-4" /></Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => selectedElements.length ? dispatch({ type: "duplicate", ids: editorState.selectedIds }) : undefined} disabled={!selectedElements.length} aria-label="Nhân bản lựa chọn"><Copy className="size-4" /></Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => selectedElements.length > 1 ? dispatch({ type: "group", ids: editorState.selectedIds }) : undefined} disabled={selectedElements.length < 2} aria-label="Nhóm lựa chọn"><Group className="size-4" /></Button>
           </div>
 
           {selectedElement ? (
             <div className="space-y-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Selected</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Đã chọn</p>
                 <p className="mt-1 truncate text-sm font-semibold">{elementLabel(selectedElement)}</p>
               </div>
               {selectedElement.type === "text" ? (
                 <>
-                  <label className="grid gap-1 text-xs font-medium" htmlFor="poster-editor-text">Text
+                  <label className="grid gap-1 text-xs font-medium" htmlFor="poster-editor-text">Nội dung
                     <textarea id="poster-editor-text" value={selectedElement.text} onChange={(event) => dispatch({ type: "set-text", id: selectedElement.id, text: event.target.value })} rows={4} maxLength={500} className="rounded-lg border border-input bg-background p-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-focus" />
                   </label>
-                  <label className="grid gap-1 text-xs font-medium" htmlFor="poster-editor-fill">Text color
+                  <label className="grid gap-1 text-xs font-medium" htmlFor="poster-editor-fill">Màu chữ
                     <input id="poster-editor-fill" type="color" value={selectedElement.style.fill.startsWith("#") && selectedElement.style.fill.length === 7 ? selectedElement.style.fill : "#111827"} onChange={(event) => dispatch({ type: "set-fill", id: selectedElement.id, fill: event.target.value })} className="h-9 w-full rounded-lg border border-input bg-background p-1" />
                   </label>
                 </>
               ) : null}
               <div className="grid grid-cols-2 gap-2">
-                <label className="grid gap-1 text-xs font-medium" htmlFor="poster-editor-width">Width
+                <label className="grid gap-1 text-xs font-medium" htmlFor="poster-editor-width">Chiều rộng
                   <input id="poster-editor-width" type="number" min={24} value={Math.round(selectedElement.frame.width)} onChange={(event) => dispatch({ type: "resize", id: selectedElement.id, width: Number(event.target.value), height: selectedElement.frame.height })} className="min-h-9 rounded-lg border border-input bg-background px-2 text-sm" />
                 </label>
-                <label className="grid gap-1 text-xs font-medium" htmlFor="poster-editor-height">Height
+                <label className="grid gap-1 text-xs font-medium" htmlFor="poster-editor-height">Chiều cao
                   <input id="poster-editor-height" type="number" min={24} value={Math.round(selectedElement.frame.height)} onChange={(event) => dispatch({ type: "resize", id: selectedElement.id, width: selectedElement.frame.width, height: Number(event.target.value) })} className="min-h-9 rounded-lg border border-input bg-background px-2 text-sm" />
                 </label>
               </div>
-              <label className="grid gap-1 text-xs font-medium" htmlFor="poster-editor-rotation">Rotation
+              <label className="grid gap-1 text-xs font-medium" htmlFor="poster-editor-rotation">Góc xoay
                 <input id="poster-editor-rotation" type="number" value={Math.round(selectedElement.rotation)} onChange={(event) => dispatch({ type: "rotate", ids: [selectedElement.id], degrees: Number(event.target.value) - selectedElement.rotation })} className="min-h-9 rounded-lg border border-input bg-background px-2 text-sm" />
               </label>
               <div className="flex flex-wrap gap-2">
                 <Button type="button" variant="outline" size="sm" onClick={() => dispatch({ type: "set-lock", ids: [selectedElement.id], locked: !selectedElement.locked })}>
                   {selectedElement.locked ? <Unlock className="size-4" /> : <Lock className="size-4" />}
-                  {selectedElement.locked ? "Unlock" : "Lock"}
+                  {selectedElement.locked ? "Mở khóa" : "Khóa"}
                 </Button>
-                {selectedElement.type === "group" ? <Button type="button" variant="outline" size="sm" onClick={() => dispatch({ type: "ungroup", id: selectedElement.id })}><Ungroup className="size-4" />Ungroup</Button> : null}
-                <Button type="button" variant="outline" size="sm" onClick={() => dispatch({ type: "set-z-index", id: selectedElement.id, zIndex: selectedElement.zIndex + 1 })}>Bring forward</Button>
+                {selectedElement.type === "group" ? <Button type="button" variant="outline" size="sm" onClick={() => dispatch({ type: "ungroup", id: selectedElement.id })}><Ungroup className="size-4" />Bỏ nhóm</Button> : null}
+                <Button type="button" variant="outline" size="sm" onClick={() => dispatch({ type: "set-z-index", id: selectedElement.id, zIndex: selectedElement.zIndex + 1 })}>Đưa lên trước</Button>
               </div>
             </div>
           ) : (
-            <p className="text-sm leading-6 text-muted-foreground">Select an element to edit its properties. Locked elements remain visible but cannot be mutated.</p>
+            <p className="text-sm leading-6 text-muted-foreground">Chọn một thành phần để chỉnh thuộc tính. Thành phần bị khóa vẫn hiển thị nhưng không thể thay đổi.</p>
           )}
 
           <div className="rounded-xl border border-border/80 bg-muted/30 p-3 text-xs leading-5 text-muted-foreground">
-            <p>Capability: {capabilities.advancedEditor ? "Advanced Editor" : "Quick Create"}</p>
-            <p>Document version: {editorState.document.version}</p>
-            <p>Elements: {editorState.document.elements.length}</p>
+            <p>Khả năng: {capabilities.advancedEditor ? "Trình chỉnh sửa nâng cao" : "Tạo nhanh"}</p>
+            <p>Phiên bản tài liệu: {editorState.document.version}</p>
+            <p>Thành phần: {editorState.document.elements.length}</p>
           </div>
         </aside>
       </div>

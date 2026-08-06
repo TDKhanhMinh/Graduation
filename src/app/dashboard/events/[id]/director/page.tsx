@@ -5,7 +5,7 @@ import { getOwnedEventById } from "@/features/events/dal"
 import { getApprovedWishesPage } from "@/features/wishes/dal"
 
 export const metadata = {
-  title: "Director Mode",
+  title: "Chế độ đạo diễn",
 }
 
 export default async function DirectorPage({

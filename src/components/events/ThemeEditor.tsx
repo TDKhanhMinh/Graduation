@@ -37,12 +37,12 @@ const presets: Array<{
   sample: string
   accent: string
 }> = [
-  { key: "minimal", label: "Minimal", description: "Tinh gọn, sáng và tập trung nội dung.", hint: "Low resource", sample: "bg-[linear-gradient(135deg,#f8fafc,#e2e8f0)]", accent: "bg-slate-700" },
-  { key: "elegant", label: "Elegant", description: "Mềm mại với chất tạp chí hiện đại.", hint: "Balanced", sample: "bg-[linear-gradient(135deg,#fbf8f2,#ead6c3)]", accent: "bg-[#7d5a5f]" },
-  { key: "romantic", label: "Romantic", description: "Ấm áp, dịu dàng và giàu cảm xúc.", hint: "Balanced", sample: "bg-[linear-gradient(135deg,#fff1f2,#fbcfe8)]", accent: "bg-pink-500" },
-  { key: "graduation", label: "Graduation", description: "Trang trọng, nổi bật và giàu năng lượng.", hint: "Medium resource", sample: "bg-[linear-gradient(135deg,var(--brand-50),var(--memory-peach))]", accent: "bg-primary" },
-  { key: "celebration", label: "Celebration", description: "Rực rỡ cho những khoảnh khắc đáng nhớ.", hint: "High resource", sample: "bg-[linear-gradient(135deg,#fef3c7,#fed7aa)]", accent: "bg-orange-500" },
-  { key: "galaxy", label: "Galaxy", description: "Không gian sâu, huyền ảo và chuyển động nhẹ.", hint: "High resource", sample: "bg-[linear-gradient(135deg,#172554,#581c87)]", accent: "bg-violet-400" },
+  { key: "minimal", label: "Tối giản", description: "Tinh gọn, sáng và tập trung nội dung.", hint: "Ít tài nguyên", sample: "bg-[linear-gradient(135deg,#f8fafc,#e2e8f0)]", accent: "bg-slate-700" },
+  { key: "elegant", label: "Thanh lịch", description: "Mềm mại với chất tạp chí hiện đại.", hint: "Cân bằng", sample: "bg-[linear-gradient(135deg,#fbf8f2,#ead6c3)]", accent: "bg-[#7d5a5f]" },
+  { key: "romantic", label: "Lãng mạn", description: "Ấm áp, dịu dàng và giàu cảm xúc.", hint: "Cân bằng", sample: "bg-[linear-gradient(135deg,#fff1f2,#fbcfe8)]", accent: "bg-pink-500" },
+  { key: "graduation", label: "Tốt nghiệp", description: "Trang trọng, nổi bật và giàu năng lượng.", hint: "Tài nguyên trung bình", sample: "bg-[linear-gradient(135deg,var(--brand-50),var(--memory-peach))]", accent: "bg-primary" },
+  { key: "celebration", label: "Chúc mừng", description: "Rực rỡ cho những khoảnh khắc đáng nhớ.", hint: "Nhiều tài nguyên", sample: "bg-[linear-gradient(135deg,#fef3c7,#fed7aa)]", accent: "bg-orange-500" },
+  { key: "galaxy", label: "Ngân hà", description: "Không gian sâu, huyền ảo và chuyển động nhẹ.", hint: "Nhiều tài nguyên", sample: "bg-[linear-gradient(135deg,#172554,#581c87)]", accent: "bg-violet-400" },
 ]
 
 const viewportWidths: Record<PreviewViewport, string> = {
@@ -98,7 +98,7 @@ export function ThemeEditor({
   initialEffectQuality = "auto",
   initialWallLayout = "spotlight",
   initialQrVisible = true,
-  initialQrCta = "Send a wish",
+  initialQrCta = "Gửi lời chúc",
   initialAnimationSpeed = "normal",
 }: ThemeEditorProps) {
   const [state, formAction] = useActionState(action, {})
@@ -143,7 +143,7 @@ export function ThemeEditor({
         </div>
 
         <fieldset className="space-y-3">
-          <legend className="text-sm font-semibold">Trải nghiệm hiển thị (Preset)</legend>
+          <legend className="text-sm font-semibold">Trải nghiệm hiển thị (Mẫu)</legend>
           <div className="grid gap-3 sm:grid-cols-2">
             {presets.map((item) => {
               const selected = experiencePreset === item.key
@@ -228,10 +228,10 @@ export function ThemeEditor({
 
         <div className="grid gap-2">
           <CloudinaryCoverUpload value={cover} onChange={(value) => { setCover(value); setIsDirty(true) }} />
-          <Label htmlFor="cover_path">Đường dẫn ảnh bìa (Cloudinary URL)</Label>
+          <Label htmlFor="cover_path">Đường dẫn ảnh bìa (URL Cloudinary)</Label>
           <input id="cover_path" name="cover_path" value={cover} onChange={(event) => setCover(event.target.value)} placeholder="https://res.cloudinary.com/..." className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40" aria-describedby="cover-help" />
-          <p id="cover-help" className="text-xs leading-5 text-muted-foreground">Chỉ dùng đường dẫn (delivery URL) từ Cloudinary.</p>
-          {cover && !coverIsCloudinary ? <p className="rounded-lg bg-status-danger/10 px-3 py-2 text-sm text-status-danger" role="alert">Đường dẫn chưa hợp lệ; bản xem trước sẽ dùng ảnh mặc định cho đến khi nhập Cloudinary URL.</p> : null}
+          <p id="cover-help" className="text-xs leading-5 text-muted-foreground">Chỉ dùng đường dẫn phân phối từ Cloudinary.</p>
+          {cover && !coverIsCloudinary ? <p className="rounded-lg bg-status-danger/10 px-3 py-2 text-sm text-status-danger" role="alert">Đường dẫn chưa hợp lệ; bản xem trước sẽ dùng ảnh mặc định cho đến khi nhập URL Cloudinary.</p> : null}
         </div>
 
         <div className="flex flex-col gap-3 border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
@@ -283,7 +283,7 @@ export function ThemeEditor({
                 </article>
                 <article className="rounded-2xl border p-4" style={{ borderColor: "var(--event-border)" }}>
                   <p className="text-sm leading-6">{qrVisible ? "Mã QR sẽ hiển thị theo cấu hình." : "Mã QR đã được ẩn theo cấu hình."}</p>
-                  <p className="mt-3 text-xs" style={{ color: "var(--event-muted)" }}>Giao diện mẫu: {experiencePreset} · Chất lượng: {quality}</p>
+                  <p className="mt-3 text-xs" style={{ color: "var(--event-muted)" }}>Giao diện mẫu: {experiencePreset === "minimal" ? "Tối giản" : experiencePreset === "elegant" ? "Thanh lịch" : experiencePreset === "romantic" ? "Lãng mạn" : experiencePreset === "celebration" ? "Chúc mừng" : experiencePreset === "graduation" ? "Tốt nghiệp" : "Ngân hà"} · Chất lượng: {quality === "auto" ? "Tự động" : quality === "low" ? "Thấp" : quality === "medium" ? "Trung bình" : "Cao"}</p>
                 </article>
               </div>
             </div>

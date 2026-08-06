@@ -20,7 +20,7 @@ export function AuditHistory({ logs }: { logs: AuditLog[] }) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base"><Activity aria-hidden="true" className="size-4" />Lịch sử kiểm duyệt</CardTitle>
-        <CardDescription>Các thay đổi gần đây của event này.</CardDescription>
+        <CardDescription>Các thay đổi gần đây của sự kiện này.</CardDescription>
       </CardHeader>
       <CardContent>
         {(!logs || logs.length === 0) ? (

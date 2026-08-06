@@ -78,7 +78,7 @@ export function CloudinaryCoverUpload({ value, onChange, disabled = false }: Clo
 
         xhr.onload = () => {
           if (xhr.status < 200 || xhr.status >= 300) {
-            reject(new Error("Cloudinary upload failed."))
+            reject(new Error("Không thể tải ảnh lên Cloudinary."))
             return
           }
 
@@ -87,23 +87,23 @@ export function CloudinaryCoverUpload({ value, onChange, disabled = false }: Clo
             onChange(asset.secureUrl)
             resolve()
           } catch (caught: unknown) {
-            reject(caught instanceof Error ? caught : new Error("Cloudinary returned an invalid response."))
+            reject(caught instanceof Error ? caught : new Error("Cloudinary trả về phản hồi không hợp lệ."))
           }
         }
-        xhr.onerror = () => reject(new Error("Network error during Cloudinary upload."))
-        xhr.onabort = () => reject(new Error("Cloudinary upload cancelled."))
+        xhr.onerror = () => reject(new Error("Lỗi mạng khi tải lên Cloudinary."))
+        xhr.onabort = () => reject(new Error("Đã hủy tải lên Cloudinary."))
         xhr.send(formData)
       })
 
       if (mountedRef.current) {
         setState("ready")
         setProgress(100)
-        toast.success("Ảnh cover đã tải lên Cloudinary. Hãy lưu thay đổi để áp dụng.")
+        toast.success("Ảnh bìa đã tải lên Cloudinary. Hãy lưu thay đổi để áp dụng.")
       }
     } catch (caught: unknown) {
       if (!mountedRef.current) return
       setState("error")
-      const errorMessage = caught instanceof Error ? caught.message : "Could not upload cover."
+      const errorMessage = caught instanceof Error ? caught.message : "Không thể tải ảnh bìa lên."
       setError(errorMessage)
       toast.error(errorMessage)
     } finally {
@@ -132,7 +132,7 @@ export function CloudinaryCoverUpload({ value, onChange, disabled = false }: Clo
     } catch (caught: unknown) {
       if (!mountedRef.current) return
       setState("error")
-      const errorMessage = caught instanceof Error ? caught.message : "Could not prepare cover."
+      const errorMessage = caught instanceof Error ? caught.message : "Không thể chuẩn bị ảnh bìa."
       setError(errorMessage)
       toast.error(errorMessage)
     }
@@ -167,22 +167,22 @@ export function CloudinaryCoverUpload({ value, onChange, disabled = false }: Clo
         className="sr-only"
         onChange={(event) => void handleFileChange(event)}
         disabled={disabled || state === "uploading"}
-        aria-label="Chọn ảnh cover sự kiện"
+        aria-label="Chọn ảnh bìa sự kiện"
       />
       {preview ? (
         <div className="relative overflow-hidden rounded-2xl border bg-surface-sunken">
           {/* eslint-disable-next-line @next/next/no-img-element -- preview supports a local object URL before Cloudinary upload */}
-          <img src={preview} alt="Xem trước ảnh cover sự kiện" className="max-h-64 w-full object-cover" />
+          <img src={preview} alt="Xem trước ảnh bìa sự kiện" className="max-h-64 w-full object-cover" />
           <div className="absolute right-3 top-3 flex gap-2">
-            <Button type="button" variant="destructive" size="icon" onClick={handleRemove} disabled={state === "uploading"} aria-label="Xóa ảnh cover">
+            <Button type="button" variant="destructive" size="icon" onClick={handleRemove} disabled={state === "uploading"} aria-label="Xóa ảnh bìa">
               <X aria-hidden="true" />
             </Button>
           </div>
           {state === "uploading" ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background/80">
               <LoaderCircle aria-hidden="true" className="size-7 animate-spin text-primary" />
-              <progress className="h-2 w-40" value={progress} max={100} aria-label={`Đang tải ảnh cover lên ${progress}%`} />
-              <span className="text-sm font-medium" role="status" aria-live="polite">Đang tải ảnh cover lên… {progress}%</span>
+              <progress className="h-2 w-40" value={progress} max={100} aria-label={`Đang tải ảnh bìa lên ${progress}%`} />
+              <span className="text-sm font-medium" role="status" aria-live="polite">Đang tải ảnh bìa lên… {progress}%</span>
             </div>
           ) : null}
         </div>
@@ -190,7 +190,7 @@ export function CloudinaryCoverUpload({ value, onChange, disabled = false }: Clo
       <div className="flex flex-wrap items-center gap-2">
         <Button type="button" variant="outline" className="min-h-(--control-min-size)" onClick={() => fileInputRef.current?.click()} disabled={disabled || state === "uploading"}>
           <ImagePlus aria-hidden="true" />
-          {preview ? "Thay ảnh cover" : "Tải ảnh cover lên"}
+          {preview ? "Thay ảnh bìa" : "Tải ảnh bìa lên"}
         </Button>
         {state === "error" && canRetry ? (
           <Button type="button" variant="ghost" className="min-h-(--control-min-size)" onClick={handleRetry} disabled={disabled}>

@@ -47,7 +47,7 @@ describe("poster quick create mapping", () => {
     expect(() => createPosterDocumentFromQuickCreate({
       ...baseInput,
       templateId: "remote-template",
-    })).toThrow("Unknown local poster template")
+    })).toThrow("Không tìm thấy mẫu áp phích cục bộ")
   })
 })
 

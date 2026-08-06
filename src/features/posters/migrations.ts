@@ -27,7 +27,7 @@ const legacyPosterDocumentV0Schema = z.object({
 
 export function migratePosterDocument(input: unknown): PosterDocument {
   const versionResult = z.object({ version: z.number().int() }).safeParse(input)
-  if (!versionResult.success) throw new Error("Poster document version is required")
+  if (!versionResult.success) throw new Error("Tài liệu áp phích bắt buộc có phiên bản")
 
   if (versionResult.data.version === CURRENT_POSTER_DOCUMENT_VERSION) {
     return posterDocumentSchema.parse(input)
@@ -57,5 +57,5 @@ export function migratePosterDocument(input: unknown): PosterDocument {
     })
   }
 
-  throw new Error(`Unsupported poster document version: ${versionResult.data.version}`)
+  throw new Error(`Phiên bản tài liệu áp phích không được hỗ trợ: ${versionResult.data.version}`)
 }

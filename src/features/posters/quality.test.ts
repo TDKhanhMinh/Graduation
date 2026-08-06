@@ -37,10 +37,10 @@ describe("poster export quality gates", () => {
     })
     expect(result.success).toBe(false)
     expect(result.errors).toEqual(expect.arrayContaining([
-      "Fonts are not ready",
-      "One or more poster assets are not ready",
+      "Phông chữ chưa sẵn sàng",
+      "Một hoặc nhiều thành phần áp phích chưa sẵn sàng",
       `QR must be at least ${POSTER_QR_MIN_SIZE}px`,
-      "QR is outside the poster safe area",
+      "Mã QR nằm ngoài vùng an toàn của áp phích",
     ]))
   })
 

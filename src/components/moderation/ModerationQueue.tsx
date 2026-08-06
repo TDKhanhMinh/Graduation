@@ -58,7 +58,7 @@ export function ModerationQueue({
                 <Checkbox checked={isAllSelected} onCheckedChange={onSelectAll} aria-label="Chọn tất cả lời chúc" />
               </TableHead>
               <TableHead>Người gửi</TableHead>
-              <TableHead>Nội dung & media</TableHead>
+              <TableHead>Nội dung & tệp đa phương tiện</TableHead>
               <TableHead>Trạng thái</TableHead>
               <TableHead>Thời gian</TableHead>
             </TableRow>
@@ -70,7 +70,7 @@ export function ModerationQueue({
                 data-state={selectedWishId === wish.id ? "inspected" : selectedIds.includes(wish.id) ? "selected" : undefined}
                 tabIndex={0}
                 role="button"
-                aria-label={`Inspect wish from ${wish.sender_name}`}
+                aria-label={`Xem lời chúc của ${wish.sender_name}`}
                 aria-pressed={selectedWishId === wish.id}
                 onClick={() => onInspect(wish.id)}
                 onKeyDown={(event) => {
@@ -117,7 +117,7 @@ export function ModerationQueue({
             data-state={selectedWishId === wish.id ? "inspected" : selectedIds.includes(wish.id) ? "selected" : undefined}
             tabIndex={0}
             role="button"
-            aria-label={`Inspect wish from ${wish.sender_name}`}
+            aria-label={`Xem lời chúc của ${wish.sender_name}`}
             onClick={() => onInspect(wish.id)}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {

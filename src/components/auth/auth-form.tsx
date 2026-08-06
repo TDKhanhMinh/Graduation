@@ -67,7 +67,7 @@ export function AuthForm({ action, googleAction, mode, nextPath }: AuthFormProps
         ) : null}
 
         <div className="grid gap-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">Địa chỉ email</Label>
           <Input
             autoComplete="email"
             className="h-11 rounded-xl border-border/80 bg-background/70"

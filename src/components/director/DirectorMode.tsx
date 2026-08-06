@@ -31,10 +31,10 @@ export function DirectorMode({
   const [speed, setSpeed] = useState(initialAnimationSpeed)
   const [qrVisible, setQrVisible] = useState(initialQrVisible)
   const [celebration, setCelebration] = useState(false)
-  const [notification, setNotification] = useState("Director Mode ready")
+  const [notification, setNotification] = useState("Chế độ đạo diễn đã sẵn sàng")
   const current = queue[currentIndex] ?? null
   const next = queue[currentIndex + 1] ?? null
-  const { play: playTimeline } = useTimelinePlayback(false, () => setNotification("Current wish playback completed"))
+  const { play: playTimeline } = useTimelinePlayback(false, () => setNotification("Đã phát xong lời chúc hiện tại"))
 
   const playbackScale = speed === "slow" ? 1.25 : speed === "fast" ? 0.8 : 1
   const currentDuration = useMemo(() => {
@@ -53,7 +53,7 @@ export function DirectorMode({
     setIsPaused(false)
     const wish = queue[index]
     playTimeline(createTimelinePlan({ contentType: wish.hasMedia ? "image" : "text" }))
-    announce("Next wish is now on stage")
+    announce("Lời chúc tiếp theo đang được trình chiếu")
   }
 
   function selectPrevious() {
@@ -63,14 +63,14 @@ export function DirectorMode({
     setIsPaused(false)
     const wish = queue[index]
     playTimeline(createTimelinePlan({ contentType: wish.hasMedia ? "image" : "text" }))
-    announce("Previous wish is now on stage")
+    announce("Lời chúc trước đang được trình chiếu")
   }
 
   function skipCurrent() {
     if (!current) return
     setQueue((items) => items.filter((item) => item.id !== current.id))
     setCurrentIndex((index) => Math.min(index, Math.max(queue.length - 2, 0)))
-    announce("Wish skipped for this local playback session")
+    announce("Đã bỏ qua lời chúc trong phiên phát cục bộ")
     announce("Đã bỏ qua lời chúc trong phiên phát cục bộ")
   }
 
@@ -78,11 +78,11 @@ export function DirectorMode({
     <section className="space-y-6" aria-labelledby="director-mode-heading">
       <div className="flex flex-col gap-4 rounded-3xl border border-primary/20 bg-[radial-gradient(circle_at_90%_0%,var(--memory-peach)_0,transparent_32%),linear-gradient(135deg,var(--brand-50),var(--background)_72%)] p-5 sm:p-7 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Bảng điều khiển (Host)</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Bảng điều khiển (Người dẫn chương trình)</p>
           <h2 id="director-mode-heading" className="mt-1 font-heading text-xl font-semibold">Tùy chỉnh luồng hiển thị</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Điều khiển local playback cho màn hình public. Các thao tác không gọi public API và không thay đổi wish trong database.</p>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Điều khiển phát cục bộ cho màn hình công khai. Các thao tác không gọi API công khai và không thay đổi lời chúc trong cơ sở dữ liệu.</p>
         </div>
-        <Link href={`/dashboard/events/${eventId}/moderation`} className="text-sm font-medium text-primary underline-offset-4 hover:underline">Mở moderation</Link>
+        <Link href={`/dashboard/events/${eventId}/moderation`} className="text-sm font-medium text-primary underline-offset-4 hover:underline">Mở kiểm duyệt</Link>
       </div>
 
       <p role="status" aria-live="polite" className="rounded-xl border border-status-info/30 bg-status-info/10 px-4 py-3 text-sm text-status-info">{notification}</p>
@@ -91,8 +91,8 @@ export function DirectorMode({
         <div className="min-w-0 rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Now playing</p>
-              <p className="mt-1 text-lg font-semibold">{current ? current.senderName : "Queue empty"}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Đang trình chiếu</p>
+              <p className="mt-1 text-lg font-semibold">{current ? current.senderName : "Hàng đợi trống"}</p>
             </div>
             <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium">{current ? `${currentIndex + 1} / ${queue.length}` : "0 / 0"}</span>
           </div>
@@ -102,40 +102,40 @@ export function DirectorMode({
           </blockquote>
 
           <div className="mt-5 flex flex-wrap gap-2">
-            <Button type="button" variant="outline" onClick={selectPrevious} disabled={!current || currentIndex === 0}><ChevronLeft aria-hidden="true" />Previous</Button>
-            <Button type="button" variant="outline" onClick={selectNext} disabled={!current || currentIndex >= queue.length - 1}><ChevronRight aria-hidden="true" />Next</Button>
-            <Button type="button" variant={isPaused ? "default" : "soft"} onClick={() => { setIsPaused((value) => !value); announce(isPaused ? "Playback resumed" : "Playback paused") }} disabled={!current}>
-              {isPaused ? <><Play aria-hidden="true" />Resume</> : <><Pause aria-hidden="true" />Pause</>}
+            <Button type="button" variant="outline" onClick={selectPrevious} disabled={!current || currentIndex === 0}><ChevronLeft aria-hidden="true" />Trước</Button>
+            <Button type="button" variant="outline" onClick={selectNext} disabled={!current || currentIndex >= queue.length - 1}><ChevronRight aria-hidden="true" />Tiếp theo</Button>
+            <Button type="button" variant={isPaused ? "default" : "soft"} onClick={() => { setIsPaused((value) => !value); announce(isPaused ? "Đã tiếp tục phát" : "Đã tạm dừng phát") }} disabled={!current}>
+              {isPaused ? <><Play aria-hidden="true" />Tiếp tục</> : <><Pause aria-hidden="true" />Tạm dừng</>}
             </Button>
-            <Button type="button" variant="ghost" onClick={skipCurrent} disabled={!current}><SkipForward aria-hidden="true" />Skip local</Button>
+            <Button type="button" variant="ghost" onClick={skipCurrent} disabled={!current}><SkipForward aria-hidden="true" />Bỏ qua cục bộ</Button>
           </div>
 
-          <p className="mt-4 text-xs text-muted-foreground">Timeline estimate: {currentDuration ? `${Math.round(currentDuration / 1000)}s` : "—"} · media uses a longer reveal window.</p>
+          <p className="mt-4 text-xs text-muted-foreground">Thời lượng ước tính: {currentDuration ? `${Math.round(currentDuration / 1000)}s` : "—"} · tệp đa phương tiện dùng thời gian hiển thị lâu hơn.</p>
         </div>
 
-        <aside className="space-y-4 rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6" aria-label="Director controls">
-          <h3 className="font-semibold">Stage controls</h3>
+        <aside className="space-y-4 rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6" aria-label="Điều khiển trình chiếu">
+          <h3 className="font-semibold">Điều khiển trình chiếu</h3>
           <label className="grid gap-2 text-sm">
-            <span className="font-medium">Playback speed</span>
-            <select value={speed} onChange={(event) => { setSpeed(event.target.value as typeof speed); announce("Playback speed updated") }} className="min-h-11 rounded-xl border border-border/80 bg-background px-3">
-              <option value="slow">Slow</option>
-              <option value="normal">Normal</option>
-              <option value="fast">Fast</option>
+            <span className="font-medium">Tốc độ phát</span>
+            <select value={speed} onChange={(event) => { setSpeed(event.target.value as typeof speed); announce("Đã cập nhật tốc độ phát") }} className="min-h-11 rounded-xl border border-border/80 bg-background px-3">
+              <option value="slow">Chậm</option>
+              <option value="normal">Bình thường</option>
+              <option value="fast">Nhanh</option>
             </select>
           </label>
-          <Button type="button" variant={qrVisible ? "soft" : "outline"} className="w-full justify-start" onClick={() => { setQrVisible((value) => !value); announce(qrVisible ? "QR hidden for this console" : "QR visible for this console") }}>
-            <QrCode aria-hidden="true" />{qrVisible ? "QR visible" : "QR hidden"}
+          <Button type="button" variant={qrVisible ? "soft" : "outline"} className="w-full justify-start" onClick={() => { setQrVisible((value) => !value); announce(qrVisible ? "Đã ẩn mã QR trên màn hình này" : "Đã hiện mã QR trên màn hình này") }}>
+            <QrCode aria-hidden="true" />{qrVisible ? "Hiện mã QR" : "Ẩn mã QR"}
           </Button>
-          <Button type="button" variant={celebration ? "default" : "outline"} className="w-full justify-start" onClick={() => { setCelebration(true); announce("Celebration cue armed for the public wall") }}>
-            <Sparkles aria-hidden="true" />{celebration ? "Celebration armed" : "Celebration cue"}
+          <Button type="button" variant={celebration ? "default" : "outline"} className="w-full justify-start" onClick={() => { setCelebration(true); announce("Đã bật hiệu ứng chúc mừng cho bức tường công khai") }}>
+            <Sparkles aria-hidden="true" />{celebration ? "Đã bật hiệu ứng chúc mừng" : "Hiệu ứng chúc mừng"}
           </Button>
-          <Button type="button" variant="outline" className="w-full justify-start" onClick={() => announce("Host notification sent locally")}><Bell aria-hidden="true" />Notify screen</Button>
+          <Button type="button" variant="outline" className="w-full justify-start" onClick={() => announce("Đã gửi thông báo cục bộ từ người dẫn chương trình")}><Bell aria-hidden="true" />Thông báo trên màn hình</Button>
         </aside>
       </div>
 
       <div className="rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
-        <h3 className="font-semibold">Up next</h3>
-        <p className="mt-1 text-sm text-muted-foreground">{next ? `${next.senderName}: ${next.content}` : "Queue has no next item."}</p>
+        <h3 className="font-semibold">Tiếp theo</h3>
+        <p className="mt-1 text-sm text-muted-foreground">{next ? `${next.senderName}: ${next.content}` : "Hàng đợi không còn mục tiếp theo."}</p>
       </div>
     </section>
   )

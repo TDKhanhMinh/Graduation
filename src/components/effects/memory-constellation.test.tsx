@@ -29,15 +29,15 @@ describe("MemoryConstellation", () => {
   it("renders an informative accessible waiting state with zero wishes", () => {
     render(<MemoryConstellation wishes={[]} preset="minimal" intensity="low" mode="waiting" />)
 
-    expect(screen.getByText("Waiting for the next memory…")).toBeInTheDocument()
-    expect(screen.getByText(/No approved memories are available yet/)).toBeInTheDocument()
+    expect(screen.getByText("Đang chờ kỷ niệm tiếp theo…")).toBeInTheDocument()
+    expect(screen.getByText(/Chưa có kỷ niệm nào được duyệt/)).toBeInTheDocument()
   })
 
   it("exposes wish metadata in the accessible fallback", () => {
     render(<MemoryConstellation wishes={[wish]} preset="galaxy" intensity="low" mode="summary" />)
 
     expect(screen.getByText(/Lan: Chúc mừng!/)).toBeInTheDocument()
-    expect(screen.getByText(/Pinned/)).toBeInTheDocument()
-    expect(screen.getByText(/Includes media/)).toBeInTheDocument()
+    expect(screen.getByText(/Đã ghim/)).toBeInTheDocument()
+    expect(screen.getByText(/Có tệp đa phương tiện/)).toBeInTheDocument()
   })
 })

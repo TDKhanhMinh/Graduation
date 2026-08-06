@@ -127,7 +127,7 @@ export function CopyEventLinkButton({ url }: { url: string }) {
         className="min-h-(--control-min-size)"
       >
         {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-        <span className="hidden sm:inline">{copied ? "Đã sao chép" : "Sao chép link"}</span>
+        <span className="hidden sm:inline">{copied ? "Đã sao chép" : "Sao chép liên kết"}</span>
       </Button>
     </>
   )

@@ -11,7 +11,7 @@ import { SectionHeading } from "@/components/ui/section-heading"
 import { StatusBadge } from "@/components/ui/status-badge"
 
 export const metadata = {
-  title: "Dashboard",
+  title: "Bảng điều khiển",
 }
 
 const themeSurfaces: Record<string, string> = {
@@ -37,7 +37,7 @@ export default function DashboardPage() {
       <SectionHeading
         as="h1"
         title="Sự kiện của bạn"
-        description="Quản lý các không gian lưu giữ lời chúc trong một workspace thống nhất."
+        description="Quản lý các không gian lưu giữ lời chúc trong một không gian làm việc thống nhất."
         actions={
           <Link href="/dashboard/events/new">
             <Button className="min-h-(--control-min-size)">
@@ -112,7 +112,7 @@ async function EventList() {
           <p className="text-sm font-semibold">Tất cả không gian</p>
           <p className="mt-1 text-sm text-muted-foreground">Mở một sự kiện để tiếp tục chỉnh sửa hoặc chia sẻ.</p>
         </div>
-        <span className="hidden text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground sm:block">{events.length} workspace</span>
+        <span className="hidden text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground sm:block">{events.length} không gian</span>
       </div>
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -129,7 +129,7 @@ async function EventList() {
                 <div className="absolute inset-x-5 bottom-4 flex items-end justify-between gap-3 text-white">
                   <div className="flex items-center gap-2 text-xs font-medium">
                     {coverUrl ? <ImageIcon aria-hidden="true" className="size-4" /> : <Sparkles aria-hidden="true" className="size-4" />}
-                    <span>{event.theme_key}</span>
+                    <span>{event.theme_key === "graduation" ? "Tốt nghiệp" : event.theme_key === "editorial" ? "Biên tập" : "Tối giản"}</span>
                   </div>
                   <StatusBadge tone={isArchived ? "neutral" : "success"}>{isArchived ? "Đã lưu trữ" : "Đang hoạt động"}</StatusBadge>
                 </div>
@@ -143,7 +143,7 @@ async function EventList() {
               </CardHeader>
               <CardContent className="space-y-3 pt-0">
                 <div className="flex flex-wrap gap-2">
-                  <StatusBadge tone="info">{event.visibility}</StatusBadge>
+                  <StatusBadge tone="info">{event.visibility === "public" ? "Công khai" : event.visibility === "private" ? "Riêng tư" : "Không liệt kê"}</StatusBadge>
                   <StatusBadge tone={event.submission_mode === "closed" ? "warning" : "neutral"}>
                     {event.submission_mode === "closed" ? "Đã đóng nhận lời chúc" : "Đang nhận lời chúc"}
                   </StatusBadge>

@@ -39,9 +39,9 @@ export function PosterMedia({ src, alt }: PosterMediaProps) {
       {!imageSrc ? (
         <div className="relative flex h-full min-h-72 items-end p-6 text-white sm:min-h-96 sm:p-10">
           <div className="max-w-sm rounded-2xl border border-white/30 bg-black/20 p-5 backdrop-blur-sm">
-            <p className="text-sm font-medium">Your memories, beautifully kept.</p>
+            <p className="text-sm font-medium">Lưu giữ những kỷ niệm thật đẹp.</p>
             <p className="mt-2 text-sm leading-6 text-white/80">
-              Add a Cloudinary cover in event appearance settings when available.
+              Thêm ảnh bìa Cloudinary trong phần cài đặt giao diện sự kiện khi có thể.
             </p>
           </div>
         </div>

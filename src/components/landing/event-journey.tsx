@@ -3,7 +3,7 @@ import { CalendarHeart, Clock3, ImageIcon } from "lucide-react"
 import { LandingSection } from "@/components/landing/landing-section"
 import { PageShell } from "@/components/ui/page-shell"
 
-const journey = [[Clock3, "Trước sự kiện", "Chọn poster, chuẩn bị QR và đặt tone cho trải nghiệm."], [CalendarHeart, "Trong sự kiện", "Khách mời gửi lời chúc/media; chủ sự kiện kiểm duyệt và trình chiếu."], [ImageIcon, "Sau sự kiện", "Nhìn lại album và những lời nhắn đã làm ngày đó đặc biệt."]] as const
+const journey = [[Clock3, "Trước sự kiện", "Chọn áp phích, chuẩn bị mã QR và định hình trải nghiệm."], [CalendarHeart, "Trong sự kiện", "Khách mời gửi lời chúc và tệp đa phương tiện; chủ sự kiện kiểm duyệt và trình chiếu."], [ImageIcon, "Sau sự kiện", "Nhìn lại album và những lời nhắn đã làm ngày đó đặc biệt."]] as const
 
 export function EventJourney() {
   return <LandingSection id="event-journey" className="bg-background"><PageShell>      <div className="grid gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:items-end">

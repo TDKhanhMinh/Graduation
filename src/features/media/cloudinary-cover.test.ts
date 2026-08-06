@@ -42,8 +42,8 @@ describe("cloudinary cover contract", () => {
     })
   })
 
-  it("rejects a response without a valid secure URL", () => {
-    expect(() => parseCloudinaryCoverUploadResponse({ secure_url: "https://example.com/cover.webp" })).toThrow("secure URL")
+  it("rejects a response without a valid URL bảo mật", () => {
+    expect(() => parseCloudinaryCoverUploadResponse({ secure_url: "https://example.com/cover.webp" })).toThrow("URL bảo mật")
   })
 
   it("builds the upload endpoint from public configuration", () => {

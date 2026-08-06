@@ -133,7 +133,7 @@ export async function preparePosterImage(file: File, options?: {
   }
 
   const decoded = await decodeImage(file)
-  if (!decoded.width || !decoded.height) throw new Error("Image dimensions are invalid")
+  if (!decoded.width || !decoded.height) throw new Error("Kích thước hình ảnh không hợp lệ")
 
   const maxDimension = options?.maxDimension ?? POSTER_IMAGE_MAX_DIMENSION
   const scale = Math.min(1, maxDimension / Math.max(decoded.width, decoded.height))
@@ -143,20 +143,20 @@ export async function preparePosterImage(file: File, options?: {
   canvas.width = width
   canvas.height = height
   const context = canvas.getContext("2d")
-  if (!context) throw new Error("Canvas is not available")
+  if (!context) throw new Error("Canvas không khả dụng")
   context.drawImage(decoded.image, 0, 0, width, height)
 
   const outputMimeType = "image/webp" as const
   const blob = await new Promise<Blob | null>((resolve) => {
     canvas.toBlob(resolve, outputMimeType, options?.quality ?? POSTER_IMAGE_QUALITY)
   })
-  if (!blob) throw new Error("Image compression failed")
-  if (blob.size > (options?.maxBytes ?? POSTER_ASSET_MAX_BYTES)) throw new Error("Compressed image still exceeds the size limit")
+  if (!blob) throw new Error("Nén hình ảnh thất bại")
+  if (blob.size > (options?.maxBytes ?? POSTER_ASSET_MAX_BYTES)) throw new Error("Hình ảnh sau khi nén vẫn vượt quá giới hạn kích thước")
 
   const dataUrl = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader()
-    reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("Image encoding failed"))
-    reader.onerror = () => reject(new Error("Image encoding failed"))
+    reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("Mã hóa hình ảnh thất bại"))
+    reader.onerror = () => reject(new Error("Mã hóa hình ảnh thất bại"))
     reader.readAsDataURL(blob)
   })
 

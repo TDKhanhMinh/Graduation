@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     const kind = body.kind === "avatar" ? "avatar" : "media";
 
     if (!wishId || !path || path.startsWith("http://") || path.startsWith("https://")) {
-      return NextResponse.json({ error: "Invalid media request" }, { status: 400 });
+      return NextResponse.json({ error: "Yêu cầu tệp đa phương tiện không hợp lệ" }, { status: 400 });
     }
 
     const supabase = createAdminClient();
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (error || !data) {
-      return NextResponse.json({ error: "Media is unavailable" }, { status: 404 });
+      return NextResponse.json({ error: "Tệp đa phương tiện không khả dụng" }, { status: 404 });
     }
 
     const projection = data as PublicMediaProjection & { media?: unknown };
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       ? projection.sender_avatar_path
       : media?.path;
     if (allowedPath !== path) {
-      return NextResponse.json({ error: "Media is unavailable" }, { status: 404 });
+      return NextResponse.json({ error: "Tệp đa phương tiện không khả dụng" }, { status: 404 });
     }
 
     const { data: signed, error: signedError } = await supabase
@@ -47,11 +47,11 @@ export async function POST(request: Request) {
       .from("event-media-private")
       .createSignedUrl(path, 2 * 60 * 60);
     if (signedError || !signed?.signedUrl) {
-      return NextResponse.json({ error: "Media is unavailable" }, { status: 404 });
+      return NextResponse.json({ error: "Tệp đa phương tiện không khả dụng" }, { status: 404 });
     }
 
     return NextResponse.json({ signedUrl: signed.signedUrl });
   } catch {
-    return NextResponse.json({ error: "Invalid media request" }, { status: 400 });
+    return NextResponse.json({ error: "Yêu cầu tệp đa phương tiện không hợp lệ" }, { status: 400 });
   }
 }

@@ -39,9 +39,9 @@ export function validatePosterExportQuality(input: PosterExportQualityInput) {
   const { width, height } = getPosterDimensions(input.ratio)
   const errors: string[] = []
 
-  if (!validateCanonicalPosterUrl(input.publicUrl)) errors.push("QR URL must be a canonical public event URL")
-  if (!input.fontReady) errors.push("Fonts are not ready")
-  if (!input.assetsReady) errors.push("One or more poster assets are not ready")
+  if (!validateCanonicalPosterUrl(input.publicUrl)) errors.push("URL mã QR phải là URL sự kiện công khai chuẩn")
+  if (!input.fontReady) errors.push("Phông chữ chưa sẵn sàng")
+  if (!input.assetsReady) errors.push("Một hoặc nhiều thành phần áp phích chưa sẵn sàng")
   if (input.qr.size < POSTER_QR_MIN_SIZE) errors.push(`QR must be at least ${POSTER_QR_MIN_SIZE}px`)
   if (
     input.qr.x < input.safeArea.left ||
@@ -49,7 +49,7 @@ export function validatePosterExportQuality(input: PosterExportQualityInput) {
     input.qr.x + input.qr.size > width - input.safeArea.right ||
     input.qr.y + input.qr.size > height - input.safeArea.bottom
   ) {
-    errors.push("QR is outside the poster safe area")
+    errors.push("Mã QR nằm ngoài vùng an toàn của áp phích")
   }
 
   return {

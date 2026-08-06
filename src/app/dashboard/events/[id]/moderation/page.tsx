@@ -29,7 +29,7 @@ export default async function ModerationPage({
     <div className="min-w-0 space-y-7 pb-10">
       <SectionHeading
         title="Kiểm duyệt lời chúc"
-        description="Lọc, xem preview an toàn và xử lý từng hoặc nhiều lời chúc."
+        description="Lọc, xem trước an toàn và xử lý từng hoặc nhiều lời chúc."
       />
       <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
         <div className="min-w-0">

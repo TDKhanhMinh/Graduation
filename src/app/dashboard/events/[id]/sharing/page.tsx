@@ -98,7 +98,7 @@ export default async function EventSharingPage({
             </Link>
             <div className="flex items-start gap-2 rounded-lg border border-border/70 bg-surface-sunken/50 p-3 text-xs leading-5 text-muted-foreground">
               <Link2 aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-              <span>Slug được quản lý trong Cài đặt; route chia sẻ không cho phép chỉnh sửa trực tiếp.</span>
+              <span>Slug được quản lý trong Cài đặt; đường dẫn chia sẻ không cho phép chỉnh sửa trực tiếp.</span>
             </div>
           </CardContent>
         </Card>

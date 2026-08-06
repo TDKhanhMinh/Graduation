@@ -406,7 +406,7 @@ export function WishComposer({
 
                 <div className="mt-5 rounded-xl border bg-surface-sunken p-4" aria-label="Xem trước lời chúc">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Xem trước</p>
-                  <textarea readOnly value={draft.content.trim()} aria-label="Draft preview" rows={4} className="mt-2 w-full resize-none bg-transparent text-sm leading-6 outline-none" placeholder="Bản nháp của bạn đã sẵn sàng để gửi." />
+                  <textarea readOnly value={draft.content.trim()} aria-label="Xem trước bản nháp" rows={4} className="mt-2 w-full resize-none bg-transparent text-sm leading-6 outline-none" placeholder="Bản nháp của bạn đã sẵn sàng để gửi." />
                   <p className="mt-3 text-sm font-medium">— {draft.senderName.trim() || "Tên của bạn"}</p>
                 </div>
 

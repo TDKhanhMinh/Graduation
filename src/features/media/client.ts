@@ -31,7 +31,7 @@ export async function requestUploadSession(params: {
   });
 
   if (error || !data?.signedUrl || !data?.path) {
-    throw new Error(error?.message || "Failed to request upload session");
+    throw new Error(error?.message || "Không thể yêu cầu phiên tải lên");
   }
 
   return data as { path: string; token: string; signedUrl: string };
@@ -61,11 +61,11 @@ export async function uploadToSignedUrl(
       if (xhr.status >= 200 && xhr.status < 300) {
         resolve();
       } else {
-        reject(new Error("Upload failed with status " + xhr.status));
+        reject(new Error("Tải lên thất bại với mã trạng thái " + xhr.status));
       }
     };
-    xhr.onerror = () => reject(new Error("Network error during upload"));
-    xhr.onabort = () => reject(new Error("Upload cancelled"));
+    xhr.onerror = () => reject(new Error("Lỗi mạng trong khi tải lên"));
+    xhr.onabort = () => reject(new Error("Đã hủy tải lên"));
     xhr.send(file);
   });
 }
@@ -125,11 +125,11 @@ export async function prepareImage(file: File, maxSize: number = 1920): Promise<
       canvas.width = width;
       canvas.height = height;
       const context = canvas.getContext("2d");
-      if (!context) return reject(new Error("Canvas not supported"));
+      if (!context) return reject(new Error("Trình duyệt không hỗ trợ canvas"));
       context.drawImage(image, 0, 0, width, height);
 
       canvas.toBlob((blob) => {
-        if (!blob) return reject(new Error("Canvas toBlob failed"));
+        if (!blob) return reject(new Error("Không thể tạo tệp từ canvas"));
         resolve(new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".webp", {
           type: "image/webp",
           lastModified: Date.now(),
@@ -138,7 +138,7 @@ export async function prepareImage(file: File, maxSize: number = 1920): Promise<
     };
     image.onerror = () => {
       URL.revokeObjectURL(url);
-      reject(new Error("Failed to load image"));
+      reject(new Error("Không thể tải hình ảnh"));
     };
     image.src = url;
   });

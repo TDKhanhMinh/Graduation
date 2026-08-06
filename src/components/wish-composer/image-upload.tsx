@@ -70,7 +70,7 @@ export function ImageUploadField({
       if (!mountedRef.current) return
       setUploading(false)
       xhrRef.current = null
-      if (caught instanceof Error && caught.message === "Upload cancelled") {
+      if (caught instanceof Error && caught.message === "Đã hủy tải lên") {
         setError("Đã hủy tải lên. Bạn có thể thử lại hoặc xóa ảnh.")
         toast.error("Đã hủy tải lên. Bạn có thể thử lại hoặc xóa ảnh.")
       } else {

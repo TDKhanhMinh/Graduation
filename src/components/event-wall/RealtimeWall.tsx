@@ -121,31 +121,31 @@ export function RealtimeWall({
     >
       <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-[var(--event-border)] bg-[var(--event-surface)] p-3 shadow-sm sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-wrap gap-3">
-          <label className="flex min-w-40 flex-col gap-1 text-sm"><span className="font-medium">Filter wishes</span><select value={filter} onChange={(event) => setFilter(event.target.value as WallFilter)} className="min-h-(--control-min-size) rounded-xl border-[var(--event-border)] bg-background/70 px-3"><option value="all">All wishes</option><option value="pinned">Pinned</option><option value="media">With media</option></select></label>
-          <label className="flex min-w-40 flex-col gap-1 text-sm"><span className="font-medium">Sort</span><select value={sort} onChange={(event) => setSort(event.target.value as WallSort)} className="min-h-(--control-min-size) rounded-xl border-[var(--event-border)] bg-background/70 px-3"><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select></label>
+          <label className="flex min-w-40 flex-col gap-1 text-sm"><span className="font-medium">Lọc lời chúc</span><select value={filter} onChange={(event) => setFilter(event.target.value as WallFilter)} className="min-h-(--control-min-size) rounded-xl border-[var(--event-border)] bg-background/70 px-3"><option value="all">Tất cả lời chúc</option><option value="pinned">Đã ghim</option><option value="media">Có tệp đa phương tiện</option></select></label>
+          <label className="flex min-w-40 flex-col gap-1 text-sm"><span className="font-medium">Sắp xếp</span><select value={sort} onChange={(event) => setSort(event.target.value as WallSort)} className="min-h-(--control-min-size) rounded-xl border-[var(--event-border)] bg-background/70 px-3"><option value="newest">Mới nhất trước</option><option value="oldest">Cũ nhất trước</option></select></label>
         </div>
-        {filter !== "all" || sort !== "newest" ? <Button type="button" variant="ghost" onClick={() => { setFilter("all"); setSort("newest") }}>Reset filters</Button> : null}
+        {filter !== "all" || sort !== "newest" ? <Button type="button" variant="ghost" onClick={() => { setFilter("all"); setSort("newest") }}>Đặt lại bộ lọc</Button> : null}
       </div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--event-border)] bg-[var(--event-surface)] px-3 py-2.5" data-testid="wall-customizer">
-        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Bố cục public wall">
-          <span className="px-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Layout</span>
-          {(["spotlight", "grid", "photo-focus"] as const).map((value) => <Button key={value} type="button" size="sm" variant={layout === value ? "default" : "ghost"} onClick={() => setLayout(value)} aria-pressed={layout === value}>{value === "spotlight" ? "Spotlight" : value === "grid" ? <><LayoutGrid aria-hidden="true" />Grid</> : "Photo focus"}</Button>)}
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Bố cục bức tường công khai">
+          <span className="px-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Bố cục</span>
+          {(["spotlight", "grid", "photo-focus"] as const).map((value) => <Button key={value} type="button" size="sm" variant={layout === value ? "default" : "ghost"} onClick={() => setLayout(value)} aria-pressed={layout === value}>{value === "spotlight" ? "Nổi bật" : value === "grid" ? <><LayoutGrid aria-hidden="true" />Lưới</> : "Ưu tiên ảnh"}</Button>)}
         </div>
-        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Tỷ lệ hiển thị public wall">
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Tỷ lệ hiển thị bức tường công khai">
           <Button type="button" size="sm" variant={aspect === "wide" ? "soft" : "ghost"} onClick={() => setAspect("wide")} aria-pressed={aspect === "wide"}><Maximize2 aria-hidden="true" />16:9</Button>
           <Button type="button" size="sm" variant={aspect === "portrait" ? "soft" : "ghost"} onClick={() => setAspect("portrait")} aria-pressed={aspect === "portrait"}><Smartphone aria-hidden="true" />9:16</Button>
         </div>
-        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Hiệu ứng public wall">
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Hiệu ứng bức tường công khai">
           <label className="flex items-center gap-2 text-xs font-medium">
-            <span>Theme</span>
+            <span>Giao diện</span>
             <select value={effectConfig.preset} onChange={(event) => setPreset(event.target.value as EffectPreset)} className="min-h-(--control-min-size) rounded-xl border-[var(--event-border)] bg-background/70 px-2.5 text-sm">
-              {(["minimal", "elegant", "romantic", "celebration", "graduation"] as const).map((value) => <option key={value} value={value}>{value}</option>)}
+              {(["minimal", "elegant", "romantic", "celebration", "graduation"] as const).map((value) => <option key={value} value={value}>{value === "minimal" ? "Tối giản" : value === "elegant" ? "Thanh lịch" : value === "romantic" ? "Lãng mạn" : value === "celebration" ? "Chúc mừng" : "Tốt nghiệp"}</option>)}
             </select>
           </label>
           <label className="flex items-center gap-2 text-xs font-medium">
-            <span>Intensity</span>
+            <span>Cường độ</span>
             <select value={effectConfig.intensity} onChange={(event) => setIntensity(event.target.value as "off" | "low" | "medium" | "high")} className="min-h-(--control-min-size) rounded-xl border-[var(--event-border)] bg-background/70 px-2.5 text-sm">
-              {(["off", "low", "medium", "high"] as const).map((value) => <option key={value} value={value}>{value}</option>)}
+              {(["off", "low", "medium", "high"] as const).map((value) => <option key={value} value={value}>{value === "off" ? "Tắt" : value === "low" ? "Thấp" : value === "medium" ? "Trung bình" : "Cao"}</option>)}
             </select>
           </label>
         </div>
@@ -216,9 +216,9 @@ export function RealtimeWall({
       ) : visibleWishes.length === 0 ? (
         <FeedbackState
           status="empty"
-          title="No wishes match these filters"
-          description="Reset the filters to see all approved wishes."
-          action={<Button type="button" variant="outline" onClick={() => { setFilter("all"); setSort("newest") }}>Reset filters</Button>}
+          title="Không có lời chúc nào phù hợp với bộ lọc"
+          description="Đặt lại bộ lọc để xem tất cả lời chúc đã duyệt."
+          action={<Button type="button" variant="outline" onClick={() => { setFilter("all"); setSort("newest") }}>Đặt lại bộ lọc</Button>}
           className="min-h-52"
         />
       ) : (

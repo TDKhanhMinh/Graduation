@@ -15,7 +15,7 @@ export const quickCreateInputSchema = z.object({
   eventCategory: posterEventCategorySchema,
   templateId: z.string().trim().min(1),
   ratio: posterRatioSchema,
-  title: z.string().trim().min(1, "Event title is required").max(100),
+  title: z.string().trim().min(1, "Tên sự kiện là bắt buộc").max(100),
   tagline: z.string().trim().max(80),
   date: z.string().trim().max(40),
   location: z.string().trim().max(120),
@@ -36,13 +36,13 @@ export type QuickCreateInput = z.input<typeof quickCreateInputSchema>
 export function createPosterDocumentFromQuickCreate(input: QuickCreateInput, now = new Date()): PosterDocument {
   const parsed = quickCreateInputSchema.parse(input)
   const template = localPosterTemplates.find((candidate) => candidate.id === parsed.templateId)
-  if (!template) throw new Error(`Unknown local poster template: ${parsed.templateId}`)
+  if (!template) throw new Error(`Không tìm thấy mẫu áp phích cục bộ: ${parsed.templateId}`)
   if (!template.categories.includes(parsed.eventCategory)) {
-    throw new Error(`Template ${parsed.templateId} does not support ${parsed.eventCategory}`)
+    throw new Error(`Mẫu ${parsed.templateId} không hỗ trợ ${parsed.eventCategory}`)
   }
 
   const layout = template.layouts[parsed.ratio]
-  if (!layout) throw new Error(`Template ${parsed.templateId} does not support ${parsed.ratio}`)
+  if (!layout) throw new Error(`Mẫu ${parsed.templateId} không hỗ trợ ${parsed.ratio}`)
 
   const timestamp = now.toISOString()
   const elements = layout.elements.map((element) => {

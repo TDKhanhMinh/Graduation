@@ -20,7 +20,7 @@ export async function savePosterDocument(
     return {
       success: false as const,
       conflict: false as const,
-      error: error instanceof Error ? error.message : "Could not save the poster document.",
+      error: error instanceof Error ? error.message : "Không thể lưu tài liệu áp phích.",
     }
   }
 }

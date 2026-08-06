@@ -23,11 +23,11 @@ type PosterQuickCreateProps = {
 
 const ratios = ["4:5", "9:16"] as const
 const categories: Array<{ value: PosterEventCategory; label: string }> = [
-  { value: "graduation", label: "Graduation" },
-  { value: "wedding", label: "Wedding" },
-  { value: "birthday", label: "Birthday" },
-  { value: "corporate", label: "Corporate" },
-  { value: "general", label: "General" },
+  { value: "graduation", label: "Tốt nghiệp" },
+  { value: "wedding", label: "Đám cưới" },
+  { value: "birthday", label: "Sinh nhật" },
+  { value: "corporate", label: "Doanh nghiệp" },
+  { value: "general", label: "Tổng quát" },
 ]
 
 function PosterPreview({
@@ -70,7 +70,7 @@ function PosterPreview({
       width={width}
       height={height}
       role="img"
-      aria-label={`Poster preview: ${document.content.title}`}
+      aria-label={`Xem trước áp phích: ${document.content.title}`}
       className="block h-full w-full"
     >
       <defs>
@@ -100,21 +100,21 @@ function PosterPreview({
 
       <g fontFamily="Geist, Arial, sans-serif" fill={foreground}>
         <text x="80" y="120" fontSize="28" letterSpacing="8" fill={foreground}>MEMORIA</text>
-        <text x="80" y="190" fontSize="22" letterSpacing="4" opacity="0.78">A MOMENT TO REMEMBER</text>
+        <text x="80" y="190" fontSize="22" letterSpacing="4" opacity="0.78">MỘT KHOẢNH KHẮC ĐÁNG NHỚ</text>
         <text x="80" y={titleStartY} fontSize={document.ratio === "4:5" ? 82 : 74} fontWeight="700">
           {titleLines.map((line, index) => (
             <tspan key={`${line}-${index}`} x="80" dy={index === 0 ? 0 : 96}>{line}</tspan>
           ))}
         </text>
         <text x="80" y={titleStartY + titleLines.length * 96 + 30} fontSize="30" fill={foreground} opacity="0.88">
-          {document.content.tagline || "A moment worth remembering"}
+          {document.content.tagline || "Một khoảnh khắc đáng nhớ"}
         </text>
         <line x1="80" y1={titleStartY + titleLines.length * 96 + 92} x2={width - 80} y2={titleStartY + titleLines.length * 96 + 92} stroke={foreground} strokeOpacity="0.5" />
         <text x="80" y={titleStartY + titleLines.length * 96 + 152} fontSize="34" fontWeight="600">
           {formatPosterDate(document.content.date)}
         </text>
         <text x="80" y={titleStartY + titleLines.length * 96 + 208} fontSize="30" opacity="0.86">
-          {document.content.location || "Event location"}
+          {document.content.location || "Địa điểm sự kiện"}
         </text>
       </g>
 
@@ -125,7 +125,7 @@ function PosterPreview({
         </g>
       ) : null}
       <text x="80" y={height - 92} fontFamily="Geist, Arial, sans-serif" fontSize="22" letterSpacing="3" fill={foreground} opacity="0.7">
-        SCAN TO JOIN THE MEMORY WALL
+        QUÉT ĐỂ THAM GIA BỨC TƯỜNG KỶ NIỆM
       </text>
     </svg>
   )
@@ -136,9 +136,9 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
   const [category, setCategory] = useState<PosterEventCategory>(initialCategory)
   const [templateId, setTemplateId] = useState(localPosterTemplates[0]?.id ?? "")
   const [title, setTitle] = useState(eventTitle)
-  const [tagline, setTagline] = useState("A moment worth remembering")
+  const [tagline, setTagline] = useState("Một khoảnh khắc đáng nhớ")
   const [date, setDate] = useState(eventDate?.slice(0, 10) ?? "")
-  const [location, setLocation] = useState("Memoria Hall")
+  const [location, setLocation] = useState("Sảnh Memoria")
   const [accent, setAccent] = useState("#c85b45")
   const [imageDataUrl, setImageDataUrl] = useState("")
   const [preparedAsset, setPreparedAsset] = useState<PreparedPosterImage | null>(null)
@@ -179,9 +179,9 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
     }
   }, [accent, category, cropPreset, date, eventId, location, preparedAsset, preparedLogo, publicUrl, ratio, tagline, template, title])
 
-  const titleError = title.trim().length === 0 ? "Event title is required" : ""
+  const titleError = title.trim().length === 0 ? "Tên sự kiện là bắt buộc" : ""
   const qualityGate = useMemo(() => {
-    if (!posterDocument || !template) return { success: false as const, errors: ["Poster document is not ready"] }
+    if (!posterDocument || !template) return { success: false as const, errors: ["Tài liệu áp phích chưa sẵn sàng"] }
     return validatePosterExportQuality({
       ratio: posterDocument.ratio as "4:5" | "9:16",
       publicUrl: posterDocument.content.publicUrl,
@@ -197,7 +197,7 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
     void createQrDataUrl(publicUrl, 256).then((value) => {
       if (!cancelled) setQrDataUrl(value)
     }).catch(() => {
-      if (!cancelled) toast.error("QR generation is temporarily unavailable.")
+      if (!cancelled) toast.error("Hiện chưa thể tạo mã QR.")
     })
     return () => { cancelled = true }
   }, [publicUrl])
@@ -216,9 +216,9 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
       setImageFailed(false)
     setLogoFailed(false)
       setCropPreset("center")
-      toast.success(`Image prepared locally at ${prepared.width} x ${prepared.height}.`)
+      toast.success(`Đã chuẩn bị ảnh cục bộ với kích thước ${prepared.width} x ${prepared.height}.`)
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "The selected image could not be prepared."
+      const errorMessage = error instanceof Error ? error.message : "Không thể chuẩn bị ảnh đã chọn."
       setImageError(errorMessage)
       toast.error(errorMessage)
     }
@@ -231,9 +231,9 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
       setPreparedLogo(prepared)
       setLogoDataUrl(prepared.dataUrl)
       setLogoFailed(false)
-      toast.success(`Logo prepared locally at ${prepared.width} x ${prepared.height}.`)
+      toast.success(`Đã chuẩn bị logo cục bộ với kích thước ${prepared.width} x ${prepared.height}.`)
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "The selected logo could not be prepared."
+      const errorMessage = error instanceof Error ? error.message : "Không thể chuẩn bị logo đã chọn."
       setImageError(errorMessage)
       toast.error(errorMessage)
     }
@@ -243,9 +243,9 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
     setTemplateId(localPosterTemplates[0]?.id ?? "")
     setRatio("4:5")
     setTitle(eventTitle)
-    setTagline("A moment worth remembering")
+    setTagline("Một khoảnh khắc đáng nhớ")
     setDate(eventDate?.slice(0, 10) ?? "")
-    setLocation("Memoria Hall")
+    setLocation("Sảnh Memoria")
     setAccent("#c85b45")
     setImageDataUrl("")
     setPreparedAsset(null)
@@ -255,7 +255,7 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
     setImageFailed(false)
     setLogoFailed(false)
     setImageError("")
-    toast.success("Draft reset to the event defaults.")
+    toast.success("Đã đặt lại bản nháp về mặc định của sự kiện.")
   }
 
   async function exportPng() {
@@ -297,9 +297,9 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
       anchor.download = posterExportFilename(posterDocument.content.title, posterDocument.ratio as "4:5" | "9:16")
       anchor.click()
       URL.revokeObjectURL(downloadUrl)
-      toast.success(`PNG exported at ${canvas.width} x ${canvas.height}.`)
+      toast.success(`Đã xuất PNG với kích thước ${canvas.width} x ${canvas.height}.`)
     } catch {
-      toast.error("PNG export failed. Try again when the preview is ready.")
+      toast.error("Xuất PNG thất bại. Hãy thử lại khi bản xem trước đã sẵn sàng.")
     } finally {
       URL.revokeObjectURL(svgUrl)
     }
@@ -310,8 +310,8 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
       <section className="min-w-0 space-y-5 rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6" aria-labelledby="poster-quick-create-controls">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Tạo nhanh</p>
-          <h2 id="poster-quick-create-controls" className="mt-1 font-heading text-xl font-semibold">Tạo poster trong vài phút</h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">Sử dụng template và phông chữ cục bộ, xem trước trực tiếp. Không yêu cầu API bên thứ ba.</p>
+          <h2 id="poster-quick-create-controls" className="mt-1 font-heading text-xl font-semibold">Tạo áp phích trong vài phút</h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">Sử dụng mẫu và phông chữ cục bộ, xem trước trực tiếp. Không cần dịch vụ API bên thứ ba.</p>
         </div>
 
         <label className="grid gap-2 text-sm font-medium" htmlFor="poster-category">Loại sự kiện
@@ -321,8 +321,8 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
         </label>
 
         <div className="grid gap-2">
-          <span className="text-sm font-semibold">Template</span>
-          <div className="grid gap-2 sm:grid-cols-2" role="group" aria-label="Local poster templates">
+          <span className="text-sm font-semibold">Mẫu</span>
+          <div className="grid gap-2 sm:grid-cols-2" role="group" aria-label="Các mẫu áp phích cục bộ">
             {localPosterTemplates.map((item) => (
               <button key={item.id} type="button" aria-pressed={template?.id === item.id} onClick={() => setTemplateId(item.id)} className={`min-h-16 rounded-xl border px-3 py-2 text-left text-sm transition-colors ${template?.id === item.id ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-muted"}`}>
                 <span className="block font-semibold">{item.name}</span>
@@ -333,62 +333,62 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
         </div>
 
         <div className="grid gap-2">
-          <span className="text-sm font-semibold">Poster ratio</span>
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Poster ratio">
+          <span className="text-sm font-semibold">Tỷ lệ áp phích</span>
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Tỷ lệ áp phích">
             {ratios.map((value) => <button key={value} type="button" aria-pressed={ratio === value} onClick={() => setRatio(value)} className={`min-h-10 rounded-xl border px-4 text-sm font-medium ${ratio === value ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-muted"}`}>{value}</button>)}
           </div>
         </div>
 
-        <label className="grid gap-2 text-sm font-medium" htmlFor="poster-title">Event title
+        <label className="grid gap-2 text-sm font-medium" htmlFor="poster-title">Tên sự kiện
           <input id="poster-title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={100} aria-invalid={Boolean(titleError)} aria-describedby={titleError ? "poster-title-error" : undefined} className="min-h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-focus/40" />
           {titleError ? <span id="poster-title-error" role="alert" className="text-xs font-normal text-destructive">{titleError}</span> : null}
         </label>
-        <label className="grid gap-2 text-sm font-medium" htmlFor="poster-tagline">Tagline (optional)
+        <label className="grid gap-2 text-sm font-medium" htmlFor="poster-tagline">Khẩu hiệu (tùy chọn)
           <input id="poster-tagline" value={tagline} onChange={(event) => setTagline(event.target.value)} maxLength={80} className="min-h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-focus/40" />
         </label>
         <div className="grid gap-4 sm:grid-cols-2">
-          <label className="grid gap-2 text-sm font-medium" htmlFor="poster-date">Date (optional)
+          <label className="grid gap-2 text-sm font-medium" htmlFor="poster-date">Ngày (tùy chọn)
             <input id="poster-date" type="date" value={date} onChange={(event) => setDate(event.target.value)} className="min-h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-focus/40" />
           </label>
-          <label className="grid gap-2 text-sm font-medium" htmlFor="poster-location">Location (optional)
+          <label className="grid gap-2 text-sm font-medium" htmlFor="poster-location">Địa điểm (tùy chọn)
             <input id="poster-location" value={location} onChange={(event) => setLocation(event.target.value)} maxLength={120} className="min-h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-focus/40" />
           </label>
         </div>
-        <label className="grid gap-2 text-sm font-medium" htmlFor="poster-accent">Accent color
+        <label className="grid gap-2 text-sm font-medium" htmlFor="poster-accent">Màu nhấn
           <input id="poster-accent" type="color" value={accent} onChange={(event) => setAccent(event.target.value)} className="h-11 w-full rounded-xl border border-input bg-background p-1" />
         </label>
-        {preparedAsset ? <label className="grid gap-2 text-sm font-medium" htmlFor="poster-crop">Crop preset
+        {preparedAsset ? <label className="grid gap-2 text-sm font-medium" htmlFor="poster-crop">Vị trí cắt
           <select id="poster-crop" value={cropPreset} onChange={(event) => setCropPreset(event.target.value as PosterCropPreset)} className="min-h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
-            <option value="center">Center</option>
-            <option value="top">Top</option>
-            <option value="bottom">Bottom</option>
-            <option value="left">Left</option>
-            <option value="right">Right</option>
+            <option value="center">Giữa</option>
+            <option value="top">Trên</option>
+            <option value="bottom">Dưới</option>
+            <option value="left">Trái</option>
+            <option value="right">Phải</option>
           </select>
-          <span className="text-xs font-normal text-muted-foreground">{preparedAsset.width} x {preparedAsset.height}, compressed locally</span>
+          <span className="text-xs font-normal text-muted-foreground">{preparedAsset.width} x {preparedAsset.height}, đã nén cục bộ</span>
         </label> : null}
 
         <label className="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-primary/40 bg-primary/5 px-3 text-sm font-medium text-primary hover:bg-primary/10" htmlFor="poster-image">
           <ImagePlus aria-hidden="true" className="size-4" />
-          Add optional background image
+          Thêm ảnh nền (tùy chọn)
           <input id="poster-image" type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => void handleImageChange(event.target.files?.[0])} />
         </label>
         <label className="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-primary/40 bg-primary/5 px-3 text-sm font-medium text-primary hover:bg-primary/10" htmlFor="poster-logo">
           <ImagePlus aria-hidden="true" className="size-4" />
-          Add optional logo
+          Thêm logo (tùy chọn)
           <input id="poster-logo" type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => void handleLogoChange(event.target.files?.[0])} />
         </label>
         {imageError ? <p role="alert" className="text-xs text-destructive">{imageError}</p> : null}
 
         <div className="rounded-xl border border-border/80 bg-muted/30 p-3 text-xs leading-5 text-muted-foreground" role="status" aria-live="polite">
-          <p>Font: {fontReady ? "ready with fallback" : "loading"}</p>
-          <p>QR: {qrDataUrl ? "ready" : "generating"}</p>
-          <p>Export gate: {qualityGate.success ? "ready" : "waiting"}</p>
+          <p>Phông chữ: {fontReady ? "sẵn sàng với phông thay thế" : "đang tải"}</p>
+          <p>Mã QR: {qrDataUrl ? "sẵn sàng" : "đang tạo"}</p>
+          <p>Điều kiện xuất: {qualityGate.success ? "sẵn sàng" : "đang chờ"}</p>
           {!qualityGate.success ? <p className="mt-1 text-destructive">{qualityGate.errors.join(" ")}</p> : null}
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button type="button" variant="outline" className="min-h-11 flex-1" onClick={resetDraft}><RefreshCcw aria-hidden="true" />Reset</Button>
-          <Button type="button" className="min-h-11 flex-1" onClick={() => void exportPng()} disabled={!qualityGate.success || Boolean(titleError)}><Download aria-hidden="true" />Export PNG</Button>
+          <Button type="button" variant="outline" className="min-h-11 flex-1" onClick={resetDraft}><RefreshCcw aria-hidden="true" />Đặt lại</Button>
+          <Button type="button" className="min-h-11 flex-1" onClick={() => void exportPng()} disabled={!qualityGate.success || Boolean(titleError)}><Download aria-hidden="true" />Xuất PNG</Button>
         </div>
       </section>
 
@@ -396,13 +396,13 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 id="poster-quick-create-preview" className="font-heading text-lg font-semibold">Xem trước trực tiếp</h2>
-            <p className="text-sm text-muted-foreground">Preview and export share the same SVG renderer.</p>
+            <p className="text-sm text-muted-foreground">Bản xem trước và tệp xuất dùng chung bộ dựng SVG.</p>
           </div>
           <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{ratio}</span>
         </div>
         <div className="mx-auto max-h-[75vh] w-full max-w-[42rem] overflow-auto rounded-2xl border border-border/80 bg-[#21182b] p-3 shadow-lg sm:p-5">
           <div className="mx-auto max-h-[68vh] w-full" style={{ aspectRatio: ratio === "4:5" ? "4 / 5" : "9 / 16" }}>
-            {posterDocument && template ? <PosterPreview document={posterDocument} imageDataUrl={imageFailed ? "" : imageDataUrl} logoDataUrl={logoFailed ? "" : logoDataUrl} qrDataUrl={qrDataUrl} svgRef={svgRef} palette={template.palette} cropPreset={cropPreset} onImageError={() => { setImageFailed(true); toast.error("Image failed to render; using the template background fallback.") }} onLogoError={() => { setLogoFailed(true); toast.error("Logo failed to render; using the poster without a logo.") }} /> : <div className="flex h-full items-center justify-center rounded-xl bg-muted p-6 text-center text-sm text-muted-foreground">Enter an event title to preview the poster.</div>}
+            {posterDocument && template ? <PosterPreview document={posterDocument} imageDataUrl={imageFailed ? "" : imageDataUrl} logoDataUrl={logoFailed ? "" : logoDataUrl} qrDataUrl={qrDataUrl} svgRef={svgRef} palette={template.palette} cropPreset={cropPreset} onImageError={() => { setImageFailed(true); toast.error("Không thể hiển thị ảnh; đang dùng nền mẫu thay thế.") }} onLogoError={() => { setLogoFailed(true); toast.error("Không thể hiển thị logo; đang dùng áp phích không có logo.") }} /> : <div className="flex h-full items-center justify-center rounded-xl bg-muted p-6 text-center text-sm text-muted-foreground">Nhập tên sự kiện để xem trước áp phích.</div>}
           </div>
         </div>
       </section>

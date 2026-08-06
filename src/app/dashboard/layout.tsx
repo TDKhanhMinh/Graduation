@@ -30,7 +30,7 @@ export default async function DashboardLayout({
           <div className="flex h-16 items-center justify-between gap-4">
             <Link
               href="/dashboard"
-              aria-label="Memoria - về dashboard"
+              aria-label="Memoria - về bảng điều khiển"
               className="flex min-h-(--control-min-size) items-center rounded-xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/50"
             >
               <MemoriaLogo />
@@ -38,7 +38,7 @@ export default async function DashboardLayout({
 
             <div className="flex items-center gap-3">
               <span className="hidden rounded-full bg-primary/8 px-3 py-1.5 text-xs font-medium text-primary sm:inline-flex">
-                Workspace
+                Không gian làm việc
               </span>
               <form action={signOut}>
                 <IconButton type="submit" label="Đăng xuất" variant="ghost">

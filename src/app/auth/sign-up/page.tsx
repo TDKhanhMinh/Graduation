@@ -8,7 +8,7 @@ export default function SignUpPage() {
   return (
     <AuthPageShell
       title="Tạo tài khoản"
-      description="Tạo workspace an toàn để bắt đầu lưu giữ những khoảnh khắc đáng nhớ."
+      description="Tạo không gian làm việc an toàn để bắt đầu lưu giữ những khoảnh khắc đáng nhớ."
       footer={
         <p className="text-center text-sm text-muted-foreground">
           Đã có tài khoản?{" "}

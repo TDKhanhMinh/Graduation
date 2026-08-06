@@ -6,7 +6,7 @@ import { getOwnedEventById } from "@/features/events/dal"
 import { updateEventAppearance } from "@/features/events/actions"
 
 export const metadata = {
-  title: "Appearance",
+  title: "Giao diện",
 }
 
 export default async function EventAppearancePage({

@@ -31,11 +31,11 @@ export const appearanceSchema = z.object({
   effect_quality: z.enum(['auto', 'low', 'medium', 'high']).default('auto'),
   wall_layout: z.enum(['spotlight', 'grid', 'photo-focus']).default('spotlight'),
   qr_visible: z.boolean().default(true),
-  qr_cta: z.string().trim().min(1).max(80).default('Send a wish'),
+  qr_cta: z.string().trim().min(1).max(80).default('Gửi lời chúc'),
   animation_speed: z.enum(['slow', 'normal', 'fast']).default('normal'),
   cover_path: z
     .string()
     .trim()
-    .max(500, 'Cover URL is too long.')
-    .refine((value) => value === '' || isCloudinaryDeliveryUrl(value), 'Cover must be a Cloudinary delivery URL.'),
+    .max(500, 'URL ảnh bìa quá dài.')
+    .refine((value) => value === '' || isCloudinaryDeliveryUrl(value), 'Ảnh bìa phải là URL phân phối của Cloudinary.'),
 });

@@ -11,8 +11,8 @@ const items = [
   { segment: "/moderation", label: "Kiểm duyệt", Icon: ShieldCheck, available: true },
   { segment: "/settings", label: "Cài đặt", Icon: Settings, available: true },
   { segment: "/appearance", label: "Giao diện", Icon: Palette, available: true },
-  { segment: "/poster-studio", label: "Poster Studio", Icon: Palette, available: true },
-  { segment: "/director", label: "Director", Icon: Clapperboard, available: true },
+  { segment: "/poster-studio", label: "Xưởng áp phích", Icon: Palette, available: true },
+  { segment: "/director", label: "Đạo diễn", Icon: Clapperboard, available: true },
   { segment: "/sharing", label: "Chia sẻ & QR", Icon: QrCode, available: true },
   { segment: "/export", label: "Xuất dữ liệu", Icon: Download, available: false },
 ] as const
@@ -55,7 +55,7 @@ export function EventNav({ eventId }: { eventId: string }) {
           })}
         </ul>
       </div>
-      <p className="text-xs leading-5 text-muted-foreground">Các mục hiển thị theo capability đã có route và handler thật.</p>
+      <p className="text-xs leading-5 text-muted-foreground">Các mục hiển thị theo khả năng đã có đường dẫn và trình xử lý thật.</p>
     </nav>
   )
 }

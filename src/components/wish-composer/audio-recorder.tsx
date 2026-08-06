@@ -168,7 +168,7 @@ export function AudioRecorderField({ eventId, clientRequestId, onUploadSuccess, 
       xhrRef.current = null
       setStatus("preview")
       const message =
-        caught instanceof Error && caught.message === "Upload cancelled"
+        caught instanceof Error && caught.message === "Đã hủy tải lên"
           ? "Đã hủy tải lên. Bạn có thể thử lại."
           : caught instanceof Error
             ? caught.message

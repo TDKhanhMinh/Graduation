@@ -26,12 +26,12 @@ export function EventCreationPreview() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2" aria-label="Các theme có sẵn trong appearance editor">
-        <div className="rounded-xl border border-primary bg-[var(--brand-50)] p-2 text-center text-[10px] font-medium text-primary ring-2 ring-primary/10">Graduation</div>
-        <div className="rounded-xl border bg-amber-50 p-2 text-center text-[10px] font-medium text-amber-800">Editorial</div>
-        <div className="rounded-xl border bg-slate-50 p-2 text-center text-[10px] font-medium text-slate-700">Minimal</div>
+      <div className="grid grid-cols-3 gap-2" aria-label="Các giao diện có sẵn trong trình chỉnh sửa giao diện">
+        <div className="rounded-xl border border-primary bg-[var(--brand-50)] p-2 text-center text-[10px] font-medium text-primary ring-2 ring-primary/10">Tốt nghiệp</div>
+        <div className="rounded-xl border bg-amber-50 p-2 text-center text-[10px] font-medium text-amber-800">Biên tập</div>
+        <div className="rounded-xl border bg-slate-50 p-2 text-center text-[10px] font-medium text-slate-700">Tối giản</div>
       </div>
-      <p className="text-xs leading-5 text-muted-foreground">Bạn có thể chọn theme và cover trong Appearance sau khi tạo event.</p>
+      <p className="text-xs leading-5 text-muted-foreground">Bạn có thể chọn giao diện và ảnh bìa sau khi tạo sự kiện.</p>
     </aside>
   )
 }

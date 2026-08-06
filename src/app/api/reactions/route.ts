@@ -21,14 +21,14 @@ export async function POST(req: NextRequest) {
         resultCode: "429",
         durationMs: requestDurationMs(reqContext)
       })
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 })
+      return NextResponse.json({ error: "Có quá nhiều yêu cầu" }, { status: 429 })
     }
     
     const body = await req.json()
     const { wishId, emoji } = body
     
     if (!wishId || !emoji) {
-      return NextResponse.json({ error: "Missing wishId or emoji" }, { status: 400 })
+      return NextResponse.json({ error: "Thiếu wishId hoặc biểu tượng cảm xúc" }, { status: 400 })
     }
     
     const isAdded = await toggleReaction(wishId, emoji)
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     
     return NextResponse.json({ success: true, added: isAdded })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal server error"
+    const message = error instanceof Error ? error.message : "Lỗi máy chủ nội bộ"
     logger.error("Error toggling reaction", error, {
       ...reqContext,
       surface: "route",

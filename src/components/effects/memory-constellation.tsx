@@ -97,19 +97,19 @@ export function MemoryConstellation({
         }}
       />
       <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 rounded-2xl border border-white/15 bg-black/20 px-3 py-2 text-xs text-white/90 backdrop-blur-sm">
-        {mode === "waiting" ? "Waiting for the next memory…" : mode === "summary" ? `${wishes.length} memories in this constellation` : "Memory constellation"}
+        {mode === "waiting" ? "Đang chờ kỷ niệm tiếp theo…" : mode === "summary" ? `${wishes.length} kỷ niệm trong chòm sao này` : "Chòm sao kỷ niệm"}
       </div>
-      <div className="sr-only" role="region" aria-label="Accessible memory constellation list">
+      <div className="sr-only" role="region" aria-label="Danh sách chòm sao kỷ niệm dành cho trình đọc màn hình">
         {accessibleWishes.length === 0 ? (
-          <p>No approved memories are available yet. The constellation is waiting for the first wish.</p>
+          <p>Chưa có kỷ niệm nào được duyệt. Chòm sao đang chờ lời chúc đầu tiên.</p>
         ) : (
           <ul>
             {accessibleWishes.map((wish) => (
               <li key={wish.id}>
-                <span>{wish.sender_name}: {wish.content || "Media memory"}</span>
-                {wish.is_pinned ? <span> Pinned.</span> : null}
-                {wish.media ? <span> Includes media.</span> : null}
-                {wish.reactions?.length ? <span> Has reactions.</span> : null}
+                <span>{wish.sender_name}: {wish.content || "Kỷ niệm đa phương tiện"}</span>
+                {wish.is_pinned ? <span> Đã ghim.</span> : null}
+                {wish.media ? <span> Có tệp đa phương tiện.</span> : null}
+                {wish.reactions?.length ? <span> Có phản ứng.</span> : null}
               </li>
             ))}
           </ul>

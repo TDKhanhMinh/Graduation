@@ -10,8 +10,8 @@ export function ModerationDetailPanel({ wish }: { wish: ModerationWish | null })
     return (
       <FeedbackState
         status="empty"
-        title="Select a wish"
-        description="Choose a row to inspect its content and media."
+        title="Chọn một lời chúc"
+        description="Chọn một dòng để xem nội dung và tệp đa phương tiện."
         className="min-h-52"
       />
     )
@@ -26,13 +26,13 @@ export function ModerationDetailPanel({ wish }: { wish: ModerationWish | null })
         </CardDescription>
         <div className="flex flex-wrap gap-2">
           <StatusBadge>{wish.moderation_status}</StatusBadge>
-          {wish.is_pinned ? <StatusBadge tone="info">Pinned</StatusBadge> : null}
+          {wish.is_pinned ? <StatusBadge tone="info">Đã ghim</StatusBadge> : null}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4">
           <p className="whitespace-pre-wrap break-words text-sm leading-6">
-            {wish.content || <span className="italic text-muted-foreground">No content</span>}
+            {wish.content || <span className="italic text-muted-foreground">Không có nội dung</span>}
           </p>
         </div>
         {wish.media ? <ModerationMediaPreview media={wish.media} /> : null}

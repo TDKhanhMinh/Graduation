@@ -33,9 +33,9 @@ export function PublicMediaRenderer({ wishId, media }: MediaProps) {
       body: JSON.stringify({ wishId, path: media.path, kind: "media" }),
     })
       .then(async (response) => {
-        if (!response.ok) throw new Error("Media unavailable")
+        if (!response.ok) throw new Error("Tệp đa phương tiện không khả dụng")
         const body = (await response.json()) as { signedUrl?: string }
-        if (!body.signedUrl) throw new Error("Media unavailable")
+        if (!body.signedUrl) throw new Error("Tệp đa phương tiện không khả dụng")
         if (active) setResolution({ key: mediaKey, url: body.signedUrl, error: false })
       })
       .catch(() => {

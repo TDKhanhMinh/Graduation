@@ -16,7 +16,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <AuthPageShell
       title="Đăng nhập"
-      description="Truy cập workspace để quản lý sự kiện và những lời chúc của bạn."
+      description="Truy cập không gian làm việc để quản lý sự kiện và những lời chúc của bạn."
       alert={null}
       footer={
         <p className="text-center text-sm text-muted-foreground">

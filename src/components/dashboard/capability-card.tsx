@@ -37,7 +37,7 @@ export function CapabilityCard({
       </CardHeader>
       <CardContent>
         <p className="text-xs leading-5 text-muted-foreground">
-          {detail ?? "Khu vực này sẽ được mở khi route và capability contract sẵn sàng."}
+          {detail ?? "Khu vực này sẽ được mở khi đường dẫn và hợp đồng khả năng sẵn sàng."}
         </p>
         {href ? (
           <Link

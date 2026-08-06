@@ -35,7 +35,7 @@ export function getCloudinaryCoverUploadConfig() {
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET?.trim()
 
   if (!cloudName || !uploadPreset) {
-    throw new Error("Missing Cloudinary cover upload configuration.")
+    throw new Error("Thiếu cấu hình tải ảnh bìa lên Cloudinary.")
   }
 
   return {
@@ -80,7 +80,7 @@ export function parseCloudinaryCoverUploadResponse(
   response: CloudinaryCoverUploadResponse,
 ): CloudinaryCoverAsset {
   if (typeof response.secure_url !== "string" || !isCloudinaryDeliveryUrl(response.secure_url)) {
-    throw new Error("Cloudinary did not return a valid secure URL.")
+    throw new Error("Cloudinary không trả về URL bảo mật hợp lệ.")
   }
 
   return {

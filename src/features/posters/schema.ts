@@ -56,7 +56,7 @@ export const posterTextConstraintsSchema = z.object({
   overflow: z.enum(["clip", "ellipsis"]).default("clip"),
 }).superRefine((value, context) => {
   if (value.minFontSize > value.maxFontSize) {
-    context.addIssue({ code: "custom", path: ["minFontSize"], message: "minFontSize must not exceed maxFontSize" })
+    context.addIssue({ code: "custom", path: ["minFontSize"], message: "minFontSize không được lớn hơn maxFontSize" })
   }
 })
 
@@ -89,7 +89,7 @@ export const posterImageElementSchema = posterElementBaseSchema.extend({
   }),
 }).superRefine((value, context) => {
   if (!value.bind && !value.assetId) {
-    context.addIssue({ code: "custom", path: ["assetId"], message: "An image must bind to an event asset or provide an assetId" })
+    context.addIssue({ code: "custom", path: ["assetId"], message: "Hình ảnh phải liên kết với thành phần sự kiện hoặc cung cấp assetId" })
   }
 })
 
@@ -159,7 +159,7 @@ export const posterTemplateLayoutSchema = z.object({
 }).superRefine((value, context) => {
   const ids = value.elements.map((element) => element.id)
   if (new Set(ids).size !== ids.length) {
-    context.addIssue({ code: "custom", path: ["elements"], message: "Template element ids must be unique" })
+    context.addIssue({ code: "custom", path: ["elements"], message: "ID thành phần mẫu phải là duy nhất" })
   }
 })
 export type PosterTemplateLayout = z.infer<typeof posterTemplateLayoutSchema>
@@ -178,29 +178,29 @@ export const posterTemplateSchema = z.object({
 }).superRefine((value, context) => {
   for (const ratio of Object.keys(value.layouts)) {
     if (!posterRatioSchema.safeParse(ratio).success) {
-      context.addIssue({ code: "custom", path: ["layouts", ratio], message: `Unsupported layout ratio ${ratio}` })
+      context.addIssue({ code: "custom", path: ["layouts", ratio], message: `Tỷ lệ bố cục không được hỗ trợ ${ratio}` })
     }
   }
   if (new Set(value.supportedRatios).size !== value.supportedRatios.length) {
-    context.addIssue({ code: "custom", path: ["supportedRatios"], message: "supportedRatios must be unique" })
+    context.addIssue({ code: "custom", path: ["supportedRatios"], message: "supportedRatios phải là duy nhất" })
   }
 
   for (const ratio of value.supportedRatios) {
     if (!value.layouts[ratio]) {
-      context.addIssue({ code: "custom", path: ["layouts", ratio], message: `Missing layout for ${ratio}` })
+      context.addIssue({ code: "custom", path: ["layouts", ratio], message: `Thiếu bố cục cho ${ratio}` })
     }
   }
 
   for (const ratio of ["4:5", "9:16"] as const) {
     if (!value.supportedRatios.includes(ratio)) {
-      context.addIssue({ code: "custom", path: ["supportedRatios"], message: `MVP template must support ${ratio}` })
+      context.addIssue({ code: "custom", path: ["supportedRatios"], message: `Mẫu MVP phải hỗ trợ ${ratio}` })
     }
   }
 
   const allElementIds = new Set(Object.values(value.layouts).flatMap((layout) => layout.elements.map((element) => element.id)))
   for (const id of value.requiredElementIds) {
     if (!allElementIds.has(id)) {
-      context.addIssue({ code: "custom", path: ["requiredElementIds"], message: `Required element ${id} is not present in any layout` })
+      context.addIssue({ code: "custom", path: ["requiredElementIds"], message: `Thiếu thành phần bắt buộc ${id} trong mọi bố cục` })
     }
   }
 })
@@ -248,7 +248,7 @@ export const posterDocumentSchema = z.object({
   }
   const expected = expectedDimensions[value.ratio]
   if (value.dimensions.width !== expected.width || value.dimensions.height !== expected.height) {
-    context.addIssue({ code: "custom", path: ["dimensions"], message: `Dimensions do not match ${value.ratio}` })
+    context.addIssue({ code: "custom", path: ["dimensions"], message: `Kích thước không khớp với ${value.ratio}` })
   }
 })
 export type PosterDocument = z.infer<typeof posterDocumentSchema>
