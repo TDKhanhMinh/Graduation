@@ -8,7 +8,6 @@ import { FaqSection } from "@/components/landing/faq-section"
 import { FinalCta } from "@/components/landing/final-cta"
 import { HeroSection } from "@/components/landing/hero-section"
 import { HowItWorks } from "@/components/landing/how-it-works"
-import { LandingAnalytics } from "@/components/landing/landing-analytics"
 import { LandingFooter } from "@/components/landing/landing-footer"
 import { LandingHeader } from "@/components/landing/landing-header"
 import { UseCases } from "@/components/landing/use-cases"
@@ -17,6 +16,7 @@ import { getSiteUrl } from "@/lib/supabase/env"
 
 const TemplateShowcase = nextDynamic(() => import("@/components/landing/template-showcase").then((module) => module.TemplateShowcase), { loading: () => <div className="min-h-96 border-t bg-background" aria-hidden="true" /> })
 const PublicWallDemo = nextDynamic(() => import("@/components/landing/public-wall-demo").then((module) => module.PublicWallDemo), { loading: () => <div className="min-h-96 border-t bg-surface-sunken" aria-hidden="true" /> })
+
 const siteUrl = getSiteUrl()
 export const dynamic = "force-dynamic"
 export const metadata: Metadata = { metadataBase: new URL(siteUrl), title: "Memoria — Poster là nơi mọi kỷ niệm bắt đầu", description: "Tạo poster, chia sẻ QR, nhận lời chúc và media rồi trình chiếu tất cả trên Public Wall của sự kiện.", alternates: { canonical: siteUrl }, openGraph: { title: "Memoria — Poster là nơi mọi kỷ niệm bắt đầu", description: "Poster · QR · Lời chúc · Public Wall cho những sự kiện đáng nhớ.", url: siteUrl, siteName: "Memoria", type: "website", images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Memoria poster, QR và Public Wall" }] }, twitter: { card: "summary_large_image", title: "Memoria — Poster là nơi mọi kỷ niệm bắt đầu", description: "Poster · QR · Lời chúc · Public Wall cho những sự kiện đáng nhớ.", images: ["/twitter-image"] } }
@@ -24,5 +24,5 @@ export const metadata: Metadata = { metadataBase: new URL(siteUrl), title: "Memo
 export default async function Home() {
   const session = await verifySession()
   const authenticated = Boolean(session)
-  return <div className="flex min-h-screen flex-col overflow-x-hidden bg-surface-sunken text-foreground"><LandingAnalytics /><LandingHeader authenticated={authenticated} /><main id="main-content" className="flex-1"><HeroSection authenticated={authenticated} /><TemplateShowcase /><PublicWallDemo /><HowItWorks /><FeatureBento /><EventJourney /><ComparisonSection /><UseCases /><FaqSection /><FinalCta authenticated={authenticated} /></main><LandingFooter /></div>
+  return <div className="flex min-h-screen flex-col overflow-x-hidden bg-surface-sunken text-foreground"><LandingHeader authenticated={authenticated} /><main id="main-content" className="flex-1"><HeroSection authenticated={authenticated} /><TemplateShowcase /><PublicWallDemo /><HowItWorks /><FeatureBento /><EventJourney /><ComparisonSection /><UseCases /><FaqSection /><FinalCta authenticated={authenticated} /></main><LandingFooter /></div>
 }

@@ -1,4 +1,4 @@
-﻿import "server-only"
+import "server-only"
 
 import { cache } from "react"
 
@@ -32,7 +32,7 @@ export const getOwnedPosterDocument = cache(async (eventId: string): Promise<Pos
     .maybeSingle()
 
   if (error) {
-    console.error("Error fetching owned poster document:", error)
+    console.error("Error fetching owned poster document:", error.message, error.details, error.hint, error.code)
     return null
   }
 
@@ -144,7 +144,7 @@ export const getOwnedPosterAssets = cache(async (eventId: string): Promise<Poste
     .order("created_at", { ascending: false })
 
   if (error) {
-    console.error("Error fetching owned poster assets:", error)
+    console.error("Error fetching owned poster assets:", error.message, error.details, error.hint, error.code)
     return []
   }
 
