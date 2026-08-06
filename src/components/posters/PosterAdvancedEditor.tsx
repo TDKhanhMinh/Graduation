@@ -351,7 +351,7 @@ export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision
         </div>
         <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground" role="status" aria-live="polite">
           <Save className="size-4" aria-hidden="true" />
-          {formatSaveStatus()}
+          {renderStatus()}
           <span className="sr-only">Phông chữ {fontReady ? "sẵn sàng" : "đang tải"}, QR {qrDataUrl ? "sẵn sàng" : "đang tải"}</span>
         </div>
       </div>
