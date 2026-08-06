@@ -309,12 +309,12 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
     <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)]">
       <section className="min-w-0 space-y-5 rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6" aria-labelledby="poster-quick-create-controls">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Quick Create</p>
-          <h2 id="poster-quick-create-controls" className="mt-1 font-heading text-xl font-semibold">Create a poster in minutes</h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">Local templates, local fonts, and a live preview. No stock or font API is required.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Tạo nhanh</p>
+          <h2 id="poster-quick-create-controls" className="mt-1 font-heading text-xl font-semibold">Tạo poster trong vài phút</h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">Sử dụng template và phông chữ cục bộ, xem trước trực tiếp. Không yêu cầu API bên thứ ba.</p>
         </div>
 
-        <label className="grid gap-2 text-sm font-medium" htmlFor="poster-category">Event type
+        <label className="grid gap-2 text-sm font-medium" htmlFor="poster-category">Loại sự kiện
           <select id="poster-category" value={category} onChange={(event) => setCategory(event.target.value as PosterEventCategory)} className="min-h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
             {categories.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
           </select>
@@ -395,7 +395,7 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
       <section className="min-w-0 rounded-3xl border border-border/80 bg-surface-sunken p-4 sm:p-6" aria-labelledby="poster-quick-create-preview">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 id="poster-quick-create-preview" className="font-heading text-lg font-semibold">Live preview</h2>
+            <h2 id="poster-quick-create-preview" className="font-heading text-lg font-semibold">Xem trước trực tiếp</h2>
             <p className="text-sm text-muted-foreground">Preview and export share the same SVG renderer.</p>
           </div>
           <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{ratio}</span>

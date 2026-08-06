@@ -135,15 +135,15 @@ export function ThemeEditor({
         <input type="hidden" name="experience_preset" value={experiencePreset} />
 
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Event Theme Studio</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Cấu hình Giao diện Sự kiện</p>
           <h2 className="mt-1 font-heading text-xl font-semibold">Chọn trải nghiệm cho sự kiện</h2>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Preset điều khiển lớp hiển thị public; Product UI vẫn giữ token riêng.
+            Giao diện mẫu điều khiển lớp hiển thị công khai; giao diện hệ thống vẫn giữ nguyên.
           </p>
         </div>
 
         <fieldset className="space-y-3">
-          <legend className="text-sm font-semibold">Experience preset</legend>
+          <legend className="text-sm font-semibold">Trải nghiệm hiển thị (Preset)</legend>
           <div className="grid gap-3 sm:grid-cols-2">
             {presets.map((item) => {
               const selected = experiencePreset === item.key
@@ -179,29 +179,37 @@ export function ThemeEditor({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-2">
-            <Label htmlFor="effect_intensity">Effect intensity</Label>
+            <Label htmlFor="effect_intensity">Cường độ hiệu ứng</Label>
             <select id="effect_intensity" name="effect_intensity" value={intensity} onChange={(event) => setIntensity(event.target.value as EffectIntensity)} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
-              {(["off", "low", "medium", "high"] as const).map((value) => <option key={value} value={value}>{value}</option>)}
+              <option value="off">tắt</option>
+              <option value="low">thấp</option>
+              <option value="medium">trung bình</option>
+              <option value="high">cao</option>
             </select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="effect_quality">Effect quality</Label>
+            <Label htmlFor="effect_quality">Chất lượng hiệu ứng</Label>
             <select id="effect_quality" name="effect_quality" value={quality} onChange={(event) => setQuality(event.target.value as EffectQuality)} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
-              {(["auto", "low", "medium", "high"] as const).map((value) => <option key={value} value={value}>{value}</option>)}
+              <option value="auto">tự động</option>
+              <option value="low">thấp</option>
+              <option value="medium">trung bình</option>
+              <option value="high">cao</option>
             </select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="wall_layout">Public wall layout</Label>
+            <Label htmlFor="wall_layout">Bố cục bức tường</Label>
             <select id="wall_layout" name="wall_layout" value={layout} onChange={(event) => setLayout(event.target.value as WallLayout)} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
-              <option value="spotlight">Spotlight</option>
-              <option value="grid">Grid</option>
-              <option value="photo-focus">Photo focus</option>
+              <option value="spotlight">Nổi bật</option>
+              <option value="grid">Dạng lưới</option>
+              <option value="photo-focus">Ưu tiên ảnh</option>
             </select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="animation_speed">Animation speed</Label>
+            <Label htmlFor="animation_speed">Tốc độ hoạt ảnh</Label>
             <select id="animation_speed" name="animation_speed" value={animationSpeed} onChange={(event) => setAnimationSpeed(event.target.value as AnimationSpeed)} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
-              {(["slow", "normal", "fast"] as const).map((value) => <option key={value} value={value}>{value}</option>)}
+              <option value="slow">chậm</option>
+              <option value="normal">bình thường</option>
+              <option value="fast">nhanh</option>
             </select>
           </div>
         </div>
@@ -210,20 +218,20 @@ export function ThemeEditor({
           <label className="flex min-h-11 items-center gap-2 text-sm font-medium">
             <input type="hidden" name="qr_visible" value="false" />
             <input type="checkbox" name="qr_visible" value="true" checked={qrVisible} onChange={(event) => setQrVisible(event.target.checked)} className="size-4 rounded border-border accent-primary" />
-            Show QR
+            Hiển thị mã QR
           </label>
           <div className="grid gap-2">
-            <Label htmlFor="qr_cta">QR call to action</Label>
+            <Label htmlFor="qr_cta">Nội dung nút gọi hành động QR</Label>
             <input id="qr_cta" name="qr_cta" value={qrCta} onChange={(event) => setQrCta(event.target.value)} maxLength={80} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40" />
           </div>
         </div>
 
         <div className="grid gap-2">
           <CloudinaryCoverUpload value={cover} onChange={(value) => { setCover(value); setIsDirty(true) }} />
-          <Label htmlFor="cover_path">Cloudinary cover URL</Label>
+          <Label htmlFor="cover_path">Đường dẫn ảnh bìa (Cloudinary URL)</Label>
           <input id="cover_path" name="cover_path" value={cover} onChange={(event) => setCover(event.target.value)} placeholder="https://res.cloudinary.com/..." className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40" aria-describedby="cover-help" />
-          <p id="cover-help" className="text-xs leading-5 text-muted-foreground">Chỉ dùng delivery URL từ Cloudinary. Upload media chưa nằm trong task này.</p>
-          {cover && !coverIsCloudinary ? <p className="rounded-lg bg-status-danger/10 px-3 py-2 text-sm text-status-danger" role="alert">Cover chưa hợp lệ; preview sẽ dùng fallback cho đến khi nhập Cloudinary URL.</p> : null}
+          <p id="cover-help" className="text-xs leading-5 text-muted-foreground">Chỉ dùng đường dẫn (delivery URL) từ Cloudinary.</p>
+          {cover && !coverIsCloudinary ? <p className="rounded-lg bg-status-danger/10 px-3 py-2 text-sm text-status-danger" role="alert">Đường dẫn chưa hợp lệ; bản xem trước sẽ dùng ảnh mặc định cho đến khi nhập Cloudinary URL.</p> : null}
         </div>
 
         <div className="flex flex-col gap-3 border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
@@ -235,15 +243,15 @@ export function ThemeEditor({
       <section className="min-w-0 rounded-3xl border border-border/80 bg-surface-sunken p-4 sm:p-5" aria-labelledby="theme-preview-heading">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p id="theme-preview-heading" className="text-sm font-semibold">Live public preview</p>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">Preview an toàn, không truy vấn wish pending/private.</p>
+            <p id="theme-preview-heading" className="text-sm font-semibold">Xem trước giao diện công khai</p>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">Chế độ xem an toàn, không hiển thị dữ liệu riêng tư.</p>
           </div>
-          <div className="flex flex-wrap rounded-xl border bg-background p-1" role="group" aria-label="Kích thước preview">
+          <div className="flex flex-wrap rounded-xl border bg-background p-1" role="group" aria-label="Kích thước xem trước">
             {([
-              ["desktop", Monitor, "Desktop"],
+              ["desktop", Monitor, "Máy tính"],
               ["tv", Tv, "TV 16:9"],
-              ["mobile", Smartphone, "Mobile 9:16"],
-              ["fullscreen", Maximize2, "Fullscreen"],
+              ["mobile", Smartphone, "Điện thoại 9:16"],
+              ["fullscreen", Maximize2, "Toàn màn hình"],
             ] as const).map(([value, Icon, label]) => (
               <Button key={value} type="button" size="sm" variant={viewport === value ? "default" : "ghost"} onClick={() => setViewport(value)} aria-pressed={viewport === value}>
                 <Icon aria-hidden="true" className="size-4" />
@@ -271,11 +279,11 @@ export function ThemeEditor({
               <div className="grid gap-4 p-4 sm:grid-cols-2" style={{ backgroundColor: "var(--event-surface)" }}>
                 <article className="rounded-2xl border p-4" style={{ borderColor: "var(--event-border)" }}>
                   <p className="text-sm leading-6">Một lời chúc được duyệt sẽ xuất hiện ở đây.</p>
-                  <p className="mt-3 text-xs" style={{ color: "var(--event-muted)" }}>Approved public content only</p>
+                  <p className="mt-3 text-xs" style={{ color: "var(--event-muted)" }}>Chỉ hiển thị nội dung đã duyệt</p>
                 </article>
                 <article className="rounded-2xl border p-4" style={{ borderColor: "var(--event-border)" }}>
-                  <p className="text-sm leading-6">{qrVisible ? "QR sẽ hiển thị theo cấu hình." : "QR đã được ẩn theo cấu hình."}</p>
-                  <p className="mt-3 text-xs" style={{ color: "var(--event-muted)" }}>Preset: {experiencePreset} · Quality: {quality}</p>
+                  <p className="text-sm leading-6">{qrVisible ? "Mã QR sẽ hiển thị theo cấu hình." : "Mã QR đã được ẩn theo cấu hình."}</p>
+                  <p className="mt-3 text-xs" style={{ color: "var(--event-muted)" }}>Giao diện mẫu: {experiencePreset} · Chất lượng: {quality}</p>
                 </article>
               </div>
             </div>

@@ -406,7 +406,7 @@ export function WishComposer({
 
                 <div className="mt-5 rounded-xl border bg-surface-sunken p-4" aria-label="Xem trước lời chúc">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Xem trước</p>
-                  <textarea readOnly value={draft.content.trim()} aria-label="Draft preview" rows={4} className="mt-2 w-full resize-none bg-transparent text-sm leading-6 outline-none" placeholder="Your draft is ready to review before submitting." />
+                  <textarea readOnly value={draft.content.trim()} aria-label="Draft preview" rows={4} className="mt-2 w-full resize-none bg-transparent text-sm leading-6 outline-none" placeholder="Bản nháp của bạn đã sẵn sàng để gửi." />
                   <p className="mt-3 text-sm font-medium">— {draft.senderName.trim() || "Tên của bạn"}</p>
                 </div>
 
@@ -431,22 +431,22 @@ export function WishComposer({
             )}
             </div>
 
-            <aside className="mt-8 hidden min-w-0 lg:mt-0 lg:block" aria-label="Wish preview">
+            <aside className="mt-8 hidden min-w-0 lg:mt-0 lg:block" aria-label="Xem trước lời chúc">
               <div className="sticky top-0 rounded-2xl border bg-surface-sunken p-5">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Live preview</p>
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Xem trước trực tiếp</p>
                 <div className="mt-4 rounded-xl border bg-background p-5 shadow-sm">
-                  <input readOnly value={draft.content.trim()} aria-label="Live wish preview" className="w-full bg-transparent text-base leading-7 outline-none" placeholder="Your wish will appear here as you write it." />
+                  <input readOnly value={draft.content.trim()} aria-label="Xem trước lời chúc trực tiếp" className="w-full bg-transparent text-base leading-7 outline-none" placeholder="Lời chúc của bạn sẽ xuất hiện ở đây khi bạn nhập." />
                   <p className="mt-5 text-sm font-medium">
-                    - {draft.senderName.trim() || "Your name"}
+                    - {draft.senderName.trim() || "Tên của bạn"}
                   </p>
                   {draft.media ? (
                     <p className="mt-4 rounded-lg bg-primary/10 px-3 py-2 text-xs text-primary">
-                      {draft.media.type === "image" ? "Image attached" : "Audio attached"}
+                      {draft.media.type === "image" ? "Đã đính kèm ảnh" : "Đã đính kèm âm thanh"}
                     </p>
                   ) : null}
                 </div>
                 <p className="mt-4 text-sm leading-6 text-muted-foreground">
-                  The preview stays visible on desktop while you edit the form.
+                  Bản xem trước sẽ luôn hiển thị trên máy tính khi bạn soạn thảo.
                 </p>
               </div>
             </aside>

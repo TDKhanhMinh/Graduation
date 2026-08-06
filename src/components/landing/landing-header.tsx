@@ -8,7 +8,7 @@ import { MemoriaLogo } from "@/components/brand/memoria-logo"
 import { Button } from "@/components/ui/button"
 import { PageShell } from "@/components/ui/page-shell"
 
-const navigation = [["Cách hoạt động", "#how-it-works"], ["Template Showcase", "#template-showcase"], ["Public Wall", "#public-wall"], ["Tính năng", "#features"], ["FAQ", "#faq"]] as const
+const navigation = [["Cách hoạt động", "#how-it-works"], ["Giao diện Mẫu", "#template-showcase"], ["Public Wall", "#public-wall"], ["Tính năng", "#features"], ["FAQ", "#faq"]] as const
 
 export function LandingHeader({ authenticated }: { authenticated: boolean }) {
   const [scrolled, setScrolled] = useState(false)

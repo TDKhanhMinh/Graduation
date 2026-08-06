@@ -71,14 +71,15 @@ export function DirectorMode({
     setQueue((items) => items.filter((item) => item.id !== current.id))
     setCurrentIndex((index) => Math.min(index, Math.max(queue.length - 2, 0)))
     announce("Wish skipped for this local playback session")
+    announce("Đã bỏ qua lời chúc trong phiên phát cục bộ")
   }
 
   return (
     <section className="space-y-6" aria-labelledby="director-mode-heading">
       <div className="flex flex-col gap-4 rounded-3xl border border-primary/20 bg-[radial-gradient(circle_at_90%_0%,var(--memory-peach)_0,transparent_32%),linear-gradient(135deg,var(--brand-50),var(--background)_72%)] p-5 sm:p-7 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Host console</p>
-          <h2 id="director-mode-heading" className="mt-1 font-heading text-2xl font-semibold">Director Mode</h2>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Bảng điều khiển (Host)</p>
+          <h2 id="director-mode-heading" className="mt-1 font-heading text-xl font-semibold">Tùy chỉnh luồng hiển thị</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Điều khiển local playback cho màn hình public. Các thao tác không gọi public API và không thay đổi wish trong database.</p>
         </div>
         <Link href={`/dashboard/events/${eventId}/moderation`} className="text-sm font-medium text-primary underline-offset-4 hover:underline">Mở moderation</Link>

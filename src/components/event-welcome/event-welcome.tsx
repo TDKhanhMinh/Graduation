@@ -104,9 +104,9 @@ export function EventWelcome({
           <Link
             href="#wall-heading"
             className={cn("welcome-scroll-indicator inline-flex w-fit items-center gap-2 text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline mt-20")}
-            aria-label="Explore the event wall"
+            aria-label="Khám phá bức tường sự kiện"
           >
-            Scroll to explore
+            Cuộn để khám phá
             <ChevronDown aria-hidden="true" className="size-4" />
           </Link>
         </div>

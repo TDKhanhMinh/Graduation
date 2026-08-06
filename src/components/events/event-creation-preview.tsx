@@ -4,7 +4,7 @@ export function EventCreationPreview() {
   return (
     <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start" aria-labelledby="event-preview-title">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Live preview</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Xem trước trực tiếp</p>
         <h2 id="event-preview-title" className="mt-1 font-heading text-lg font-semibold">Không gian sau khi tạo</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">Nội dung thật sẽ được hiển thị trên trang sự kiện của bạn.</p>
       </div>
@@ -14,7 +14,7 @@ export function EventCreationPreview() {
           <div className="absolute -right-5 -top-5 size-20 rounded-full border border-memory-pink/30" />
           <div className="relative">
             <div className="flex items-center justify-between text-xs text-muted-foreground"><span>Memoria</span><Sparkles className="size-4 text-primary" /></div>
-            <p className="mt-8 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary/75">Your event title</p>
+            <p className="mt-8 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary/75">Tên sự kiện của bạn</p>
             <p className="mt-2 font-heading text-2xl font-semibold tracking-tight">Một ngày thật đẹp</p>
             <p className="mt-2 text-xs leading-5 text-muted-foreground">Lời chào và mô tả của bạn sẽ xuất hiện ở đây.</p>
             <div className="mt-5 flex items-center gap-2 text-xs text-muted-foreground"><CalendarDays className="size-3.5" />Ngày sự kiện</div>

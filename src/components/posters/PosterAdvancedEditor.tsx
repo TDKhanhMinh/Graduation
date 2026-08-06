@@ -325,34 +325,34 @@ export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision
       anchor.click()
       URL.revokeObjectURL(downloadUrl)
       setExportStatus("idle")
-      toast.success("Advanced Editor PNG exported at " + canvas.width + " x " + canvas.height + ".")
+      toast.success("Đã xuất PNG từ Trình biên tập nâng cao với kích thước " + canvas.width + " x " + canvas.height + ".")
     } catch {
       setExportStatus("error")
-      toast.error("Advanced Editor PNG export failed. Try again when the preview is ready.")
+      toast.error("Xuất PNG từ Trình biên tập nâng cao thất bại. Vui lòng thử lại khi bản xem trước đã sẵn sàng.")
     } finally {
       URL.revokeObjectURL(svgUrl)
     }
   }
 
-  function formatSaveStatus() {
-    if (saveStatus === "saving") return "Saving..."
-    if (saveStatus === "saved") return "Saved"
-    if (saveStatus === "conflict") return "Conflict — reload required"
-    return "Local draft"
+  function renderStatus() {
+    if (saveStatus === "saving") return "Đang lưu..."
+    if (saveStatus === "saved") return "Đã lưu"
+    if (saveStatus === "conflict") return "Xung đột — cần tải lại"
+    return "Bản nháp cục bộ"
   }
 
   return (
     <section className="hidden space-y-5 rounded-3xl border border-border/80 bg-card p-5 shadow-sm md:block sm:p-6" aria-labelledby="poster-advanced-editor">
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Advanced Editor</p>
-          <h2 id="poster-advanced-editor" className="mt-1 font-heading text-xl font-semibold">Personalize on tablet or desktop</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Select, move, resize, rotate, group and layer elements while preserving the versioned poster document. Mobile uses Quick Create.</p>
+        <div className="lg:max-w-md">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Trình biên tập nâng cao</p>
+          <h2 id="poster-advanced-editor" className="mt-1 font-heading text-xl font-semibold">Tùy chỉnh chi tiết trên máy tính bảng hoặc máy tính để bàn</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Chọn, di chuyển, thay đổi kích thước, xoay, nhóm và phân lớp các thành phần trong khi vẫn bảo toàn phiên bản tài liệu áp phích. Thiết bị di động sử dụng tính năng Tạo nhanh.</p>
         </div>
         <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground" role="status" aria-live="polite">
           <Save className="size-4" aria-hidden="true" />
           {formatSaveStatus()}
-          <span className="sr-only">Font {fontReady ? "ready" : "loading"}, QR {qrDataUrl ? "ready" : "loading"}</span>
+          <span className="sr-only">Phông chữ {fontReady ? "sẵn sàng" : "đang tải"}, QR {qrDataUrl ? "sẵn sàng" : "đang tải"}</span>
         </div>
       </div>
 

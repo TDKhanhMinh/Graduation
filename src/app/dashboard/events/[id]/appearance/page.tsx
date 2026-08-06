@@ -24,8 +24,8 @@ export default async function EventAppearancePage({
   return (
     <div className="space-y-6 pb-10">
       <SectionHeading
-        title="Appearance"
-        description="Configure the public event identity with a Cloudinary cover and safe live preview."
+        title="Giao diện"
+        description="Cấu hình nhận diện sự kiện công khai với ảnh bìa Cloudinary và xem trước trực tiếp an toàn."
       />
       <ThemeEditor
         action={boundAction}
