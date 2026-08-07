@@ -566,21 +566,35 @@ export function ThemeEditor({
 
               <div className="space-y-4 border-t border-border/80 pt-5">
                 <h3 className="text-sm font-semibold">Căn chỉnh & Hiệu ứng Poster</h3>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <div className="grid gap-2 min-w-0">
-                    <Label htmlFor="welcome_poster_fit">Cách căn chỉnh poster</Label>
+                    <Label htmlFor="welcome_poster_aspect">Tỉ lệ khung hình</Label>
+                    <select
+                      id="welcome_poster_aspect"
+                      value={welcomeConfig.poster.aspectRatio}
+                      onChange={(event) => updateWelcomePoster({ aspectRatio: event.target.value as WelcomeHeroConfig["poster"]["aspectRatio"] })}
+                      className="w-full min-h-11 rounded-xl border border-border/80 bg-background px-3 text-sm outline-hidden focus-visible:ring-3 focus-visible:ring-focus/40"
+                    >
+                      <option value="portrait">Dọc (3:4) - Poster</option>
+                      <option value="square">Vuông (1:1)</option>
+                      <option value="landscape">Ngang (16:9)</option>
+                      <option value="auto">Tự do (Tùy ảnh)</option>
+                    </select>
+                  </div>
+                  <div className="grid gap-2 min-w-0">
+                    <Label htmlFor="welcome_poster_fit">Cách hiển thị</Label>
                     <select
                       id="welcome_poster_fit"
                       value={welcomeConfig.poster.fit}
                       onChange={(event) => updateWelcomePoster({ fit: event.target.value as WelcomeHeroConfig["poster"]["fit"] })}
                       className="w-full min-h-11 rounded-xl border border-border/80 bg-background px-3 text-sm outline-hidden focus-visible:ring-3 focus-visible:ring-focus/40"
                     >
-                      <option value="contain">Giữ đủ toàn bộ poster (Contain)</option>
-                      <option value="cover">Phủ kín khung (Cover)</option>
+                      <option value="contain">Giữ đủ toàn ảnh</option>
+                      <option value="cover">Phủ kín (Cover)</option>
                     </select>
                   </div>
                   <div className="grid gap-2 min-w-0">
-                    <Label htmlFor="welcome_poster_position">Vị trí trọng tâm poster</Label>
+                    <Label htmlFor="welcome_poster_position">Trọng tâm ảnh</Label>
                     <select
                       id="welcome_poster_position"
                       value={welcomeConfig.poster.position}

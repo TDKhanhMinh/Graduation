@@ -60,10 +60,10 @@ export function WelcomeHeroPreview({
         config.poster.shadow ? "shadow-xl" : "shadow-none",
       )}
     >
-      <div className={cn("relative min-h-[30rem]", isSplit ? "grid grid-cols-[3fr_2fr]" : "flex flex-col")}>
+      <div className={cn("relative min-h-[30rem]", isSplit ? "flex flex-col md:flex-row items-center" : "flex flex-col")}>
         <div className={cn(
           "welcome-hero-content relative z-10 flex min-w-0 flex-col justify-center gap-4 p-5 sm:p-8",
-          isSplit ? "order-1" : "order-2",
+          isSplit ? "order-1 flex-1" : "order-2",
           !config.enabled && "order-1",
         )} style={{ backgroundColor: "var(--event-background)", color: "var(--event-text)" }}>
           <div className="flex flex-wrap items-center gap-2 text-[11px] font-medium">
@@ -82,7 +82,14 @@ export function WelcomeHeroPreview({
         </div>
 
         {config.enabled ? (
-          <div className={cn("relative min-h-56 overflow-hidden", isSplit ? "order-2" : "order-1")}>
+          <div className={cn(
+            "relative overflow-hidden rounded-xl lg:rounded-2xl shadow-lg border border-border/50",
+            isSplit ? "order-2 w-full md:w-2/5 shrink-0" : "order-1 w-full",
+            config.poster.aspectRatio === "square" ? "aspect-square" :
+            config.poster.aspectRatio === "landscape" ? "aspect-video" :
+            config.poster.aspectRatio === "portrait" ? "aspect-[3/4]" :
+            "min-h-[24rem]"
+          )}>
             {coverIsCloudinary ? (
               <>
                 {config.poster.backgroundBlur ? <div aria-hidden="true" className="absolute inset-0 scale-110 bg-cover bg-center opacity-45 blur-2xl" style={{ backgroundImage: `url(${cover})` }} /> : null}

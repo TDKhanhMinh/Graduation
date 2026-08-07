@@ -16,6 +16,7 @@ export const welcomeHeroConfigSchema = z.object({
   primaryLabel: z.string().trim().min(1).max(80),
   secondaryLabel: z.string().trim().min(1).max(80),
   poster: z.object({
+    aspectRatio: z.enum(["auto", "portrait", "square", "landscape"]).default("portrait"),
     fit: z.enum(["contain", "cover"]),
     position: z.enum(["center", "top", "bottom"]),
     border: z.boolean(),
@@ -64,6 +65,7 @@ export function getDefaultWelcomeHeroConfig(legacy: LegacyWelcomeSettings = {}):
     primaryLabel: "Gửi lời chúc",
     secondaryLabel: "Khám phá sự kiện",
     poster: {
+      aspectRatio: "portrait",
       fit: "contain",
       position: "center",
       border: true,

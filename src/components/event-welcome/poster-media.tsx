@@ -23,7 +23,7 @@ export function PosterMedia({ src, alt, fit, position, border, shadow, backgroun
   return (
     <div
       className={cn(
-        "relative min-h-72 overflow-hidden bg-[radial-gradient(circle_at_20%_20%,var(--event-secondary),transparent_45%),linear-gradient(135deg,var(--event-primary),var(--event-secondary))] sm:min-h-96 lg:min-h-full",
+        "relative h-full w-full overflow-hidden bg-[radial-gradient(circle_at_20%_20%,var(--event-secondary),transparent_45%),linear-gradient(135deg,var(--event-primary),var(--event-secondary))]",
         border && "border border-[var(--event-border)]",
         shadow && "shadow-2xl",
       )}
@@ -52,7 +52,7 @@ export function PosterMedia({ src, alt, fit, position, border, shadow, backgroun
       ) : null}
       <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent" aria-hidden="true" />
       {!imageSrc ? (
-        <div className="relative flex h-full min-h-72 items-end p-6 text-white sm:min-h-96 sm:p-10">
+        <div className="relative flex h-full min-h-64 items-end p-6 text-white sm:p-8">
           <div className="max-w-sm rounded-2xl border border-white/30 bg-black/20 p-5 backdrop-blur-sm">
             <p className="text-sm font-medium">Lưu giữ những kỷ niệm thật đẹp.</p>
             <p className="mt-2 text-sm leading-6 text-white/80">

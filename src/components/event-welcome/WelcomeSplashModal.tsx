@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react"
 
 import { buttonVariants } from "@/components/ui/button"
 import { formatWelcomeDate, type AudioStatus, type WelcomeStage } from "@/features/events/welcome"
+import type { WelcomeHeroConfig } from "@/features/events/welcome-config"
 import { cn } from "@/lib/utils"
 
 import {
@@ -27,6 +28,7 @@ export type WelcomeSplashModalProps = {
   coverUrl: string | null
   eventDate: string | null
   description: string | null
+  posterConfig?: WelcomeHeroConfig["poster"]
   reducedMotion?: boolean
   audioStatus?: AudioStatus
   onOpenEnvelope?: () => void
@@ -87,6 +89,7 @@ export function WelcomeSplashModal({
   coverUrl,
   eventDate,
   description,
+  posterConfig,
   reducedMotion = false,
   audioStatus = "idle",
   onOpenEnvelope,
@@ -487,15 +490,21 @@ export function WelcomeSplashModal({
               ) : null}
 
               {coverUrl ? (
-                <div className="relative aspect-video max-h-[180px] w-full overflow-hidden rounded-2xl border border-amber-400/30 shadow-md sm:max-h-[240px] lg:max-h-[300px]">
+                <div className={cn(
+                  "relative w-full overflow-hidden rounded-2xl border border-amber-400/30 shadow-md",
+                  posterConfig?.aspectRatio === "square" ? "aspect-square" :
+                  posterConfig?.aspectRatio === "landscape" ? "aspect-video" :
+                  posterConfig?.aspectRatio === "portrait" ? "aspect-[3/4]" :
+                  "aspect-video max-h-[180px] sm:max-h-[240px] lg:max-h-[300px]"
+                )}>
                   <PosterMedia
                     src={coverUrl}
                     alt={title + " cover"}
-                    fit="cover"
-                    position="center"
-                    border={false}
-                    shadow={true}
-                    backgroundBlur={true}
+                    fit={posterConfig?.fit ?? "cover"}
+                    position={posterConfig?.position ?? "center"}
+                    border={posterConfig?.border ?? false}
+                    shadow={posterConfig?.shadow ?? true}
+                    backgroundBlur={posterConfig?.backgroundBlur ?? true}
                   />
                 </div>
               ) : null}

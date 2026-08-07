@@ -40,11 +40,13 @@ function WelcomeSplashIntegration({
   description,
   eventDate,
   coverUrl,
+  posterConfig,
 }: {
   title: string
   description: string | null
   eventDate: string | null
   coverUrl: string | null
+  posterConfig: WelcomeHeroConfig["poster"]
 }) {
   const experience = useWelcomeExperience()
 
@@ -63,6 +65,7 @@ function WelcomeSplashIntegration({
         coverUrl={coverUrl}
         eventDate={eventDate}
         description={description}
+        posterConfig={posterConfig}
         reducedMotion={experience.reducedMotion}
         audioStatus={experience.audioStatus}
         onOpenEnvelope={experience.openEnvelope}
@@ -135,12 +138,12 @@ export function EventWelcome({
     >
       {isEnabled ? <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">{decorativeLayers}</div> : null}
       <div className={cn(
-        "relative z-10 min-h-[520px]",
-        isEnabled && layout === "split" ? "grid lg:grid-cols-[3fr_2fr]" : "flex flex-col",
+        "relative z-10 min-h-[520px] p-6 lg:p-14",
+        isEnabled && layout === "split" ? "flex flex-col lg:flex-row items-center gap-8 lg:gap-14" : "flex flex-col",
       )}>
         <div className={cn(
-          "welcome-hero-content flex min-w-0 flex-col justify-center gap-6 p-6 sm:p-10 lg:p-14",
-          isEnabled && layout === "poster-focus" ? "order-2" : "order-2 lg:order-1",
+          "welcome-hero-content flex min-w-0 flex-col justify-center gap-6",
+          isEnabled && layout === "split" ? "order-2 lg:order-1 flex-1" : "order-2",
           !isEnabled && "order-1",
         )}>
           <StatusBadge tone={presentation.badgeTone} className="welcome-hero-status w-fit">{presentation.badge}</StatusBadge>
@@ -199,8 +202,12 @@ export function EventWelcome({
         </div>
         {isEnabled ? (
           <div className={cn(
-            "welcome-hero-poster min-w-0 overflow-hidden",
-            layout === "poster-focus" ? "order-1" : "order-1 lg:order-2",
+            "welcome-hero-poster relative min-w-0 overflow-hidden rounded-xl lg:rounded-2xl shadow-xl",
+            layout === "split" ? "order-1 w-full lg:order-2 lg:w-2/5 shrink-0" : "order-1 w-full",
+            welcomeConfig.poster.aspectRatio === "square" ? "aspect-square" :
+            welcomeConfig.poster.aspectRatio === "landscape" ? "aspect-video" :
+            welcomeConfig.poster.aspectRatio === "portrait" ? "aspect-[3/4]" :
+            "min-h-[24rem] lg:min-h-full"
           )}>
             <PosterMedia
               src={coverUrl}
@@ -220,6 +227,7 @@ export function EventWelcome({
         description={welcomeMessage}
         eventDate={eventDate}
         coverUrl={coverUrl}
+        posterConfig={welcomeConfig.poster}
       />
     </WelcomeAnalytics>
   )
