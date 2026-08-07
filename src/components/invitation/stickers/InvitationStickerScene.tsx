@@ -64,8 +64,8 @@ export const InvitationStickerScene = forwardRef<
     triggerAction: (stickerId: string, action: StickerAction) => {
       controller.triggerCharacterAction(stickerId, action)
     },
-    pointToElement: (id, selector, placement) => {
-      controller.pointToElement(id, selector, placement)
+    pointToElement: (stickerId, selector, placement = "center", triggerSpeech = true) => {
+      controller.pointToElement(stickerId, selector, placement, triggerSpeech)
     },
     teleportToElement: (id, selector, placement) => {
       controller.teleportToElement(id, selector, placement)

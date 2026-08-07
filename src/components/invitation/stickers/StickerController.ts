@@ -134,7 +134,7 @@ export class StickerController {
     char.triggerSpeech(text, durationInSeconds)
   }
 
-  public pointToElement(stickerId: string, selector: string, placement?: string) {
+  public pointToElement(stickerId: string, selector: string, placement: "center" | "top-left" | "top" | "left" | "right" | "bottom" | "auto" = "center", triggerSpeech = true) {
     const char = this.characters.get(stickerId)
     if (!char || typeof document === "undefined") return
 
@@ -149,25 +149,40 @@ export class StickerController {
       const containerWidth = window.innerWidth
       const containerHeight = window.innerHeight
       
-      let targetPixelX = rect.left + rect.width / 2
-      let targetPixelY = rect.top + rect.height / 2
-      
-      // If placement is provided, shift the sticker so it points AT the element instead of covering it
-      if (placement) {
-        const offset = 60
-        if (placement.includes("top")) targetPixelY = rect.top - offset
-        if (placement.includes("bottom")) targetPixelY = rect.bottom + offset
-        if (placement.includes("left")) targetPixelX = rect.left - offset
-        if (placement.includes("right")) targetPixelX = rect.right + offset
+      let pixelX = rect.left + rect.width / 2
+      let pixelY = rect.top + rect.height / 2
+
+      const charOffset = 60 // Base offset for sticker size
+
+      if (placement === "top-left") {
+        pixelX = rect.left - charOffset / 2
+        pixelY = rect.top - charOffset
+      } else if (placement === "top") {
+        pixelY = rect.top - charOffset
+      } else if (placement === "bottom") {
+        pixelY = rect.bottom + charOffset
+      } else if (placement === "left") {
+        pixelX = rect.left - charOffset
+      } else if (placement === "right") {
+        pixelX = rect.right + charOffset
+      } else if (placement === "auto") {
+        // Simple auto placement: place right if there is space, else bottom
+        if (rect.right + charOffset * 2 < containerWidth) {
+          pixelX = rect.right + charOffset
+        } else {
+          pixelY = rect.bottom + charOffset
+        }
       }
 
-      char.targetNormalizedX = Math.min(Math.max(targetPixelX / containerWidth, 0.1), 0.9)
-      char.targetNormalizedY = Math.min(Math.max(targetPixelY / containerHeight, 0.1), 0.9)
+      char.targetNormalizedX = Math.min(Math.max(pixelX / containerWidth, 0.05), 0.95)
+      char.targetNormalizedY = Math.min(Math.max(pixelY / containerHeight, 0.05), 0.95)
       char.setState("reacting", "point-to-cta")
 
-      const rsvpMsgs = getSpeechCategory(char.def.speechMessages, "rsvp")
-      if (rsvpMsgs && rsvpMsgs.length > 0) {
-        char.triggerSpeech(rsvpMsgs[0], 3.5)
+      if (triggerSpeech) {
+        const rsvpMsgs = getSpeechCategory(char.def.speechMessages, "rsvp")
+        if (rsvpMsgs && rsvpMsgs.length > 0) {
+          char.triggerSpeech(rsvpMsgs[0], 3.5)
+        }
       }
     }
   }
