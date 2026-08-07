@@ -189,6 +189,7 @@ export function ThemeEditor({
     if (state.error) toast.error(state.error)
     if (state.message) {
       toast.success(state.message)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsDirty(false)
     }
   }, [state.error, state.message])

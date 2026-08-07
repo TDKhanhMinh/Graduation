@@ -19,6 +19,29 @@ type TourRunnerProps = {
 
 type Rect = { top: number; left: number; width: number; height: number; bottom: number; right: number }
 
+function waitForTourTarget(selector: string, timeoutMs: number = 3000): Promise<Element | null> {
+  return new Promise((resolve) => {
+    const el = document.querySelector(selector)
+    if (el) return resolve(el)
+    
+    const timer = setTimeout(() => {
+      observer.disconnect()
+      resolve(document.querySelector(selector))
+    }, timeoutMs)
+    
+    const observer = new MutationObserver(() => {
+      const el = document.querySelector(selector)
+      if (el) {
+        observer.disconnect()
+        clearTimeout(timer)
+        resolve(el)
+      }
+    })
+    
+    observer.observe(document.body, { childList: true, subtree: true })
+  })
+}
+
 export function TourRunner({ config, onComplete, onSkip, reducedMotion = false, sceneRef }: TourRunnerProps) {
   const [mounted, setMounted] = useState(false)
   const [stepIndex, setStepIndex] = useState(0)
@@ -40,24 +63,73 @@ export function TourRunner({ config, onComplete, onSkip, reducedMotion = false, 
     }
   }, [])
 
-  const measureTarget = useCallback(() => {
-    if (!step?.targetSelector) {
-      setTargetRect(null)
-      return
-    }
-    const el = document.querySelector(step.targetSelector)
-    if (!el) {
-      console.warn(`Tour target ${step.targetSelector} not found.`)
-      // Missing target fallback -> auto-skip step
-      if (stepIndex < config.steps.length - 1) {
-        setStepIndex(stepIndex + 1)
-      } else {
-        onComplete()
+  // measure target logic split into async wait and sync update
+  useEffect(() => {
+    let active = true
+    let measureTimer: NodeJS.Timeout
+
+    const resolveTarget = async () => {
+      if (!step?.targetSelector) {
+        if (active) setTargetRect(null)
+        return
       }
-      return
+      
+      const el = await waitForTourTarget(step.targetSelector)
+      if (!active) return
+      
+      if (!el) {
+        console.warn(`Tour target ${step.targetSelector} not found.`)
+        // Missing target fallback -> auto-skip step
+        if (stepIndex < config.steps.length - 1) {
+          setStepIndex(stepIndex + 1)
+        } else {
+          onComplete()
+        }
+        return
+      }
+      
+      // Auto-scroll
+      el.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center", inline: "nearest" })
+      
+      const measure = () => {
+        if (!active) return
+        const rect = el.getBoundingClientRect()
+        const newRect = {
+          top: rect.top + window.scrollY,
+          left: rect.left + window.scrollX,
+          width: rect.width,
+          height: rect.height,
+          bottom: rect.bottom + window.scrollY,
+          right: rect.right + window.scrollX,
+        }
+        setTargetRect(prev => {
+          if (prev && 
+              Math.abs(prev.top - newRect.top) < 1 &&
+              Math.abs(prev.left - newRect.left) < 1 &&
+              Math.abs(prev.width - newRect.width) < 1 &&
+              Math.abs(prev.height - newRect.height) < 1) {
+            return prev
+          }
+          return newRect
+        })
+      }
+      
+      measureTimer = setTimeout(measure, reducedMotion ? 50 : 350)
     }
     
-    // Avoid re-triggering state unnecessarily
+    resolveTarget()
+    
+    return () => {
+      active = false
+      if (measureTimer) clearTimeout(measureTimer)
+    }
+  }, [step, stepIndex, config.steps.length, onComplete, reducedMotion])
+
+  const measureTargetSync = useCallback(() => {
+    if (!step?.targetSelector) return
+    const el = document.querySelector(step.targetSelector)
+    if (!el) return
+    
     const rect = el.getBoundingClientRect()
     const newRect = {
       top: rect.top + window.scrollY,
@@ -67,7 +139,6 @@ export function TourRunner({ config, onComplete, onSkip, reducedMotion = false, 
       bottom: rect.bottom + window.scrollY,
       right: rect.right + window.scrollX,
     }
-    
     setTargetRect(prev => {
       if (prev && 
           Math.abs(prev.top - newRect.top) < 1 &&
@@ -78,31 +149,20 @@ export function TourRunner({ config, onComplete, onSkip, reducedMotion = false, 
       }
       return newRect
     })
-  }, [step, stepIndex, config.steps.length, onComplete])
+  }, [step])
 
   useEffect(() => {
-    if (step?.targetSelector) {
-      const el = document.querySelector(step.targetSelector)
-      if (el) {
-        el.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center", inline: "nearest" })
-      }
-    }
-    
-    // Wait for scroll to settle
-    const timeoutId = setTimeout(measureTarget, reducedMotion ? 50 : 350)
-    return () => clearTimeout(timeoutId)
-  }, [stepIndex, measureTarget, reducedMotion, step?.targetSelector])
-
-  useEffect(() => {
-    const handleScrollResize = () => measureTarget()
+    const handleScrollResize = () => measureTargetSync()
     // Passive to avoid scroll jank
     window.addEventListener("scroll", handleScrollResize, { passive: true })
     window.addEventListener("resize", handleScrollResize, { passive: true })
+    window.addEventListener("orientationchange", handleScrollResize, { passive: true })
     return () => {
       window.removeEventListener("scroll", handleScrollResize)
       window.removeEventListener("resize", handleScrollResize)
+      window.removeEventListener("orientationchange", handleScrollResize)
     }
-  }, [measureTarget])
+  }, [measureTargetSync])
 
   const handleNext = useCallback(() => {
     if (stepIndex < config.steps.length - 1) {
@@ -127,9 +187,23 @@ export function TourRunner({ config, onComplete, onSkip, reducedMotion = false, 
     const cardHeight = 240 // rough estimation of card height
     const padding = 20
     const pad = 12 // hole padding
+    const placement = step.placement || "auto"
     
     let y = targetRect.bottom + pad + padding
     let x = targetRect.left + (targetRect.width / 2) - (cardWidth / 2)
+    
+    // Calculate position based on placement
+    if (placement === "top") {
+      y = targetRect.top - pad - padding - cardHeight
+    } else if (placement === "bottom") {
+      y = targetRect.bottom + pad + padding
+    } else if (placement === "left") {
+      x = targetRect.left - pad - padding - cardWidth
+      y = targetRect.top + (targetRect.height / 2) - (cardHeight / 2)
+    } else if (placement === "right") {
+      x = targetRect.right + pad + padding
+      y = targetRect.top + (targetRect.height / 2) - (cardHeight / 2)
+    }
     
     // clamp horizontally
     if (x < padding) x = padding
@@ -137,14 +211,16 @@ export function TourRunner({ config, onComplete, onSkip, reducedMotion = false, 
       x = document.documentElement.clientWidth - cardWidth - padding
     }
 
-    // clamp vertically: if it goes past the viewport bottom, place it ABOVE the target instead
-    const viewportBottom = window.scrollY + window.innerHeight
-    if (y + cardHeight > viewportBottom) {
-      const spaceAbove = targetRect.top - window.scrollY
-      // If there's more space above than below, or if below is strictly out of bounds
-      if (spaceAbove > cardHeight + padding + pad) {
-        y = targetRect.top - pad - padding - cardHeight
-      }
+    // clamp vertically
+    const viewportTop = window.scrollY + padding
+    const viewportBottom = window.scrollY + window.innerHeight - padding
+    
+    if (y < viewportTop) {
+      // Too high, push below target
+      y = targetRect.bottom + pad + padding
+    } else if (y + cardHeight > viewportBottom) {
+      // Too low, push above target
+      y = targetRect.top - pad - padding - cardHeight
     }
 
     cardPos = { x, y }

@@ -5,54 +5,52 @@ import { getTourSessionKey } from "./types"
 
 export type TourLifecycleStage = 
   | "checking"   // Hydrating from localStorage
-  | "idle"       // Waiting for conditions (e.g. splash to close)
+  | "idle"       // Waiting for conditions
+  | "not-seen"   // Ready but prompt hasn't been shown yet
   | "ready"      // Showing prompt to start or skip
   | "running"    // Tour is active
   | "completed"  // Tour reached the end
-  | "skipped"    // Tour was skipped
+  | "dismissed"  // Tour was skipped
 
 export type UseGuidedTourOptions = {
-  slug: string
+  tourId: string
   version?: string
-  splashStage: string // e.g. "checking", "intro", "open", "closed"
-  deepLinkSkipIntro?: boolean
-  eventStatus?: "archived" | "upcoming" | "live" | "closed"
+  ready?: boolean
+  autoPrompt?: boolean
 }
 
 export function useGuidedTour({ 
-  slug, 
+  tourId, 
   version = "v1",
-  splashStage,
-  deepLinkSkipIntro = false,
-  eventStatus = "upcoming"
+  ready = true,
+  autoPrompt = true
 }: UseGuidedTourOptions) {
   // Initialize state synchronously based on available props
   const [stage, setStage] = useState<TourLifecycleStage>(() => {
-    if (eventStatus === "archived" || eventStatus === "closed" || deepLinkSkipIntro) {
-      return "skipped"
-    }
-    
     // We can't access localStorage in SSR safely, but if window exists we can hydrate
     if (typeof window !== "undefined") {
       try {
-        const key = getTourSessionKey(slug, version)
+        const key = getTourSessionKey(tourId, version)
         const stored = window.localStorage.getItem(key)
         if (stored === "completed") return "completed"
-        if (stored === "skipped") return "skipped"
+        if (stored === "dismissed" || stored === "skipped") return "dismissed"
       } catch {}
     }
     
     return "idle"
   })
 
-  // Watch for splash stage to close, then prompt if idle
-  // We use an effect here but only to transition from idle to ready
+  // Watch for readiness
   useEffect(() => {
-    if (stage === "idle" && splashStage === "closed") {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setStage("ready")
+    if (stage === "idle" && ready) {
+      if (autoPrompt) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setStage("ready")
+      } else {
+        setStage("not-seen")
+      }
     }
-  }, [stage, splashStage])
+  }, [stage, ready, autoPrompt])
 
   // Replay event listener
   useEffect(() => {
@@ -64,40 +62,41 @@ export function useGuidedTour({
   }, [])
 
   const startTour = useCallback(() => {
-    if (stage === "ready" || stage === "completed" || stage === "skipped") {
+    // allow force replay
+    if (stage === "ready" || stage === "completed" || stage === "dismissed" || stage === "not-seen" || stage === "idle") {
       setStage("running")
     }
   }, [stage])
 
   const skipTour = useCallback(() => {
-    setStage("skipped")
+    setStage("dismissed")
     try {
-      const key = getTourSessionKey(slug, version)
-      window.localStorage.setItem(key, "skipped")
+      const key = getTourSessionKey(tourId, version)
+      window.localStorage.setItem(key, "dismissed")
     } catch {
       // Ignore quota/security errors
     }
-  }, [slug, version])
+  }, [tourId, version])
 
   const completeTour = useCallback(() => {
     setStage("completed")
     try {
-      const key = getTourSessionKey(slug, version)
+      const key = getTourSessionKey(tourId, version)
       window.localStorage.setItem(key, "completed")
     } catch {
       // Ignore quota/security errors
     }
-  }, [slug, version])
+  }, [tourId, version])
 
   const resetTour = useCallback(() => {
     try {
-      const key = getTourSessionKey(slug, version)
+      const key = getTourSessionKey(tourId, version)
       window.localStorage.removeItem(key)
     } catch {
       // Ignore quota/security errors
     }
     setStage("idle")
-  }, [slug, version])
+  }, [tourId, version])
 
   return {
     stage,

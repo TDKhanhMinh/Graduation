@@ -86,11 +86,10 @@ export function TourExperience({
   }, [])
   
   const tour = useGuidedTour({
-    slug,
-    splashStage,
-    deepLinkSkipIntro: deepLinkSkip,
-    eventStatus,
-    version: defaultTourConfig.version
+    tourId: `invitation-tour:${slug}`,
+    version: defaultTourConfig.version,
+    ready: splashStage === "closed" && !deepLinkSkip && eventStatus !== "archived" && eventStatus !== "closed",
+    autoPrompt: true
   })
 
   return (

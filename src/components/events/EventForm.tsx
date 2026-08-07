@@ -27,7 +27,7 @@ function SubmitButton({ label }: { label: string }) {
   const { pending } = useFormStatus()
 
   return (
-    <Button type="submit" disabled={pending} className="min-h-(--control-min-size) w-full sm:w-auto" variant="event">
+    <Button type="submit" disabled={pending} className="min-h-(--control-min-size) w-full sm:w-auto" variant="event" data-tour-target="event-submit">
       {pending ? <><LoaderCircle aria-hidden="true" className="animate-spin" />Đang xử lý…</> : label}
     </Button>
   )
@@ -83,13 +83,13 @@ export function EventForm({ action, initialData, submitLabel = "Lưu sự kiện
 
       <fieldset className="space-y-5">
         <legend className="text-base font-semibold">Thông tin cơ bản</legend>
-        <div className="grid gap-2">
+        <div className="grid gap-2" data-tour-target="event-title">
           <Label htmlFor="title">Tên sự kiện <span className="text-status-danger">*</span></Label>
           <Input id="title" name="title" defaultValue={initialData?.title} placeholder="Ví dụ: Kỷ niệm 10 năm ra trường" required className="h-11 rounded-xl border-border/80 bg-background/70" aria-invalid={Boolean(state.fieldErrors?.title)} aria-describedby={state.fieldErrors?.title ? "title-help title-error" : "title-help"} />
           <p id="title-help" className="text-xs leading-5 text-muted-foreground">Tên này sẽ xuất hiện trên trang sự kiện và trong dashboard của bạn.</p>
           <FieldError id="title-error" messages={state.fieldErrors?.title} />
         </div>
-        <div className="grid gap-2">
+        <div className="grid gap-2" data-tour-target="event-slug">
           <Label htmlFor="slug">Đường dẫn (slug) <span className="text-status-danger">*</span></Label>
           <div className="flex min-w-0">
             <span className="inline-flex min-h-11 items-center rounded-l-xl border border-r-0 bg-muted px-3 text-sm text-muted-foreground">/</span>
@@ -109,7 +109,7 @@ export function EventForm({ action, initialData, submitLabel = "Lưu sự kiện
       <fieldset className="space-y-5 border-t pt-6">
         <legend className="text-base font-semibold">Cấu hình sự kiện</legend>
         <div className="grid gap-5 sm:grid-cols-2">
-          <div className="grid gap-2">
+          <div className="grid gap-2" data-tour-target="event-visibility">
             <Label htmlFor="visibility">Chế độ hiển thị</Label>
             <Select key={`visibility-${initialData?.visibility || "unlisted"}`} name="visibility" defaultValue={initialData?.visibility || "unlisted"}>
               <SelectTrigger id="visibility" className="h-11 w-full rounded-xl border-border/80 bg-background/70" aria-invalid={Boolean(state.fieldErrors?.visibility)} aria-describedby={state.fieldErrors?.visibility ? "visibility-help visibility-error" : "visibility-help"}><SelectValue placeholder="Chọn chế độ hiển thị" /></SelectTrigger>

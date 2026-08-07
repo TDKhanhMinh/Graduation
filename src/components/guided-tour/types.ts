@@ -32,10 +32,24 @@ export interface GuidedTourStep {
 
   /** Text to display in the mascot's speech bubble */
   speech: string;
+
+  /**
+   * Placement of the tour tooltip relative to the target element.
+   * "auto" is recommended for most cases to avoid screen overflow.
+   */
+  placement?: "top" | "bottom" | "left" | "right" | "auto";
+
+  /**
+   * Whether the user can interact with the target element while the step is active.
+   * If false, the spotlight overlay will block pointer events.
+   */
+  allowInteraction?: boolean;
 }
 
 export interface GuidedTourConfig {
+  tourId: string;
   version: string;
+  mascotId?: string;
   steps: GuidedTourStep[];
 }
 
@@ -72,8 +86,11 @@ export function canAutoStartTour(
  * with Welcome Splash logic.
  */
 export function getTourSessionKey(
-  eventSlug: string,
+  tourId: string,
   version: string = "v1",
 ): string {
-  return `invitation-tour:${eventSlug}:${version}`;
+  if (tourId.startsWith("invitation-tour:")) {
+    return `${tourId}:${version}`;
+  }
+  return `guided-tour:${tourId}:${version}`;
 }

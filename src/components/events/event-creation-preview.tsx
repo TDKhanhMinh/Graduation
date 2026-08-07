@@ -2,7 +2,7 @@ import { CalendarDays, Heart, QrCode, Sparkles } from "lucide-react"
 
 export function EventCreationPreview() {
   return (
-    <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start" aria-labelledby="event-preview-title">
+    <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start" aria-labelledby="event-preview-title" data-tour-target="event-preview">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Xem trước trực tiếp</p>
         <h2 id="event-preview-title" className="mt-1 font-heading text-lg font-semibold">Không gian sau khi tạo</h2>

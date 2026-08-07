@@ -2,6 +2,7 @@ import type { GuidedTourConfig } from "./types"
 import { TOUR_TARGET_MATRIX } from "./types"
 
 export const defaultTourConfig: GuidedTourConfig = {
+  tourId: "invitation-tour",
   version: "v1",
   steps: [
     {
