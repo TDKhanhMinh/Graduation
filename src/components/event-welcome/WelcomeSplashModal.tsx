@@ -308,18 +308,31 @@ export function WelcomeSplashModal({
         </div>
 
         {/* 3D Envelope Container with Smooth Internal Scroll */}
-        <div className="perspective-[1200px] flex-1 overflow-y-auto pr-1 pt-2 scrollbar-thin scrollbar-thumb-amber-400/30">
+        <div className="perspective-[1400px] flex-1 overflow-y-auto pr-1 pt-2 scrollbar-thin scrollbar-thumb-amber-400/30">
           {!isEnvelopeOpen ? (
-            /* Envelope Sealed View */
+            /* 3D Sealed Envelope View */
             <div
               className={cn(
-                "relative mx-auto flex flex-col items-center justify-center rounded-2xl border border-amber-400/40 bg-gradient-to-b from-amber-500/15 via-primary/10 to-accent/20 p-6 text-center shadow-[0_0_40px_rgba(251,191,36,0.15)] sm:p-10",
-                "transition-transform duration-500 hover:scale-[1.01]",
+                "relative mx-auto my-4 flex min-h-[340px] w-full max-w-lg flex-col items-center justify-center rounded-2xl border-2 border-amber-400/50 bg-gradient-to-b from-amber-950/30 via-background/95 to-amber-900/30 p-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.7)] sm:min-h-[380px] sm:p-10",
+                "transition-all duration-700 transform-gpu",
+                stage === "opening" && "scale-105 shadow-[0_0_80px_rgba(251,191,36,0.5)]",
               )}
               data-testid="envelope-sealed"
             >
+              {/* 3D Envelope Triangular Flap (Flips 180° Open when clicked) */}
+              <div
+                className={cn(
+                  "absolute inset-x-0 top-0 h-32 origin-top transition-transform duration-700 ease-in-out transform-gpu z-20 pointer-events-none",
+                  stage === "opening" ? "-rotate-x-180 opacity-40 scale-y-90" : "rotate-x-0",
+                )}
+                style={{ transformStyle: "preserve-3d" }}
+              >
+                {/* Triangular Paper Flap Shape */}
+                <div className="size-full bg-gradient-to-b from-amber-500/25 via-amber-400/15 to-transparent clip-path-envelope-flap border-b border-amber-400/40 drop-shadow-md" />
+              </div>
+
               {/* Top-Right Pinned Anime Sticker: Open Envelope & Confetti Burst */}
-              <div className="absolute -right-3 -top-3 z-20 flex flex-col items-center sm:-right-4 sm:-top-4">
+              <div className="absolute -right-3 -top-3 z-30 flex flex-col items-center sm:-right-4 sm:-top-4">
                 <AnimatedSticker
                   sticker={ANIME_STICKERS[0]}
                   size="md"
@@ -335,7 +348,7 @@ export function WelcomeSplashModal({
 
               {/* Top-Left Pinned Anime Sticker: Toggle Audio */}
               {onToggleAudio ? (
-                <div className="absolute -left-3 -top-3 z-20 flex flex-col items-center sm:-left-4 sm:-top-4">
+                <div className="absolute -left-3 -top-3 z-30 flex flex-col items-center sm:-left-4 sm:-top-4">
                   <AnimatedSticker
                     sticker={ANIME_STICKERS[2]}
                     size="md"
@@ -350,21 +363,32 @@ export function WelcomeSplashModal({
                 </div>
               ) : null}
 
-              {/* Wax Seal Badge */}
-              <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-xl text-white shadow-[0_0_25px_rgba(251,191,36,0.5)] ring-6 ring-amber-400/25 sm:mb-6 sm:size-20 sm:text-2xl">
-                <span>{currentPack.sealIcon}</span>
-              </div>
+              {/* Royal Embossed Wax Seal Badge (Cracks/Flashes open) */}
+              <button
+                type="button"
+                onClick={onOpenEnvelope}
+                className={cn(
+                  "relative z-30 mb-4 flex size-20 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-2xl text-white shadow-[0_0_35px_rgba(251,191,36,0.6)] ring-8 ring-amber-400/30 transition-transform duration-300 hover:scale-110 active:scale-95 sm:mb-6 sm:size-24 sm:text-3xl",
+                  stage === "opening" && "animate-ping opacity-75 scale-125",
+                )}
+                title="Bấm để lật mở con dấu sáp"
+              >
+                <span className="drop-shadow-md">{currentPack.sealIcon}</span>
+                <span className="absolute -bottom-2 rounded-full border border-amber-300 bg-black/90 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-amber-400 shadow-lg">
+                  WAX SEAL
+                </span>
+              </button>
 
-              <span className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.2em] text-amber-400">
+              <span className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.25em] text-amber-400">
                 <span>✨</span> {currentPack.badge} <span>✨</span>
               </span>
 
-              <h2 id="splash-title" className="mb-3 font-heading text-xl font-bold tracking-tight sm:text-3xl">
+              <h2 id="splash-title" className="mb-3 font-heading text-xl font-bold tracking-tight text-foreground sm:text-3xl" data-sticker-safe="title">
                 {title}
               </h2>
 
               {dateLabel ? (
-                <p className="mb-5 flex items-center justify-center gap-2 text-xs text-muted-foreground sm:text-sm">
+                <p className="mb-6 flex items-center justify-center gap-2 text-xs text-muted-foreground sm:text-sm" data-sticker-safe="event-time">
                   <CalendarDays className="size-4 text-amber-400" aria-hidden="true" />
                   {dateLabel}
                 </p>
@@ -379,24 +403,37 @@ export function WelcomeSplashModal({
                   variant: "event",
                   size: "lg",
                   className:
-                    "min-h-[44px] min-w-[170px] px-8 text-sm shadow-[0_0_25px_rgba(251,191,36,0.4)] transition-transform hover:scale-105 bg-gradient-to-r from-amber-500 to-primary text-primary-foreground font-bold sm:text-base",
+                    "z-30 min-h-[46px] min-w-[190px] px-8 text-sm font-black shadow-[0_0_30px_rgba(251,191,36,0.5)] transition-transform hover:scale-105 bg-gradient-to-r from-amber-500 via-amber-400 to-primary text-black sm:text-base",
                 })}
                 data-testid="open-envelope-btn"
               >
-                ✨ Mở thiệp ngay ✨
+                💌 Mở phong thư ngay 💌
               </button>
             </div>
           ) : (
-            /* Invitation Card Opened View */
+            /* 3D Invitation Letter Opened View (Slides Out from Envelope) */
             <div
               className={cn(
-                "relative flex flex-col gap-4 rounded-2xl border p-4 sm:gap-5 sm:p-5",
+                "relative flex flex-col gap-4 rounded-2xl border-2 border-amber-400/40 bg-gradient-to-b from-amber-950/20 via-background/95 to-amber-900/20 p-5 sm:gap-5 sm:p-6",
                 currentPack.borderGlow,
-                "animate-in fade-in-50 zoom-in-95 duration-500",
+                "animate-in fade-in-50 slide-in-from-bottom-8 zoom-in-95 duration-700 ease-out",
                 reducedMotion && "animate-none",
               )}
               data-testid="envelope-opened"
             >
+              {/* Top Letterhead Calligraphy Header Ornament */}
+              <div className="flex items-center justify-between border-b border-amber-400/30 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">📜</span>
+                  <span className="text-xs font-black uppercase tracking-[0.25em] text-amber-400">
+                    THƯ MỜI CHÍNH THỨC ✦ MEMORIA
+                  </span>
+                </div>
+                <span className="rounded-full border border-amber-400/50 bg-amber-400/20 px-2.5 py-0.5 text-[10px] font-bold text-amber-300">
+                  {currentPack.badge}
+                </span>
+              </div>
+
               {/* Top-Right Pinned Anime Mascot Sticker: Re-trigger Confetti & Party Action */}
               <div className="absolute -right-3 -top-3 z-20 flex flex-col items-center sm:-right-4 sm:-top-4">
                 <AnimatedSticker
@@ -463,7 +500,7 @@ export function WelcomeSplashModal({
               <div className="space-y-2 text-center sm:text-left">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">Memoria Event</span>
 
-                <h2 id="splash-title" className="font-heading text-2xl font-bold tracking-tight sm:text-4xl">
+                <h2 id="splash-title" className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-4xl" data-sticker-safe="title">
                   {title}
                 </h2>
 
@@ -472,7 +509,7 @@ export function WelcomeSplashModal({
                 ) : null}
 
                 {dateLabel ? (
-                  <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground sm:justify-start sm:text-sm">
+                  <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground sm:justify-start sm:text-sm" data-sticker-safe="event-time">
                     <CalendarDays className="size-4 text-primary" aria-hidden="true" />
                     {dateLabel}
                   </p>
@@ -486,7 +523,7 @@ export function WelcomeSplashModal({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col gap-2.5 pt-2 sm:flex-row sm:items-center">
+              <div className="flex flex-col gap-2.5 pt-2 sm:flex-row sm:items-center" data-sticker-safe="rsvp">
                 {onSendWish ? (
                   <button
                     type="button"

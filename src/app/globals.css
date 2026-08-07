@@ -673,6 +673,12 @@
   }
 }
 
+@layer utilities {
+  .clip-path-envelope-flap {
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
