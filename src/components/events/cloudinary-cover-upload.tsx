@@ -32,6 +32,7 @@ export function CloudinaryCoverUpload({ value, onChange, disabled = false }: Clo
   const mountedRef = useRef(true)
 
   useEffect(() => {
+    mountedRef.current = true
     return () => {
       mountedRef.current = false
       xhrRef.current?.abort()

@@ -39,6 +39,7 @@ export function AudioRecorderField({ eventId, clientRequestId, onUploadSuccess, 
   const cancelledRef = useRef(false)
 
   useEffect(() => {
+    mountedRef.current = true
     return () => {
       mountedRef.current = false
       streamRef.current?.getTracks().forEach((track) => track.stop())
