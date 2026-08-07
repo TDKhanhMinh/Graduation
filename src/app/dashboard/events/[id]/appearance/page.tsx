@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation"
 
 import { ThemeEditor } from "@/components/events/ThemeEditor"
-import { SectionHeading } from "@/components/ui/section-heading"
 import { getOwnedEventById } from "@/features/events/dal"
 import { updateEventAppearance } from "@/features/events/actions"
 import { normalizeWelcomeHeroConfig } from "@/features/events/welcome-config"
@@ -23,11 +22,7 @@ export default async function EventAppearancePage({
   const boundAction = updateEventAppearance.bind(null, event.id)
 
   return (
-    <div className="space-y-6 pb-10">
-      <SectionHeading
-        title="Giao diện"
-        description="Cấu hình nhận diện sự kiện công khai với ảnh bìa Cloudinary và xem trước trực tiếp an toàn."
-      />
+    <div className="pb-10">
       <ThemeEditor
         action={boundAction}
         eventTitle={event.title}
