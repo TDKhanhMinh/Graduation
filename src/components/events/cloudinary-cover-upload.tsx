@@ -78,7 +78,14 @@ export function CloudinaryCoverUpload({ value, onChange, disabled = false }: Clo
 
         xhr.onload = () => {
           if (xhr.status < 200 || xhr.status >= 300) {
-            reject(new Error("Không thể tải ảnh lên Cloudinary."))
+            try {
+              const res = JSON.parse(xhr.responseText) as { error?: { message?: string } }
+              if (res?.error?.message) {
+                reject(new Error(`Lỗi Cloudinary (${xhr.status}): ${res.error.message}`))
+                return
+              }
+            } catch {}
+            reject(new Error(`Không thể tải ảnh lên Cloudinary (HTTP ${xhr.status}).`))
             return
           }
 
@@ -90,15 +97,15 @@ export function CloudinaryCoverUpload({ value, onChange, disabled = false }: Clo
             reject(caught instanceof Error ? caught : new Error("Cloudinary trả về phản hồi không hợp lệ."))
           }
         }
-        xhr.onerror = () => reject(new Error("Lỗi mạng khi tải lên Cloudinary."))
-        xhr.onabort = () => reject(new Error("Đã hủy tải lên Cloudinary."))
+        xhr.onerror = () => reject(new Error("Lỗi kết nối mạng khi tải ảnh lên Cloudinary."))
+        xhr.onabort = () => reject(new Error("Đã hủy tải ảnh lên Cloudinary."))
         xhr.send(formData)
       })
 
       if (mountedRef.current) {
         setState("ready")
         setProgress(100)
-        toast.success("Ảnh bìa đã tải lên Cloudinary. Hãy lưu thay đổi để áp dụng.")
+        toast.success("Đã tải ảnh bìa lên Cloudinary. Hãy lưu thay đổi để áp dụng.")
       }
     } catch (caught: unknown) {
       if (!mountedRef.current) return
@@ -120,21 +127,30 @@ export function CloudinaryCoverUpload({ value, onChange, disabled = false }: Clo
       setError(validationError)
       setState("error")
       toast.error(validationError)
+      if (fileInputRef.current) fileInputRef.current.value = ""
       return
     }
 
     try {
-      const preparedFile = await prepareImage(selectedFile, 1920)
+      let uploadableFile = selectedFile
+      try {
+        uploadableFile = await prepareImage(selectedFile, 1920)
+      } catch (prepError) {
+        console.warn("Không thể tối ưu ảnh bìa, dùng tệp gốc:", prepError)
+      }
+
       if (!mountedRef.current) return
       if (previewUrl) URL.revokeObjectURL(previewUrl)
-      setPreviewUrl(URL.createObjectURL(preparedFile))
-      await uploadFile(preparedFile)
+      setPreviewUrl(URL.createObjectURL(uploadableFile))
+      await uploadFile(uploadableFile)
     } catch (caught: unknown) {
       if (!mountedRef.current) return
       setState("error")
-      const errorMessage = caught instanceof Error ? caught.message : "Không thể chuẩn bị ảnh bìa."
+      const errorMessage = caught instanceof Error ? caught.message : "Không thể tải ảnh bìa."
       setError(errorMessage)
       toast.error(errorMessage)
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = ""
     }
   }
 

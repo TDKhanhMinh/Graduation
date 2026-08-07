@@ -31,11 +31,14 @@ export type CloudinaryCoverAsset = {
 }
 
 export function getCloudinaryCoverUploadConfig() {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME?.trim()
-  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET?.trim()
+  const rawCloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || ""
+  const rawPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || ""
+
+  const cloudName = rawCloudName.trim().replace(/^["']|["']$/g, "")
+  const uploadPreset = rawPreset.trim().replace(/^["']|["']$/g, "")
 
   if (!cloudName || !uploadPreset) {
-    throw new Error("Thiếu cấu hình tải ảnh bìa lên Cloudinary.")
+    throw new Error("Thiếu cấu hình tải ảnh bìa lên Cloudinary (NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME hoặc NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET).")
   }
 
   return {
@@ -50,7 +53,7 @@ export function isCloudinaryDeliveryUrl(value: string | null | undefined) {
 
   try {
     const url = new URL(value)
-    return url.protocol === "https:" && url.hostname === "res.cloudinary.com" && url.pathname.length > 1
+    return url.protocol === "https:" && (url.hostname === "res.cloudinary.com" || url.hostname.endsWith(".cloudinary.com")) && url.pathname.length > 1
   } catch {
     return false
   }

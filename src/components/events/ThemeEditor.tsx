@@ -395,7 +395,7 @@ export function ThemeEditor({
             <CloudinaryCoverUpload value={cover} onChange={(value) => { setCover(value); setIsDirty(true) }} />
             <div className="mt-2 grid gap-2 min-w-0">
               <Label htmlFor="cover_path" className="truncate">Hoặc dán đường dẫn ảnh bìa (URL Cloudinary)</Label>
-              <input id="cover_path" name="cover_path" value={cover} onChange={(event) => setCover(event.target.value)} placeholder="https://res.cloudinary.com/..." className="w-full min-w-0 min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40" aria-describedby="cover-help" />
+              <input id="cover_path" name="cover_path" value={cover} onChange={(event) => { setCover(event.target.value); setIsDirty(true) }} placeholder="https://res.cloudinary.com/..." className="w-full min-w-0 min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40" aria-describedby="cover-help" />
               <p id="cover-help" className="text-xs leading-5 text-muted-foreground">Bạn có thể tự nhập URL ảnh từ Cloudinary nếu đã có sẵn.</p>
               {cover && !coverIsCloudinary ? <p className="mt-1 rounded-lg bg-status-danger/10 px-3 py-2 text-sm text-status-danger" role="alert">Đường dẫn chưa hợp lệ; vui lòng sử dụng URL phân phối của Cloudinary.</p> : null}
             </div>
