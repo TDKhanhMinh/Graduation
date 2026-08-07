@@ -91,23 +91,23 @@ export class StickerController {
         )
       }
 
-      // Random idle action changes when cooldown expires
-      if (char.state === "idle" && char.actionCooldown <= 0) {
-        if (Math.random() < 0.015) {
+      // Autonomous action changes: Trigger actions automatically every 1.5 - 3 seconds
+      if (char.actionCooldown <= 0) {
+        if (Math.random() < 0.05) {
           const actions = char.def.idleActions
           const nextAction = actions[Math.floor(Math.random() * actions.length)]
           char.currentAction = nextAction
           char.actionTime = 0
-          char.actionCooldown = 3 + Math.random() * 4
+          char.actionCooldown = 1.5 + Math.random() * 2
         }
       }
 
-      // Random idle speech trigger
-      if (!char.activeSpeech && Math.random() < 0.001) {
-        const messages = getSpeechCategory(char.def.speechMessages, "idle")
+      // Autonomous speech trigger: Pop up speech bubbles automatically
+      if (!char.activeSpeech && Math.random() < 0.005) {
+        const messages = getSpeechCategory(char.def.speechMessages, "idle") || getSpeechCategory(char.def.speechMessages, "greeting")
         if (messages && messages.length > 0) {
           const msg = messages[Math.floor(Math.random() * messages.length)]
-          char.triggerSpeech(msg, 3)
+          char.triggerSpeech(msg, 3.5)
         }
       }
     }
