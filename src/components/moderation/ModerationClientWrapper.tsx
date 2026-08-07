@@ -6,6 +6,7 @@ import { toast } from "sonner"
 
 import { submitBulkModeration } from "@/app/dashboard/events/[id]/moderation/actions"
 import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { ModerationFilters } from "./ModerationFilters"
 import { ModerationQueue } from "./ModerationQueue"
 import { ModerationDetailPanel } from "./ModerationDetailPanel"
@@ -42,10 +43,20 @@ export function ModerationClientWrapper({
     setSelectedIds((previous) => checked ? [...new Set([...previous, id])] : previous.filter((value) => value !== id))
   }
 
+  const [pendingAction, setPendingAction] = useState<ModerationAction | null>(null)
+  const [showConfirm, setShowConfirm] = useState(false)
+
   const handleBulkAction = (action: ModerationAction) => {
     if (visibleSelectedIds.length === 0) return
-    if (action === "soft_delete" && !window.confirm("Bạn có chắc muốn xóa các lời chúc đã chọn? Thao tác này không thể hoàn tác trong giao diện.")) return
+    if (action === "soft_delete") {
+      setPendingAction(action)
+      setShowConfirm(true)
+      return
+    }
+    executeBulkAction(action)
+  }
 
+  const executeBulkAction = (action: ModerationAction) => {
     startTransition(async () => {
       try {
         const expectedVersions = wishes
@@ -59,6 +70,8 @@ export function ModerationClientWrapper({
         }
 
         setSelectedIds([])
+        setShowConfirm(false)
+        setPendingAction(null)
         toast.success(`Đã xử lý ${visibleSelectedIds.length} lời chúc thành công.`)
         router.refresh()
       } catch (error) {
@@ -116,6 +129,22 @@ export function ModerationClientWrapper({
           </div>
         </nav>
       ) : null}
+
+      <ConfirmDialog
+        open={showConfirm}
+        onOpenChange={setShowConfirm}
+        variant="danger"
+        title={`Xóa ${visibleSelectedIds.length} lời chúc đã chọn?`}
+        description="Các lời chúc bị xóa sẽ chuyển vào trạng thái ẩn trên bức tường công khai và lưu trữ theo chính sách giữ lại dữ liệu."
+        confirmText={`Xóa ${visibleSelectedIds.length} lời chúc`}
+        cancelText="Hủy bỏ"
+        isPending={isPending}
+        onConfirm={() => {
+          if (pendingAction) {
+            executeBulkAction(pendingAction)
+          }
+        }}
+      />
     </div>
   )
 }

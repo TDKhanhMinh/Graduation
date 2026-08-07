@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { createQrDataUrl } from "@/features/sharing/qr"
 import { localPosterTemplates } from "@/features/posters/templates"
 import { createPosterDocumentFromQuickCreate } from "@/features/posters/quick-create"
@@ -150,6 +151,7 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
   const [qrDataUrl, setQrDataUrl] = useState("")
   const [fontReady, setFontReady] = useState(false)
   const [imageError, setImageError] = useState("")
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
   const svgRef = useRef<SVGSVGElement>(null)
 
   const template = useMemo(
@@ -387,7 +389,7 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
           {!qualityGate.success ? <p className="mt-1 text-destructive">{qualityGate.errors.join(" ")}</p> : null}
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button type="button" variant="outline" className="min-h-11 flex-1" onClick={resetDraft}><RefreshCcw aria-hidden="true" />Đặt lại</Button>
+          <Button type="button" variant="outline" className="min-h-11 flex-1" onClick={() => setShowResetConfirm(true)}><RefreshCcw aria-hidden="true" />Đặt lại</Button>
           <Button type="button" className="min-h-11 flex-1" onClick={() => void exportPng()} disabled={!qualityGate.success || Boolean(titleError)}><Download aria-hidden="true" />Xuất PNG</Button>
         </div>
       </section>
@@ -406,6 +408,20 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
           </div>
         </div>
       </section>
+
+      <ConfirmDialog
+        open={showResetConfirm}
+        onOpenChange={setShowResetConfirm}
+        variant="warning"
+        title="Đặt lại thiết kế áp phích?"
+        description="Các thông tin chỉnh sửa nháp, ảnh tải lên và tùy chỉnh màu sắc hiện tại sẽ được khôi phục về trạng thái mặc định của sự kiện."
+        confirmText="Đặt lại nháp"
+        cancelText="Giữ chỉnh sửa"
+        onConfirm={() => {
+          resetDraft()
+          setShowResetConfirm(false)
+        }}
+      />
     </div>
   )
 }

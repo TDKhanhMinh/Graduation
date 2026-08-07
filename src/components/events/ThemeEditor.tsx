@@ -8,6 +8,7 @@ import { toast } from "sonner"
 
 import { EFFECT_PRESETS, type EffectIntensity, type EffectPreset } from "@/components/effects/effect-config"
 import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { Label } from "@/components/ui/label"
 import type { EventActionState } from "@/features/events/actions"
 import { getDefaultWelcomeHeroConfig, type WelcomeHeroConfig } from "@/features/events/welcome-config"
@@ -118,6 +119,21 @@ export function ThemeEditor({
   )
   const [intensity, setIntensity] = useState<EffectIntensity>(initialEffectIntensity)
   const [quality, setQuality] = useState<EffectQuality>(initialEffectQuality)
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
+
+  const handleResetTheme = () => {
+    setCover(initialCover || "")
+    setExperiencePreset(
+      initialExperiencePreset && isPreset(initialExperiencePreset)
+        ? initialExperiencePreset
+        : legacyPresetFallback[(initialTheme as ThemeKey) in legacyPresetFallback ? initialTheme as ThemeKey : "minimal"],
+    )
+    setIntensity(initialEffectIntensity)
+    setQuality(initialEffectQuality)
+    setIsDirty(false)
+    setShowResetConfirm(false)
+    toast.success("Đã khôi phục cài đặt giao diện về ban đầu.")
+  }
   const [layout, setLayout] = useState<WallLayout>(initialWallLayout)
   const [qrVisible, setQrVisible] = useState(initialQrVisible)
   const [qrCta, setQrCta] = useState(initialQrCta)
@@ -388,9 +404,27 @@ export function ThemeEditor({
 
         <div className="flex flex-col gap-3 border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground" role="status" aria-live="polite">{state.message ? "Đã lưu" : isDirty ? "Có thay đổi chưa lưu" : "Đã lưu"}</p>
-          <SubmitButton />
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            {isDirty && (
+              <Button type="button" variant="outline" onClick={() => setShowResetConfirm(true)} className="min-h-(--control-min-size) w-full sm:w-auto">
+                Khôi phục ban đầu
+              </Button>
+            )}
+            <SubmitButton />
+          </div>
         </div>
       </form>
+
+      <ConfirmDialog
+        open={showResetConfirm}
+        onOpenChange={setShowResetConfirm}
+        variant="warning"
+        title="Khôi phục cài đặt giao diện?"
+        description="Mọi thay đổi chưa lưu về hiệu ứng, chất lượng, bố cục và ảnh bìa sẽ được hoàn tác về cài đặt ban đầu của sự kiện."
+        confirmText="Khôi phục"
+        cancelText="Giữ thay đổi"
+        onConfirm={handleResetTheme}
+      />
 
       <section className="min-w-0 rounded-3xl border border-border/80 bg-surface-sunken p-4 sm:p-5" aria-labelledby="theme-preview-heading">
         <div className="flex flex-wrap items-center justify-between gap-3">
