@@ -5,10 +5,33 @@ export const WELCOME_ANCHORS = {
 
 export const WELCOME_TIME_ZONE = "UTC"
 export const WELCOME_SESSION_PREFIX = "event-welcomed:"
+export const WELCOME_SPLASH_SESSION_PREFIX = "event-welcome:"
 
 export type WelcomeAnchor = (typeof WELCOME_ANCHORS)[keyof typeof WELCOME_ANCHORS]
 export type WelcomeAction = "wish" | "gallery"
 export type WelcomeEventStatus = "archived" | "upcoming" | "live" | "closed"
+
+export type WelcomeStage = "checking" | "idle" | "intro" | "opening" | "open" | "closing" | "closed" | "dismissed"
+export type AudioStatus = "idle" | "playing" | "paused" | "blocked" | "error" | "disabled" | "muted" | "unsupported"
+
+export type PublicSafeAudioSource = {
+  url: string
+  mimeType?: string
+  isPublicSafe: boolean
+}
+
+export type WelcomeSplashProps = {
+  slug: string
+  title: string
+  coverUrl: string | null
+  eventDate: string | null
+  description: string | null
+  audioSource?: PublicSafeAudioSource | null
+  reducedMotion?: boolean
+  isOpen: boolean
+  onClose: () => void
+  onAction?: (action: WelcomeAction) => void
+}
 
 export type WelcomeCountdown = {
   totalMs: number
@@ -48,6 +71,10 @@ export type WelcomeDeepLink = {
 
 export function getWelcomeSessionKey(slug: string): string {
   return `${WELCOME_SESSION_PREFIX}${slug}`
+}
+
+export function getWelcomeSplashSessionKey(slug: string): string {
+  return `${WELCOME_SPLASH_SESSION_PREFIX}${slug}:v1`
 }
 
 function isValidDate(value: string | null | undefined): value is string {

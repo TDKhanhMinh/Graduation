@@ -1,7 +1,8 @@
-import { CalendarDays, ChevronDown, Compass, Send } from "lucide-react"
+import { CalendarDays, ChevronDown, Compass, MailOpen, Send } from "lucide-react"
 import Link from "next/link"
 import type { ReactNode } from "react"
 
+import { CelebrationConfetti } from "@/components/effects/celebration-confetti"
 import { buttonVariants } from "@/components/ui/button"
 import { StatusBadge } from "@/components/ui/status-badge"
 import {
@@ -16,6 +17,8 @@ import { cn } from "@/lib/utils"
 import { PosterMedia } from "./poster-media"
 import { WelcomeAnalytics } from "./welcome-analytics"
 import { WelcomeCountdown } from "./welcome-countdown"
+import { useWelcomeExperience } from "./WelcomeExperience"
+import { WelcomeSplashModal } from "./WelcomeSplashModal"
 
 type EventWelcomeProps = {
   slug: string
@@ -28,6 +31,62 @@ type EventWelcomeProps = {
   welcomeConfig: WelcomeHeroConfig
   decorativeLayers?: ReactNode
   shareAction?: ReactNode
+}
+
+function WelcomeSplashIntegration({
+  title,
+  description,
+  eventDate,
+  coverUrl,
+}: {
+  title: string
+  description: string | null
+  eventDate: string | null
+  coverUrl: string | null
+}) {
+  const experience = useWelcomeExperience()
+
+  return (
+    <>
+      <CelebrationConfetti
+        active={experience.confettiActive}
+        triggerKey={experience.confettiTriggerCount}
+        reducedMotion={experience.reducedMotion}
+        onComplete={experience.completeConfetti}
+      />
+      <WelcomeSplashModal
+        isOpen={experience.stage !== "closed" && experience.stage !== "dismissed" && experience.stage !== "checking"}
+        stage={experience.stage}
+        title={title}
+        coverUrl={coverUrl}
+        eventDate={eventDate}
+        description={description}
+        reducedMotion={experience.reducedMotion}
+        audioStatus={experience.audioStatus}
+        onOpenEnvelope={experience.openEnvelope}
+        onOpeningComplete={experience.completeOpening}
+        onClose={experience.closeModal}
+        onSendWish={experience.sendWish}
+        onExploreEvent={experience.exploreEvent}
+      />
+    </>
+  )
+}
+
+function ReopenButton() {
+  const experience = useWelcomeExperience()
+
+  return (
+    <button
+      type="button"
+      onClick={(e) => experience?.reopenModal(e.currentTarget)}
+      className={buttonVariants({ variant: "event-outline", size: "lg", className: "min-h-(--control-min-size)" })}
+      data-testid="welcome-reopen-btn"
+    >
+      <MailOpen aria-hidden="true" />
+      Xem lại thiệp
+    </button>
+  )
 }
 
 export function EventWelcome({
@@ -48,7 +107,6 @@ export function EventWelcome({
     initialNow,
   )
   const presentation = getWelcomePresentation(viewModel.status)
-  const dateLabel = formatWelcomeDate(eventDate)
   const layout = welcomeConfig.layout === "poster-focus" ? "poster-focus" : "split"
   const isEnabled = welcomeConfig.enabled
   const primaryTarget = viewModel.canSubmitWish && welcomeConfig.primaryAction === "submit-wish"
@@ -98,10 +156,10 @@ export function EventWelcome({
                 {presentation.statusCopy}
               </p>
             ) : null}
-            {welcomeConfig.showDate && dateLabel ? (
+            {welcomeConfig.showDate && formatWelcomeDate(eventDate) ? (
               <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <CalendarDays aria-hidden="true" className="size-4" />
-                {dateLabel}
+                {formatWelcomeDate(eventDate)}
               </p>
             ) : null}
             {welcomeConfig.showDate && viewModel.countdownTarget ? (
@@ -125,6 +183,7 @@ export function EventWelcome({
               <Compass aria-hidden="true" />
               {welcomeConfig.secondaryLabel}
             </Link>
+            <ReopenButton />
             {shareAction}
           </div>
           <Link
@@ -154,6 +213,12 @@ export function EventWelcome({
         ) : null}
       </div>
       </section>
+      <WelcomeSplashIntegration
+        title={title}
+        description={welcomeMessage}
+        eventDate={eventDate}
+        coverUrl={coverUrl}
+      />
     </WelcomeAnalytics>
   )
 }

@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { CanvasSurface } from "./canvas-surface"
 
 type ConfettiParticle = {
@@ -16,8 +17,8 @@ type ConfettiParticle = {
 
 const COLORS = ["#f9a8d4", "#fcd34d", "#c4b5fd", "#93c5fd", "#fdba74"]
 
-function createParticles(): ConfettiParticle[] {
-  return Array.from({ length: 48 }, (_, index) => ({
+function createParticles(count = 48): ConfettiParticle[] {
+  return Array.from({ length: count }, (_, index) => ({
     color: COLORS[index % COLORS.length],
     rotation: (index * 37) % 360,
     spin: (index % 2 === 0 ? 1 : -1) * (2 + (index % 4)),
@@ -30,14 +31,37 @@ function createParticles(): ConfettiParticle[] {
   }))
 }
 
-export function CelebrationConfetti({ active }: { active: boolean }) {
-  const particles = createParticles()
+export type CelebrationConfettiProps = {
+  active: boolean
+  triggerKey?: number | string
+  reducedMotion?: boolean
+  onComplete?: () => void
+}
+
+export function CelebrationConfetti({
+  active,
+  triggerKey,
+  reducedMotion = false,
+  onComplete,
+}: CelebrationConfettiProps) {
+  useEffect(() => {
+    if (!active || !onComplete) return
+    const timer = window.setTimeout(() => {
+      onComplete()
+    }, 1650)
+    return () => window.clearTimeout(timer)
+  }, [active, triggerKey, onComplete])
 
   if (!active) return null
+
+  const particleCount = reducedMotion ? 12 : 48
+  const particles = createParticles(particleCount)
+  const surfaceKey = triggerKey !== undefined ? `confetti-${triggerKey}` : "confetti-burst"
 
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-50 overflow-hidden">
       <CanvasSurface
+        key={surfaceKey}
         duration={1.65}
         draw={(context, size, elapsed) => {
           const progress = Math.min(elapsed / 1.6, 1.2)

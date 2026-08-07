@@ -15,6 +15,7 @@ import { CopyEventLinkButton, PublicQrButton, ShareEventButton } from "@/compone
 import { RealtimeWall } from "@/components/event-wall/RealtimeWall"
 import { WishComposer } from "@/components/wish-composer/WishComposer"
 import { EventWelcome } from "@/components/event-welcome/event-welcome"
+import { WelcomeExperience } from "@/components/event-welcome/WelcomeExperience"
 import { WelcomeSession } from "@/components/event-welcome/welcome-session"
 import { getPublicEventBySlug } from "@/features/events/dal"
 import { getApprovedWishesPage } from "@/features/wishes/dal"
@@ -113,29 +114,31 @@ export default async function PublicEventPage({ params }: Props) {
 
       <main id="main-content">
         <PageShell className="space-y-8 py-6 sm:py-8">
-          <WelcomeSession slug={slug}>
-            <EventWelcome
-              slug={slug}
-              title={event.title}
-              description={event.description}
-              eventDate={event.event_date}
-              submissionMode={event.submission_mode}
-              coverUrl={coverUrl}
-              themeKey={event.theme_key}
-              welcomeConfig={welcomeConfig}
-              decorativeLayers={
-                <>
-                  <AuroraBackground preset={effectConfig.preset} intensity={effectConfig.intensity} className="z-0" />
-                  {welcomeConfig.effects.particles ? (
-                    <AmbientParticles preset={effectConfig.preset} intensity={effectConfig.intensity} className="z-0" />
-                  ) : null}
-                  <FloatingPhotoMemories featuredImage={coverUrl} />
-                  <FilmGrainOverlay />
-                </>
-              }
-              shareAction={<CopyEventLinkButton url={canonicalUrl} />}
-            />
-          </WelcomeSession>
+          <WelcomeExperience slug={slug}>
+            <WelcomeSession slug={slug}>
+              <EventWelcome
+                slug={slug}
+                title={event.title}
+                description={event.description}
+                eventDate={event.event_date}
+                submissionMode={event.submission_mode}
+                coverUrl={coverUrl}
+                themeKey={event.theme_key}
+                welcomeConfig={welcomeConfig}
+                decorativeLayers={
+                  <>
+                    <AuroraBackground preset={effectConfig.preset} intensity={effectConfig.intensity} className="z-0" />
+                    {welcomeConfig.effects.particles ? (
+                      <AmbientParticles preset={effectConfig.preset} intensity={effectConfig.intensity} className="z-0" />
+                    ) : null}
+                    <FloatingPhotoMemories featuredImage={coverUrl} />
+                    <FilmGrainOverlay />
+                  </>
+                }
+                shareAction={<CopyEventLinkButton url={canonicalUrl} />}
+              />
+            </WelcomeSession>
+          </WelcomeExperience>
 
           <section id="submit-wish" aria-labelledby="composer-heading" className="space-y-4">
             <SectionHeading
