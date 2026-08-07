@@ -128,9 +128,9 @@ export function StickerCanvas({
     <div
       ref={containerRef}
       aria-hidden="true"
-      className="pointer-events-auto absolute inset-0 z-30 overflow-hidden"
+      className="pointer-events-none absolute inset-0 z-20 overflow-hidden"
     >
-      <canvas ref={canvasRef} className="size-full" />
+      <canvas ref={canvasRef} className="size-full pointer-events-none" />
     </div>
   )
 }

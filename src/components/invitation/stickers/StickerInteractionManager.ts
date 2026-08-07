@@ -18,16 +18,15 @@ export class StickerInteractionManager {
   public attach(containerEl: HTMLElement) {
     this.containerEl = containerEl
 
-    containerEl.addEventListener("pointermove", this.handlePointerMove)
-    containerEl.addEventListener("pointerdown", this.handlePointerDown)
+    window.addEventListener("pointermove", this.handlePointerMove)
+    window.addEventListener("pointerdown", this.handlePointerDown)
     window.addEventListener("pointerup", this.handlePointerUp)
     window.addEventListener("pointercancel", this.handlePointerUp)
   }
 
   public detach() {
-    if (!this.containerEl) return
-    this.containerEl.removeEventListener("pointermove", this.handlePointerMove)
-    this.containerEl.removeEventListener("pointerdown", this.handlePointerDown)
+    window.removeEventListener("pointermove", this.handlePointerMove)
+    window.removeEventListener("pointerdown", this.handlePointerDown)
     window.removeEventListener("pointerup", this.handlePointerUp)
     window.removeEventListener("pointercancel", this.handlePointerUp)
     this.containerEl = null
