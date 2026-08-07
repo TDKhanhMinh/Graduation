@@ -94,6 +94,7 @@ export interface StickerPerformanceOptions {
 export interface StickerSceneProps {
   containerRef?: React.RefObject<HTMLElement | null>
   exclusionSelectors?: string[]
+  activeStickerIds?: string[]
   enabled?: boolean
   interactive?: boolean
   celebrationTrigger?: number
@@ -112,6 +113,8 @@ export interface InvitationStickerSceneHandle {
   triggerAction(stickerId: string, action: StickerAction): void
 
   pointToElement(stickerId: string, selector: string): void
+
+  teleportToElement(stickerId: string, selector: string): void
 
   triggerSpeech(stickerId: string, text: string, duration?: number): void
 

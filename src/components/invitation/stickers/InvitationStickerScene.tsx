@@ -21,20 +21,25 @@ import type {
   StickerSnapshot,
 } from "./types"
 
+const DEFAULT_EXCLUSION: string[] = []
+
 export const InvitationStickerScene = forwardRef<
   InvitationStickerSceneHandle,
   StickerSceneProps
 >(function InvitationStickerScene(
   {
     enabled = true,
-    exclusionSelectors = [],
+    exclusionSelectors = DEFAULT_EXCLUSION,
+    activeStickerIds,
     celebrationTrigger,
     performanceOptions,
     className,
   },
   ref,
 ) {
-  const controller = useMemo(() => new StickerController(), [])
+  const activeIdsKey = activeStickerIds?.join(",")
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const controller = useMemo(() => new StickerController(activeStickerIds), [activeIdsKey])
   const particleSystem = useMemo(() => new StickerParticleSystem(), [])
   const celebration = useMemo(
     () => new StickerCelebration(controller, particleSystem),
@@ -59,8 +64,11 @@ export const InvitationStickerScene = forwardRef<
     triggerAction: (stickerId: string, action: StickerAction) => {
       controller.triggerCharacterAction(stickerId, action)
     },
-    pointToElement: (stickerId: string, selector: string) => {
-      controller.pointToElement(stickerId, selector)
+    pointToElement: (id, selector) => {
+      controller.pointToElement(id, selector)
+    },
+    teleportToElement: (id, selector) => {
+      controller.teleportToElement(id, selector)
     },
     triggerSpeech: (stickerId: string, text: string, duration?: number) => {
       controller.triggerSpeech(stickerId, text, duration)

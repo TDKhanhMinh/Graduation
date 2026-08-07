@@ -122,7 +122,8 @@ export function StickerCanvas({
       interactionManager.detach()
       particleSystem.clear()
     }
-  }, [controller, exclusionSelectors, performanceOptions, onSnapshotsUpdate])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [controller, JSON.stringify(exclusionSelectors), JSON.stringify(performanceOptions), onSnapshotsUpdate])
 
   return (
     <div

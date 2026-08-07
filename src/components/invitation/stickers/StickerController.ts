@@ -29,9 +29,11 @@ export class StickerController {
     lowPowerMode: false,
   }
 
-  constructor() {
+  constructor(activeStickerIds?: string[]) {
     for (const def of STICKER_MANIFEST) {
-      this.characters.set(def.id, new StickerCharacter(def))
+      if (!activeStickerIds || activeStickerIds.includes(def.id)) {
+        this.characters.set(def.id, new StickerCharacter(def))
+      }
     }
   }
 
@@ -154,6 +156,28 @@ export class StickerController {
       if (rsvpMsgs && rsvpMsgs.length > 0) {
         char.triggerSpeech(rsvpMsgs[0], 3.5)
       }
+    }
+  }
+
+  public teleportToElement(stickerId: string, selector: string) {
+    const char = this.characters.get(stickerId)
+    if (!char || typeof document === "undefined") return
+
+    const element = document.querySelector(selector)
+    if (!element) return
+
+    const rect = element.getBoundingClientRect()
+    if (rect) {
+      const containerWidth = window.innerWidth
+      const containerHeight = window.innerHeight
+      
+      const nx = Math.min(Math.max((rect.left + rect.width / 2) / containerWidth, 0.1), 0.9)
+      const ny = Math.min(Math.max((rect.top + rect.height / 2) / containerHeight, 0.1), 0.9)
+      
+      char.normalizedX = nx
+      char.normalizedY = ny
+      char.targetNormalizedX = nx
+      char.targetNormalizedY = ny
     }
   }
 

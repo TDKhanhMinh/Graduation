@@ -19,7 +19,7 @@ export type TourExperienceProps = {
 
 function TourPrompt({ onStart, onSkip }: { onStart: () => void; onSkip: () => void }) {
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex w-[calc(100vw-3rem)] max-w-[320px] flex-col gap-3 rounded-2xl bg-[var(--event-surface)] p-5 text-[var(--event-text)] shadow-2xl ring-1 ring-[var(--event-border)] animate-in slide-in-from-bottom-5 backdrop-blur-xl supports-[backdrop-filter]:bg-[var(--event-surface)]">
+    <div id="tour-prompt" className="fixed bottom-6 right-6 z-50 flex w-[calc(100vw-3rem)] max-w-[320px] flex-col gap-3 rounded-2xl bg-[var(--event-surface)] p-5 text-[var(--event-text)] shadow-2xl ring-1 ring-[var(--event-border)] animate-in slide-in-from-bottom-5 backdrop-blur-xl supports-[backdrop-filter]:bg-[var(--event-surface)]">
       <div className="flex items-start justify-between">
         <h4 className="font-heading font-semibold flex items-center gap-2">
           <Map className="w-5 h-5 text-[var(--event-primary)]" />
@@ -30,13 +30,13 @@ function TourPrompt({ onStart, onSkip }: { onStart: () => void; onSkip: () => vo
         </button>
       </div>
       <p className="text-sm leading-relaxed text-muted-foreground">
-        Bạn có muốn xem qua hướng dẫn ngắn để hiểu rõ hơn về thiệp mời này không?
+        Bạn có muốn xem qua hướng dẫn các tính năng của sự kiện này không?
       </p>
       <div className="flex justify-end gap-2 mt-2">
         <button onClick={onSkip} className="text-sm px-4 py-2 font-medium text-muted-foreground hover:bg-black/5 rounded-lg transition-colors">
           Để sau
         </button>
-        <button onClick={onStart} className="text-sm px-4 py-2 font-medium bg-[var(--event-primary)] text-[var(--event-on-primary)] rounded-lg transition-colors hover:opacity-90">
+        <button onClick={onStart} className="text-sm px-4 py-2 font-medium bg-[var(--event-primary)] text-white rounded-lg transition-colors hover:opacity-90">
           Bắt đầu
         </button>
       </div>
@@ -46,13 +46,23 @@ function TourPrompt({ onStart, onSkip }: { onStart: () => void; onSkip: () => vo
 
 function TourPromptStickerBridge({ sceneRef, mascotId }: { sceneRef: React.RefObject<InvitationStickerSceneHandle | null>, mascotId: string }) {
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const initTimer = setTimeout(() => {
+      if (sceneRef.current) {
+        sceneRef.current.teleportToElement(mascotId, "#tour-prompt")
+      }
+    }, 50)
+
+    const actionTimer = setTimeout(() => {
       if (sceneRef.current) {
         sceneRef.current.triggerAction(mascotId, "wave")
-        sceneRef.current.triggerSpeech(mascotId, "Bạn có muốn mình hướng dẫn nhanh cách dùng thiệp không?", 8)
+        sceneRef.current.triggerSpeech(mascotId, "Để mình giới thiệu các tính năng cho bạn nha!", 8)
       }
     }, 500)
-    return () => clearTimeout(timer)
+    
+    return () => {
+      clearTimeout(initTimer)
+      clearTimeout(actionTimer)
+    }
   }, [sceneRef, mascotId])
 
   useEffect(() => {
@@ -92,13 +102,16 @@ export function TourExperience({
     autoPrompt: true
   })
 
+  const shouldRenderStickers = mounted && (tour.stage === "ready" || tour.stage === "running")
+
   return (
     <>
       {children}
-      {mounted && (tour.stage === "ready" || tour.stage === "running") && createPortal(
+      {shouldRenderStickers && createPortal(
         <InvitationStickerScene 
           ref={sceneRef} 
-          className="pointer-events-none fixed inset-0 z-[60] overflow-hidden" 
+          activeStickerIds={defaultTourConfig.mascotId ? [defaultTourConfig.mascotId] : undefined}
+          className="pointer-events-none fixed inset-0 z-[110] overflow-hidden" 
           performanceOptions={{ lowPowerMode: reducedMotion, enableShadows: !reducedMotion }}
         />,
         document.body

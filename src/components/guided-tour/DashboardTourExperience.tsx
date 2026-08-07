@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 
 function DashboardTourPrompt({ onStart, onSkip }: { onStart: () => void; onSkip: () => void }) {
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex w-[calc(100vw-3rem)] max-w-[320px] flex-col gap-3 rounded-2xl bg-background p-5 text-foreground shadow-2xl ring-1 ring-border animate-in slide-in-from-bottom-5 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80">
+    <div id="dashboard-tour-prompt" className="fixed bottom-6 right-6 z-50 flex w-[calc(100vw-3rem)] max-w-[320px] flex-col gap-3 rounded-2xl bg-background p-5 text-foreground shadow-2xl ring-1 ring-border animate-in slide-in-from-bottom-5 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80">
       <div className="flex items-start justify-between">
         <h4 className="font-heading font-semibold flex items-center gap-2">
           <Map className="w-5 h-5 text-primary" />
@@ -39,13 +39,23 @@ function DashboardTourPrompt({ onStart, onSkip }: { onStart: () => void; onSkip:
 
 function DashboardTourPromptStickerBridge({ sceneRef, mascotId }: { sceneRef: React.RefObject<InvitationStickerSceneHandle | null>, mascotId: string }) {
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const initTimer = setTimeout(() => {
+      if (sceneRef.current) {
+        sceneRef.current.teleportToElement(mascotId, "#dashboard-tour-prompt")
+      }
+    }, 50)
+    
+    const actionTimer = setTimeout(() => {
       if (sceneRef.current) {
         sceneRef.current.triggerAction(mascotId, "wave")
         sceneRef.current.triggerSpeech(mascotId, "Để mình hướng dẫn bạn cách tạo sự kiện nha!", 8)
       }
     }, 500)
-    return () => clearTimeout(timer)
+    
+    return () => {
+      clearTimeout(initTimer)
+      clearTimeout(actionTimer)
+    }
   }, [sceneRef, mascotId])
 
   useEffect(() => {
@@ -112,7 +122,8 @@ export function DashboardTourExperience() {
       {shouldRenderStickers && createPortal(
         <InvitationStickerScene 
           ref={sceneRef} 
-          className="pointer-events-none fixed inset-0 z-[60] overflow-hidden" 
+          activeStickerIds={dashboardTourConfig.mascotId ? [dashboardTourConfig.mascotId] : undefined}
+          className="pointer-events-none fixed inset-0 z-[110] overflow-hidden" 
           performanceOptions={{ lowPowerMode: reducedMotion, enableShadows: !reducedMotion }}
         />,
         document.body
