@@ -40,6 +40,12 @@ export interface GuidedTourStep {
   placement?: "top" | "bottom" | "left" | "right" | "auto";
 
   /**
+   * Placement of the mascot relative to the target element.
+   * If not provided, it defaults to placing at the opposite side or top-left.
+   */
+  mascotPlacement?: "top" | "bottom" | "left" | "right" | "top-left" | "auto";
+
+  /**
    * Whether the user can interact with the target element while the step is active.
    * If false, the spotlight overlay will block pointer events.
    */

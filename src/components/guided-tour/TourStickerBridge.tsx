@@ -22,14 +22,15 @@ export function TourStickerBridge({ step, sceneRef, mascotId = "anime-party" }: 
 
     if (step.mascotAction) {
       if (step.mascotAction === "point-to-content" && step.targetSelector) {
+        const placement = step.mascotPlacement || "top-left"
         // Initial point with speech (if new step)
         if (isNewStep) {
-          sceneRef.current.pointToElement(mascotId, step.targetSelector, step.placement || "center", true)
+          sceneRef.current.pointToElement(mascotId, step.targetSelector, placement, true)
         }
         
         // Continuously track position (handles smooth scrolling) without re-triggering speech
         const trackPosition = () => {
-          sceneRef.current?.pointToElement(mascotId, step.targetSelector!, step.placement || "center", false)
+          sceneRef.current?.pointToElement(mascotId, step.targetSelector!, placement, false)
           frameId = requestAnimationFrame(trackPosition)
         }
         frameId = requestAnimationFrame(trackPosition)
