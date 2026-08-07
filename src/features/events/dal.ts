@@ -42,6 +42,7 @@ export const getOwnedEvents = cache(async (): Promise<Event[]> => {
     .from('events')
     .select('*')
     .eq('owner_id', session.userId)
+    .is('deleted_at', null)
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -62,6 +63,7 @@ export const getOwnedEventById = cache(async (id: string): Promise<Event | null>
     .select('*')
     .eq('id', id)
     .eq('owner_id', session.userId)
+    .is('deleted_at', null)
     .single()
 
   if (error) return null

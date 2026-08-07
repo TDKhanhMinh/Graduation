@@ -8,6 +8,8 @@ import { SectionHeading } from "@/components/ui/section-heading"
 import { getOwnedEventById } from "@/features/events/dal"
 import { updateEvent } from "@/features/events/actions"
 
+import { DeleteEventControl } from '@/components/events/DeleteEventControl'
+
 export const metadata = {
   title: "Cài đặt sự kiện",
 }
@@ -70,6 +72,9 @@ export default async function EventSettingsPage({
         </CardHeader>
         <CardContent>
           <ArchiveEventControl eventId={event.id} isArchived={!!event.archived_at} />
+          <div className='mt-6 border-t border-status-danger/15 pt-6'>
+            <DeleteEventControl eventId={event.id} eventTitle={event.title} />
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(8);
+SELECT plan(10);
 
 SET ROLE anon;
 
@@ -74,6 +74,29 @@ SELECT is_empty(
      WHERE slug = 'public-event-1'
      RETURNING title $$,
   'Non-owner cannot update events'
+);
+
+RESET ROLE;
+SET ROLE authenticated;
+SET request.jwt.claim.sub = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
+
+SELECT results_eq(
+  $$ UPDATE public.events
+     SET deleted_at = now()
+     WHERE slug = 'public-event-1'
+       AND deleted_at IS NULL
+     RETURNING deleted_at IS NOT NULL $$,
+  $$ VALUES (true) $$,
+  'Owner can soft-delete own event'
+);
+
+SELECT is_empty(
+  $$ UPDATE public.events
+     SET deleted_at = now()
+     WHERE slug = 'public-event-1'
+       AND deleted_at IS NULL
+     RETURNING id $$,
+  'Soft-delete transition is idempotent for an already-deleted event'
 );
 
 ROLLBACK;

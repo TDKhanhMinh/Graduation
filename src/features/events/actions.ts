@@ -131,6 +131,7 @@ export async function updateEvent(
     })
     .eq("id", eventId)
     .eq("owner_id", session.userId)
+    .is("deleted_at", null)
     .select("id")
     .single()
 
@@ -210,6 +211,7 @@ export async function updateEventAppearance(
     })
     .eq("id", eventId)
     .eq("owner_id", session.userId)
+    .is("deleted_at", null)
     .select("id")
     .single()
 
@@ -239,6 +241,7 @@ export async function archiveEvent(eventId: string) {
     })
     .eq("id", eventId)
     .eq("owner_id", session.userId)
+    .is("deleted_at", null)
     .select("id")
     .single()
 
@@ -249,6 +252,34 @@ export async function archiveEvent(eventId: string) {
 
   revalidatePath("/dashboard")
   revalidatePath(`/dashboard/events/${eventId}`)
+}
+
+export async function deleteEvent(eventId: string) {
+  const session = await verifySession()
+  if (!session) {
+    redirect('/auth/login')
+  }
+  const supabase = await createClient()
+  const now = new Date().toISOString()
+  const { data, error } = await supabase
+    .from('events')
+    .update({ deleted_at: now, updated_at: now })
+    .eq('id', eventId)
+    .eq('owner_id', session.userId)
+    .is('deleted_at', null)
+    .select('id')
+    .maybeSingle()
+  if (error) {
+    logger.error('Failed to delete event', error, { userId: session.userId, eventId })
+    throw createError('INTERNAL_SERVER_ERROR', 'Kh\u00f4ng th\u1ec3 x\u00f3a s\u1ef1 ki\u1ec7n.')
+  }
+  if (!data) {
+    throw createError('NOT_FOUND', 'Kh\u00f4ng t\u00ecm th\u1ea5y s\u1ef1 ki\u1ec7n.')
+  }
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/events/' + eventId)
+  revalidatePath('/dashboard/events/' + eventId + '/settings')
+  revalidatePath('/(public)/e/[slug]', 'page')
 }
 
 export async function closeEvent(eventId: string) {
@@ -266,6 +297,7 @@ export async function closeEvent(eventId: string) {
     })
     .eq("id", eventId)
     .eq("owner_id", session.userId)
+    .is("deleted_at", null)
     .select("id")
     .single()
 
