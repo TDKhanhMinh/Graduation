@@ -7,7 +7,7 @@ export class StickerRenderer {
   constructor() {
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search)
-      this.debugMode = urlParams.get("stickerDebug") === "1" || process.env.NODE_ENV === "development"
+      this.debugMode = urlParams.get("stickerDebug") === "1"
     }
   }
 
