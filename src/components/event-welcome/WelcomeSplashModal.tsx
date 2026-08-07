@@ -192,7 +192,7 @@ export function WelcomeSplashModal({
   return (
     <div
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 sm:p-6",
+        "fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden p-3 sm:p-6 lg:p-8",
         "bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-500/20 via-black/85 to-black/95 backdrop-blur-md transition-opacity duration-300",
         stage === "closing" && "opacity-0 pointer-events-none",
       )}
@@ -240,82 +240,85 @@ export function WelcomeSplashModal({
         aria-modal="true"
         aria-labelledby="splash-title"
         className={cn(
-          "relative flex max-h-[88dvh] w-full max-w-2xl flex-col rounded-3xl border border-amber-400/30 bg-background/95 p-4 shadow-[0_0_60px_rgba(251,191,36,0.2)] sm:max-h-[90dvh] sm:p-6",
+          "relative flex max-h-[92dvh] w-full max-w-xl sm:max-w-2xl lg:max-w-3xl flex-col bg-transparent p-0 sm:max-h-[95dvh]",
           "transition-all duration-500 transform",
           reducedMotion ? "transition-none" : "",
         )}
       >
-        {/* Top Control & Sticker Pack Selector Bar */}
-        <div className="flex shrink-0 items-center justify-end gap-2 pb-2 pl-12 pr-1 sm:pl-16">
-          {/* Sticker Pack Selector */}
-          <div className="flex items-center gap-1 rounded-full border border-border/80 bg-background/80 p-1 backdrop-blur-sm">
-            {(["gold", "romance", "party"] as StickerPackKey[]).map((packKey) => (
-              <button
-                key={packKey}
-                type="button"
-                onClick={() => setActiveStickerPack(packKey)}
-                title={STICKER_PACKS[packKey].name}
-                className={cn(
-                  "flex size-7 items-center justify-center rounded-full text-xs transition-all",
-                  activeStickerPack === packKey
-                    ? "bg-amber-400 text-black font-bold shadow-sm scale-110"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
-                )}
-              >
-                {STICKER_PACKS[packKey].sealIcon}
-              </button>
-            ))}
-          </div>
-
-          {audioStatus !== "disabled" && onToggleAudio ? (
-            <button
-              type="button"
-              onClick={onToggleAudio}
-              aria-label={audioStatus === "playing" ? "Tắt âm thanh" : "Bật âm thanh"}
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-amber-400/30 bg-background/80 text-foreground transition-colors hover:bg-accent"
-              data-testid="splash-audio-toggle"
-            >
-              {audioStatus === "playing" ? (
-                <Music className="size-5 text-amber-400 animate-pulse" aria-hidden="true" />
-              ) : (
-                <Music2 className="size-5 text-muted-foreground" aria-hidden="true" />
-              )}
-            </button>
-          ) : null}
-
-          <button
-            ref={closeButtonRef}
-            type="button"
-            onClick={onClose}
-            aria-label="Đóng thiệp chào mừng"
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-border bg-background/80 text-foreground transition-colors hover:bg-accent"
-            data-testid="splash-close-btn"
+        {/* Harmonized Top Control Bar (Aligned perfectly with Envelope width) */}
+        <div className="flex shrink-0 items-center justify-between w-full max-w-xl sm:max-w-2xl lg:max-w-3xl mx-auto pb-2 px-1 z-40">
+          {/* Decorative Vintage Stamp Sticker (Top Left) */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none hidden -rotate-6 select-none sm:block"
           >
-            <X className="size-5" aria-hidden="true" />
-          </button>
-        </div>
+            <div className="rounded-xl border-2 border-dashed border-amber-400/60 bg-amber-400/10 px-3 py-1.5 backdrop-blur-sm shadow-md">
+              <span className="text-[10px] font-black uppercase tracking-widest text-amber-400">
+                {currentPack.stampText} ✦ 2026
+              </span>
+            </div>
+          </div>
 
-        {/* Decorative Vintage Stamp Sticker (Top Left) */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-3 top-3 z-30 hidden -rotate-6 select-none sm:block"
-        >
-          <div className="rounded-xl border-2 border-dashed border-amber-400/60 bg-amber-400/10 px-3 py-1.5 backdrop-blur-sm shadow-md">
-            <span className="text-[10px] font-black uppercase tracking-widest text-amber-400">
-              {currentPack.stampText} ✦ 2026
-            </span>
+          <div className="flex items-center gap-2 ml-auto">
+            {/* Sticker Pack Selector */}
+            <div className="flex items-center gap-1 rounded-full border border-amber-400/40 bg-background/90 p-1 shadow-lg backdrop-blur-md">
+              {(["gold", "romance", "party"] as StickerPackKey[]).map((packKey) => (
+                <button
+                  key={packKey}
+                  type="button"
+                  onClick={() => setActiveStickerPack(packKey)}
+                  title={STICKER_PACKS[packKey].name}
+                  className={cn(
+                    "flex size-7 items-center justify-center rounded-full text-xs transition-all",
+                    activeStickerPack === packKey
+                      ? "bg-amber-400 text-black font-bold shadow-sm scale-110"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                  )}
+                >
+                  {STICKER_PACKS[packKey].sealIcon}
+                </button>
+              ))}
+            </div>
+
+            {audioStatus !== "disabled" && onToggleAudio ? (
+              <button
+                type="button"
+                onClick={onToggleAudio}
+                aria-label={audioStatus === "playing" ? "Tắt âm thanh" : "Bật âm thanh"}
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-amber-400/40 bg-background/90 text-foreground shadow-lg backdrop-blur-md transition-colors hover:bg-accent"
+                data-testid="splash-audio-toggle"
+              >
+                {audioStatus === "playing" ? (
+                  <Music className="size-5 text-amber-400 animate-pulse" aria-hidden="true" />
+                ) : (
+                  <Music2 className="size-5 text-muted-foreground" aria-hidden="true" />
+                )}
+              </button>
+            ) : null}
+
+            <button
+              ref={closeButtonRef}
+              type="button"
+              onClick={onClose}
+              aria-label="Đóng thiệp chào mừng"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-amber-400/40 bg-background/90 text-foreground shadow-lg backdrop-blur-md transition-colors hover:bg-accent"
+              data-testid="splash-close-btn"
+            >
+              <X className="size-5" aria-hidden="true" />
+            </button>
           </div>
         </div>
 
-        {/* 3D Envelope Container with Smooth Internal Scroll */}
-        <div className="perspective-[1400px] flex-1 overflow-y-auto pr-1 pt-2 scrollbar-thin scrollbar-thumb-amber-400/30">
+        {/* 3D Envelope Container with Smooth Internal Scroll & Clean Spacing */}
+        <div className="perspective-[1400px] flex-1 overflow-y-auto overflow-x-hidden w-full min-w-0 px-1 pt-1 scrollbar-thin scrollbar-thumb-amber-400/30">
           {!isEnvelopeOpen ? (
             /* 3D Sealed Envelope View */
             <div
               className={cn(
-                "relative mx-auto my-4 flex min-h-[340px] w-full max-w-lg flex-col items-center justify-center rounded-2xl border-2 border-amber-400/50 bg-gradient-to-b from-amber-950/30 via-background/95 to-amber-900/30 p-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.7)] sm:min-h-[380px] sm:p-10",
+                "relative mx-auto flex min-h-[380px] sm:min-h-[440px] lg:min-h-[480px] w-full max-w-xl sm:max-w-2xl lg:max-w-3xl flex-col items-center justify-center rounded-3xl border-2 border-amber-400/40 bg-gradient-to-b from-amber-950/40 via-background/95 to-amber-900/40 p-6 sm:p-8 lg:p-10 text-center shadow-[0_25px_70px_rgba(0,0,0,0.8)]",
+                currentPack.borderGlow,
                 "transition-all duration-700 transform-gpu",
-                stage === "opening" && "scale-105 shadow-[0_0_80px_rgba(251,191,36,0.5)]",
+                stage === "opening" && "scale-105 shadow-[0_0_90px_rgba(251,191,36,0.6)]",
               )}
               data-testid="envelope-sealed"
             >
@@ -332,7 +335,7 @@ export function WelcomeSplashModal({
               </div>
 
               {/* Top-Right Pinned Anime Sticker: Open Envelope & Confetti Burst */}
-              <div className="absolute -right-3 -top-3 z-30 flex flex-col items-center sm:-right-4 sm:-top-4">
+              <div className="absolute right-2 top-2 sm:-right-3 sm:-top-3 z-30 flex flex-col items-center">
                 <AnimatedSticker
                   sticker={ANIME_STICKERS[0]}
                   size="md"
@@ -348,7 +351,7 @@ export function WelcomeSplashModal({
 
               {/* Top-Left Pinned Anime Sticker: Toggle Audio */}
               {onToggleAudio ? (
-                <div className="absolute -left-3 -top-3 z-30 flex flex-col items-center sm:-left-4 sm:-top-4">
+                <div className="absolute left-2 top-2 sm:-left-3 sm:-top-3 z-30 flex flex-col items-center">
                   <AnimatedSticker
                     sticker={ANIME_STICKERS[2]}
                     size="md"
@@ -383,12 +386,12 @@ export function WelcomeSplashModal({
                 <span>✨</span> {currentPack.badge} <span>✨</span>
               </span>
 
-              <h2 id="splash-title" className="mb-3 font-heading text-xl font-bold tracking-tight text-foreground sm:text-3xl" data-sticker-safe="title">
+              <h2 id="splash-title" className="mb-3 font-heading text-xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl" data-sticker-safe="title">
                 {title}
               </h2>
 
               {dateLabel ? (
-                <p className="mb-6 flex items-center justify-center gap-2 text-xs text-muted-foreground sm:text-sm" data-sticker-safe="event-time">
+                <p className="mb-6 flex items-center justify-center gap-2 text-xs text-muted-foreground sm:text-sm lg:text-base" data-sticker-safe="event-time">
                   <CalendarDays className="size-4 text-amber-400" aria-hidden="true" />
                   {dateLabel}
                 </p>
@@ -403,7 +406,7 @@ export function WelcomeSplashModal({
                   variant: "event",
                   size: "lg",
                   className:
-                    "z-30 min-h-[46px] min-w-[190px] px-8 text-sm font-black shadow-[0_0_30px_rgba(251,191,36,0.5)] transition-transform hover:scale-105 bg-gradient-to-r from-amber-500 via-amber-400 to-primary text-black sm:text-base",
+                    "z-30 min-h-[46px] min-w-[200px] px-8 text-sm font-black shadow-[0_0_30px_rgba(251,191,36,0.5)] transition-transform hover:scale-105 bg-gradient-to-r from-amber-500 via-amber-400 to-primary text-black sm:text-base lg:text-lg lg:py-6",
                 })}
                 data-testid="open-envelope-btn"
               >
@@ -414,7 +417,7 @@ export function WelcomeSplashModal({
             /* 3D Invitation Letter Opened View (Slides Out from Envelope) */
             <div
               className={cn(
-                "relative flex flex-col gap-4 rounded-2xl border-2 border-amber-400/40 bg-gradient-to-b from-amber-950/20 via-background/95 to-amber-900/20 p-5 sm:gap-5 sm:p-6",
+                "relative mx-auto flex flex-col gap-4 sm:gap-6 rounded-3xl border-2 border-amber-400/40 bg-gradient-to-b from-amber-950/30 via-background/95 to-amber-900/30 p-6 sm:p-8 lg:p-10 w-full max-w-xl sm:max-w-2xl lg:max-w-3xl shadow-[0_25px_70px_rgba(0,0,0,0.8)]",
                 currentPack.borderGlow,
                 "animate-in fade-in-50 slide-in-from-bottom-8 zoom-in-95 duration-700 ease-out",
                 reducedMotion && "animate-none",
@@ -425,17 +428,17 @@ export function WelcomeSplashModal({
               <div className="flex items-center justify-between border-b border-amber-400/30 pb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">📜</span>
-                  <span className="text-xs font-black uppercase tracking-[0.25em] text-amber-400">
+                  <span className="text-xs font-black uppercase tracking-[0.25em] text-amber-400 sm:text-sm">
                     THƯ MỜI CHÍNH THỨC ✦ MEMORIA
                   </span>
                 </div>
-                <span className="rounded-full border border-amber-400/50 bg-amber-400/20 px-2.5 py-0.5 text-[10px] font-bold text-amber-300">
+                <span className="rounded-full border border-amber-400/50 bg-amber-400/20 px-2.5 py-0.5 text-[10px] font-bold text-amber-300 sm:text-xs">
                   {currentPack.badge}
                 </span>
               </div>
 
               {/* Top-Right Pinned Anime Mascot Sticker: Re-trigger Confetti & Party Action */}
-              <div className="absolute -right-3 -top-3 z-20 flex flex-col items-center sm:-right-4 sm:-top-4">
+              <div className="absolute right-2 top-2 sm:-right-3 sm:-top-3 z-20 flex flex-col items-center">
                 <AnimatedSticker
                   sticker={ANIME_STICKERS[0]}
                   size="md"
@@ -451,7 +454,7 @@ export function WelcomeSplashModal({
 
               {/* Top-Left Pinned Anime Mascot Sticker: Toggle Audio */}
               {onToggleAudio ? (
-                <div className="absolute -left-3 -top-3 z-20 flex flex-col items-center sm:-left-4 sm:-top-4">
+                <div className="absolute left-2 top-2 sm:-left-3 sm:-top-3 z-20 flex flex-col items-center">
                   <AnimatedSticker
                     sticker={ANIME_STICKERS[2]}
                     size="md"
@@ -468,7 +471,7 @@ export function WelcomeSplashModal({
 
               {/* Bottom-Right Pinned Anime Mascot Sticker: Send Wish Action */}
               {onSendWish ? (
-                <div className="absolute -bottom-3 -right-3 z-20 flex flex-col items-center sm:-bottom-4 sm:-right-4">
+                <div className="absolute right-2 bottom-2 sm:-bottom-3 sm:-right-3 z-20 flex flex-col items-center">
                   <AnimatedSticker
                     sticker={ANIME_STICKERS[1]}
                     size="md"
@@ -484,7 +487,7 @@ export function WelcomeSplashModal({
               ) : null}
 
               {coverUrl ? (
-                <div className="relative aspect-video max-h-[160px] w-full overflow-hidden rounded-xl border border-border shadow-md sm:max-h-[220px]">
+                <div className="relative aspect-video max-h-[180px] w-full overflow-hidden rounded-2xl border border-amber-400/30 shadow-md sm:max-h-[240px] lg:max-h-[300px]">
                   <PosterMedia
                     src={coverUrl}
                     alt={title + " cover"}
@@ -498,18 +501,18 @@ export function WelcomeSplashModal({
               ) : null}
 
               <div className="space-y-2 text-center sm:text-left">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">Memoria Event</span>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary sm:text-xs">Memoria Event</span>
 
-                <h2 id="splash-title" className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-4xl" data-sticker-safe="title">
+                <h2 id="splash-title" className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl" data-sticker-safe="title">
                   {title}
                 </h2>
 
                 {description ? (
-                  <p className="line-clamp-3 text-sm text-muted-foreground leading-relaxed sm:text-base">{description}</p>
+                  <p className="line-clamp-3 text-sm text-muted-foreground leading-relaxed sm:text-base lg:text-lg">{description}</p>
                 ) : null}
 
                 {dateLabel ? (
-                  <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground sm:justify-start sm:text-sm" data-sticker-safe="event-time">
+                  <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground sm:justify-start sm:text-sm lg:text-base" data-sticker-safe="event-time">
                     <CalendarDays className="size-4 text-primary" aria-hidden="true" />
                     {dateLabel}
                   </p>
@@ -531,7 +534,7 @@ export function WelcomeSplashModal({
                     className={buttonVariants({
                       variant: "event",
                       size: "lg",
-                      className: "flex-1 min-h-[44px] justify-center text-sm font-semibold shadow-md sm:text-base",
+                      className: "flex-1 min-h-[44px] justify-center text-sm font-semibold shadow-md sm:text-base lg:text-lg lg:h-12",
                     })}
                     data-testid="splash-send-wish-btn"
                   >
@@ -547,7 +550,7 @@ export function WelcomeSplashModal({
                     className={buttonVariants({
                       variant: "event-outline",
                       size: "lg",
-                      className: "flex-1 min-h-[44px] justify-center text-sm font-semibold sm:text-base",
+                      className: "flex-1 min-h-[44px] justify-center text-sm font-semibold sm:text-base lg:text-lg lg:h-12",
                     })}
                     data-testid="splash-explore-btn"
                   >
