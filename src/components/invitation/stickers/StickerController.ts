@@ -159,7 +159,7 @@ export class StickerController {
     }
   }
 
-  public teleportToElement(stickerId: string, selector: string) {
+  public teleportToElement(stickerId: string, selector: string, placement: "center" | "top-left" | "top" | "left" = "center") {
     const char = this.characters.get(stickerId)
     if (!char || typeof document === "undefined") return
 
@@ -171,8 +171,22 @@ export class StickerController {
       const containerWidth = window.innerWidth
       const containerHeight = window.innerHeight
       
-      const nx = Math.min(Math.max((rect.left + rect.width / 2) / containerWidth, 0.1), 0.9)
-      const ny = Math.min(Math.max((rect.top + rect.height / 2) / containerHeight, 0.1), 0.9)
+      let pixelX = rect.left + rect.width / 2
+      let pixelY = rect.top + rect.height / 2
+
+      // Offset based on placement to avoid obscuring the element
+      const charOffset = 50 // roughly half the sticker size + padding
+      if (placement === "top-left") {
+        pixelX = rect.left - charOffset / 2
+        pixelY = rect.top - charOffset
+      } else if (placement === "top") {
+        pixelY = rect.top - charOffset
+      } else if (placement === "left") {
+        pixelX = rect.left - charOffset
+      }
+      
+      const nx = Math.min(Math.max(pixelX / containerWidth, 0.1), 0.9)
+      const ny = Math.min(Math.max(pixelY / containerHeight, 0.1), 0.9)
       
       char.normalizedX = nx
       char.normalizedY = ny

@@ -114,7 +114,7 @@ export interface InvitationStickerSceneHandle {
 
   pointToElement(stickerId: string, selector: string): void
 
-  teleportToElement(stickerId: string, selector: string): void
+  teleportToElement(stickerId: string, selector: string, placement?: "center" | "top-left" | "top" | "left"): void
 
   triggerSpeech(stickerId: string, text: string, duration?: number): void
 

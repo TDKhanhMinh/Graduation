@@ -48,7 +48,7 @@ function TourPromptStickerBridge({ sceneRef, mascotId }: { sceneRef: React.RefOb
   useEffect(() => {
     const initTimer = setTimeout(() => {
       if (sceneRef.current) {
-        sceneRef.current.teleportToElement(mascotId, "#tour-prompt")
+        sceneRef.current.teleportToElement(mascotId, "#tour-prompt", "top-left")
       }
     }, 50)
 

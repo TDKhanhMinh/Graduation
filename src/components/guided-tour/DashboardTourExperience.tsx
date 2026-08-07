@@ -41,7 +41,7 @@ function DashboardTourPromptStickerBridge({ sceneRef, mascotId }: { sceneRef: Re
   useEffect(() => {
     const initTimer = setTimeout(() => {
       if (sceneRef.current) {
-        sceneRef.current.teleportToElement(mascotId, "#dashboard-tour-prompt")
+        sceneRef.current.teleportToElement(mascotId, "#dashboard-tour-prompt", "top-left")
       }
     }, 50)
     
