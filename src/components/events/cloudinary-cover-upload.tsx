@@ -1,16 +1,16 @@
 "use client"
 
-import { LoaderCircle, ImagePlus, RefreshCcw, X } from "lucide-react"
+import { ImagePlus, LoaderCircle, RefreshCcw, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
+import { prepareImage } from "@/features/media/client"
 import {
   getCloudinaryCoverUploadConfig,
   parseCloudinaryCoverUploadResponse,
   validateCloudinaryCoverFile,
 } from "@/features/media/cloudinary-cover"
-import { prepareImage } from "@/features/media/client"
 
 type CloudinaryCoverUploadProps = {
   value: string

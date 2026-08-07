@@ -32,6 +32,7 @@ export default async function EventAppearancePage({
         action={boundAction}
         eventTitle={event.title}
         eventDescription={event.description || ""}
+        eventDate={event.event_date}
         initialTheme={event.theme_key}
         initialCover={event.cover_path}
         initialExperiencePreset={event.experience_preset}

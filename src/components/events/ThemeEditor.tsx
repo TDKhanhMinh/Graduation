@@ -1,7 +1,7 @@
 "use client"
 
 import { Check, LoaderCircle, Maximize2, Monitor, Smartphone, Tv } from "lucide-react"
-import Image from "next/image"
+
 import { useActionState, useEffect, useState } from "react"
 import { useFormStatus } from "react-dom"
 import { toast } from "sonner"
@@ -14,6 +14,7 @@ import { getDefaultWelcomeHeroConfig, type WelcomeHeroConfig } from "@/features/
 import { isCloudinaryDeliveryUrl } from "@/features/media/cloudinary-cover"
 
 import { CloudinaryCoverUpload } from "./cloudinary-cover-upload"
+import { WelcomeHeroPreview } from "./welcome-hero-preview"
 
 type PreviewViewport = "desktop" | "tv" | "mobile" | "fullscreen"
 type ThemeKey = "graduation" | "editorial" | "minimal"
@@ -77,6 +78,7 @@ type ThemeEditorProps = {
   action: (state: EventActionState, formData: FormData) => Promise<EventActionState>
   eventTitle: string
   eventDescription: string
+  eventDate?: string | null
   initialTheme: string
   initialCover: string | null
   initialExperiencePreset?: string
@@ -93,6 +95,7 @@ export function ThemeEditor({
   action,
   eventTitle,
   eventDescription,
+  eventDate,
   initialTheme,
   initialCover,
   initialExperiencePreset,
@@ -146,23 +149,27 @@ export function ThemeEditor({
       <form
         action={formAction}
         onChange={() => setIsDirty(true)}
-        className="min-w-0 space-y-6 rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6"
+        className="min-w-0 space-y-8 rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6 lg:p-8"
       >
         <input type="hidden" name="theme_key" value={previewTheme} />
         <input type="hidden" name="experience_preset" value={experiencePreset} />
         <input type="hidden" name="welcome_hero" value={JSON.stringify(welcomeConfig)} />
 
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Cấu hình Giao diện Sự kiện</p>
-          <h2 className="mt-1 font-heading text-xl font-semibold">Chọn trải nghiệm cho sự kiện</h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Giao diện mẫu điều khiển lớp hiển thị công khai; giao diện hệ thống vẫn giữ nguyên.
+        <div className="border-b border-border/80 pb-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Cấu hình Giao diện</p>
+          <h2 className="mt-1 font-heading text-2xl font-semibold">Thiết kế Trải nghiệm Sự kiện</h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            Cá nhân hóa giao diện hiển thị cho khách mời. Các thay đổi sẽ được cập nhật ngay trên bản xem trước.
           </p>
         </div>
 
-        <fieldset className="space-y-3">
-          <legend className="text-sm font-semibold">Trải nghiệm hiển thị (Mẫu)</legend>
-          <div className="grid gap-3 sm:grid-cols-2">
+        {/* Section 1: Mẫu giao diện */}
+        <section className="space-y-4">
+          <header>
+            <h3 className="text-base font-semibold">1. Mẫu trải nghiệm (Theme)</h3>
+            <p className="text-sm text-muted-foreground mt-1">Chọn phong cách chủ đạo cho toàn bộ sự kiện.</p>
+          </header>
+          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
             {presets.map((item) => {
               const selected = experiencePreset === item.key
               return (
@@ -196,154 +203,188 @@ export function ThemeEditor({
               )
             })}
           </div>
-        </fieldset>
+        </section>
 
-        <fieldset className="space-y-4 rounded-2xl border border-primary/15 bg-primary/5 p-4">
-          <legend className="px-1 text-sm font-semibold">Trang chào mừng</legend>
-          <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
-            <input type="checkbox" checked={welcomeConfig.enabled} onChange={(event) => updateWelcomeConfig({ enabled: event.target.checked })} className="size-4 rounded border-border accent-primary" />
-            Hiển thị Poster Welcome Hero
-          </label>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="grid gap-2">
-              <Label htmlFor="welcome_layout">Bố cục trang chào mừng</Label>
-              <select id="welcome_layout" value={welcomeConfig.layout} onChange={(event) => updateWelcomeConfig({ layout: event.target.value as WelcomeHeroConfig["layout"] })} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
-                <option value="poster-focus">Poster Focus</option>
-                <option value="split">Cinematic Split</option>
-                <option value="full-bleed">Full Bleed</option>
-                <option value="minimal">Minimal</option>
-              </select>
+        {/* Section 2: Trang chào mừng */}
+        <section className="rounded-2xl border border-primary/15 bg-primary/5 p-5 sm:p-6 transition-colors">
+          <header className="flex flex-col gap-3 border-b border-primary/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-base font-semibold">2. Màn hình Chào mừng (Welcome Hero)</h3>
+              <p className="text-sm text-muted-foreground mt-1">Màn hình đầu tiên khách mời nhìn thấy.</p>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="welcome_primary_label">CTA chính</Label>
-              <input id="welcome_primary_label" value={welcomeConfig.primaryLabel} onChange={(event) => updateWelcomeConfig({ primaryLabel: event.target.value })} maxLength={80} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="welcome_secondary_label">CTA phụ</Label>
-              <input id="welcome_secondary_label" value={welcomeConfig.secondaryLabel} onChange={(event) => updateWelcomeConfig({ secondaryLabel: event.target.value })} maxLength={80} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40" />
-            </div>
-            <div className="grid gap-2 sm:col-span-2">
-              <Label htmlFor="welcome_message">Lời chào tùy chỉnh</Label>
-              <textarea id="welcome_message" value={welcomeConfig.message ?? ""} onChange={(event) => updateWelcomeConfig({ message: event.target.value || null })} maxLength={500} rows={3} className="min-h-24 resize-y rounded-xl border border-border/80 bg-background/70 px-3 py-2 text-sm leading-6 outline-none focus-visible:ring-3 focus-visible:ring-focus/40" placeholder="Để trống để dùng lời chào theo trạng thái sự kiện." />
-            </div>
-          </div>
-          <div className="grid gap-2 sm:grid-cols-3">
-            {([
-              ["showDate", "Hiển thị ngày"],
-              ["showLocation", "Hiển thị địa điểm"],
-              ["showHost", "Hiển thị host"],
-            ] as const).map(([key, label]) => (
-              <label key={key} className="flex min-h-11 items-center gap-3 rounded-xl border border-border/70 bg-background/60 px-3 text-sm">
-                <input type="checkbox" checked={welcomeConfig[key]} onChange={(event) => updateWelcomeConfig({ [key]: event.target.checked })} className="size-4 rounded border-border accent-primary" />
-                {label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
+            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border/80 bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-muted/50 focus-within:ring-3 focus-within:ring-focus/40">
+              <input type="checkbox" checked={welcomeConfig.enabled} onChange={(event) => updateWelcomeConfig({ enabled: event.target.checked })} className="size-4 rounded border-border accent-primary" />
+              Kích hoạt
+            </label>
+          </header>
 
-        <fieldset className="space-y-4 rounded-2xl border border-border/80 p-4">
-          <legend className="px-1 text-sm font-semibold">Poster và chuyển động</legend>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="grid gap-2">
-              <Label htmlFor="welcome_poster_fit">Cách hiển thị poster</Label>
-              <select id="welcome_poster_fit" value={welcomeConfig.poster.fit} onChange={(event) => updateWelcomePoster({ fit: event.target.value as WelcomeHeroConfig["poster"]["fit"] })} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
-                <option value="contain">Giữ đủ poster</option>
-                <option value="cover">Phủ đầy khung</option>
+          <div className={`mt-5 space-y-4 ${!welcomeConfig.enabled ? "pointer-events-none opacity-50 grayscale transition-all" : "transition-all"}`}>
+            <div className="grid gap-4 grid-cols-1">
+              <div className="grid gap-2 min-w-0">
+                <Label htmlFor="welcome_layout">Bố cục trang chào mừng</Label>
+                <select id="welcome_layout" value={welcomeConfig.layout} onChange={(event) => updateWelcomeConfig({ layout: event.target.value as WelcomeHeroConfig["layout"] })} className="w-full min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
+                  <option value="poster-focus">Poster Focus</option>
+                  <option value="split">Cinematic Split</option>
+                  <option value="full-bleed">Full Bleed</option>
+                  <option value="minimal">Minimal</option>
+                </select>
+              </div>
+              <div className="grid gap-2 min-w-0">
+                <Label htmlFor="welcome_primary_label">Nút gọi hành động (CTA) chính</Label>
+                <input id="welcome_primary_label" value={welcomeConfig.primaryLabel} onChange={(event) => updateWelcomeConfig({ primaryLabel: event.target.value })} maxLength={80} className="w-full min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40" />
+              </div>
+              <div className="grid gap-2 min-w-0">
+                <Label htmlFor="welcome_secondary_label">Nút gọi hành động (CTA) phụ</Label>
+                <input id="welcome_secondary_label" value={welcomeConfig.secondaryLabel} onChange={(event) => updateWelcomeConfig({ secondaryLabel: event.target.value })} maxLength={80} className="w-full min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40" />
+              </div>
+              <div className="grid gap-2 min-w-0">
+                <Label htmlFor="welcome_message">Lời chào tùy chỉnh</Label>
+                <textarea id="welcome_message" value={welcomeConfig.message ?? ""} onChange={(event) => updateWelcomeConfig({ message: event.target.value || null })} maxLength={500} rows={3} className="w-full min-h-24 resize-y rounded-xl border border-border/80 bg-background/70 px-3 py-2 text-sm leading-6 outline-none focus-visible:ring-3 focus-visible:ring-focus/40" placeholder="Để trống để dùng lời chào mặc định." />
+              </div>
+            </div>
+            <div className="grid gap-2.5 grid-cols-1 sm:grid-cols-3">
+              {([
+                ["showDate", "Hiển thị ngày"],
+                ["showLocation", "Hiển thị địa điểm"],
+                ["showHost", "Hiển thị host"],
+              ] as const).map(([key, label]) => (
+                <label key={key} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-border/70 bg-background/60 px-3 text-sm hover:bg-background/80 transition-colors">
+                  <input type="checkbox" checked={welcomeConfig[key]} onChange={(event) => updateWelcomeConfig({ [key]: event.target.checked })} className="size-4 rounded border-border accent-primary" />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Section 3: Poster và hiệu ứng */}
+        <section className="space-y-5 rounded-2xl border border-border/80 bg-surface-sunken p-5 sm:p-6">
+          <header>
+            <h3 className="text-base font-semibold">3. Poster & Hiệu ứng Chuyển động</h3>
+            <p className="text-sm text-muted-foreground mt-1">Tùy chỉnh cách hiển thị ảnh bìa và các hiệu ứng đi kèm.</p>
+          </header>
+          
+          <div className="grid gap-4 grid-cols-1">
+            <div className="grid gap-2 min-w-0">
+              <Label htmlFor="welcome_poster_fit">Cách căn chỉnh poster</Label>
+              <select id="welcome_poster_fit" value={welcomeConfig.poster.fit} onChange={(event) => updateWelcomePoster({ fit: event.target.value as WelcomeHeroConfig["poster"]["fit"] })} className="w-full min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
+                <option value="contain">Giữ đủ toàn bộ poster (Contain)</option>
+                <option value="cover">Phủ kín toàn bộ khung (Cover)</option>
               </select>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="welcome_poster_position">Vị trí poster</Label>
-              <select id="welcome_poster_position" value={welcomeConfig.poster.position} onChange={(event) => updateWelcomePoster({ position: event.target.value as WelcomeHeroConfig["poster"]["position"] })} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
-                <option value="center">Ở giữa</option>
-                <option value="top">Phía trên</option>
-                <option value="bottom">Phía dưới</option>
+            <div className="grid gap-2 min-w-0">
+              <Label htmlFor="welcome_poster_position">Vị trí trọng tâm poster</Label>
+              <select id="welcome_poster_position" value={welcomeConfig.poster.position} onChange={(event) => updateWelcomePoster({ position: event.target.value as WelcomeHeroConfig["poster"]["position"] })} className="w-full min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
+                <option value="center">Ở giữa (Center)</option>
+                <option value="top">Phía trên (Top)</option>
+                <option value="bottom">Phía dưới (Bottom)</option>
               </select>
             </div>
           </div>
-          <div className="grid gap-2 sm:grid-cols-3">
+          
+          <div className="grid gap-2.5 grid-cols-1 sm:grid-cols-3">
             {([
               ["border", "Viền poster"],
-              ["shadow", "Đổ bóng"],
-              ["backgroundBlur", "Nền blur"],
+              ["shadow", "Đổ bóng mờ"],
+              ["backgroundBlur", "Hình nền mờ ảo"],
             ] as const).map(([key, label]) => (
-              <label key={key} className="flex min-h-11 items-center gap-3 rounded-xl border border-border/70 px-3 text-sm">
+              <label key={key} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-border/70 bg-background px-3 text-sm hover:bg-muted/30 transition-colors">
                 <input type="checkbox" checked={welcomeConfig.poster[key]} onChange={(event) => updateWelcomePoster({ [key]: event.target.checked })} className="size-4 rounded border-border accent-primary" />
                 {label}
               </label>
             ))}
           </div>
-          <div className="grid gap-2 sm:grid-cols-3">
-            <label className="flex min-h-11 items-center gap-3 rounded-xl border border-border/70 px-3 text-sm">
+          
+          <div className="grid gap-2.5 grid-cols-1 sm:grid-cols-3">
+            <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-border/70 bg-background px-3 text-sm hover:bg-muted/30 transition-colors">
               <input type="checkbox" checked={welcomeConfig.effects.particles} onChange={(event) => updateWelcomeEffects({ particles: event.target.checked })} className="size-4 rounded border-border accent-primary" />
-              Particle trang trí
+              Hạt trang trí bay
             </label>
-            <label className="flex min-h-11 items-center gap-3 rounded-xl border border-border/70 px-3 text-sm">
+            <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-border/70 bg-background px-3 text-sm hover:bg-muted/30 transition-colors">
               <input type="checkbox" checked={welcomeConfig.effects.introAnimation} onChange={(event) => updateWelcomeEffects({ introAnimation: event.target.checked })} className="size-4 rounded border-border accent-primary" />
-              Intro animation
+              Hoạt ảnh xuất hiện
             </label>
-            <label className="flex min-h-11 items-center gap-3 rounded-xl border border-border/70 px-3 text-sm">
+            <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-border/70 bg-background px-3 text-sm hover:bg-muted/30 transition-colors">
               <input type="checkbox" checked={reducedMotionPreview} onChange={(event) => setReducedMotionPreview(event.target.checked)} className="size-4 rounded border-border accent-primary" />
-              Preview reduced-motion
+              Xem trước (Tắt animation)
             </label>
           </div>
-        </fieldset>
+        </section>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="grid gap-2">
-            <Label htmlFor="effect_intensity">Cường độ hiệu ứng</Label>
-            <select id="effect_intensity" name="effect_intensity" value={intensity} onChange={(event) => { const next = event.target.value as EffectIntensity; setIntensity(next); updateWelcomeEffects({ intensity: next }) }} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
-              <option value="off">tắt</option>
-              <option value="low">thấp</option>
-              <option value="medium">trung bình</option>
-              <option value="high">cao</option>
-            </select>
+        {/* Section 4: Tính năng khác */}
+        <section className="space-y-5">
+          <header>
+            <h3 className="text-base font-semibold">4. Cấu hình tính năng khác</h3>
+            <p className="text-sm text-muted-foreground mt-1">Quản lý mã QR và bức tường thông điệp.</p>
+          </header>
+          
+          <div className="grid gap-4 grid-cols-1">
+            <div className="grid gap-2 min-w-0">
+              <Label htmlFor="effect_intensity">Cường độ hiệu ứng chung</Label>
+              <select id="effect_intensity" name="effect_intensity" value={intensity} onChange={(event) => { const next = event.target.value as EffectIntensity; setIntensity(next); updateWelcomeEffects({ intensity: next }) }} className="w-full min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
+                <option value="off">Tắt</option>
+                <option value="low">Thấp</option>
+                <option value="medium">Trung bình</option>
+                <option value="high">Cao</option>
+              </select>
+            </div>
+            <div className="grid gap-2 min-w-0">
+              <Label htmlFor="effect_quality">Chất lượng đồ họa</Label>
+              <select id="effect_quality" name="effect_quality" value={quality} onChange={(event) => setQuality(event.target.value as EffectQuality)} className="w-full min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
+                <option value="auto">Tự động (Khuyên dùng)</option>
+                <option value="low">Thấp (Tối ưu hiệu năng)</option>
+                <option value="medium">Trung bình</option>
+                <option value="high">Cao (Hình ảnh sắc nét)</option>
+              </select>
+            </div>
+            <div className="grid gap-2 min-w-0">
+              <Label htmlFor="wall_layout">Bố cục tường thông điệp</Label>
+              <select id="wall_layout" name="wall_layout" value={layout} onChange={(event) => setLayout(event.target.value as WallLayout)} className="w-full min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
+                <option value="spotlight">Spotlight (Tập trung lời chúc)</option>
+                <option value="grid">Grid (Dạng lưới cổ điển)</option>
+                <option value="photo-focus">Photo Focus (Ưu tiên hiển thị ảnh)</option>
+              </select>
+            </div>
+            <div className="grid gap-2 min-w-0">
+              <Label htmlFor="animation_speed">Tốc độ cuộn của tường</Label>
+              <select id="animation_speed" name="animation_speed" value={animationSpeed} onChange={(event) => setAnimationSpeed(event.target.value as AnimationSpeed)} className="w-full min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
+                <option value="slow">Chậm rãi</option>
+                <option value="normal">Bình thường</option>
+                <option value="fast">Nhanh</option>
+              </select>
+            </div>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="effect_quality">Chất lượng hiệu ứng</Label>
-            <select id="effect_quality" name="effect_quality" value={quality} onChange={(event) => setQuality(event.target.value as EffectQuality)} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
-              <option value="auto">tự động</option>
-              <option value="low">thấp</option>
-              <option value="medium">trung bình</option>
-              <option value="high">cao</option>
-            </select>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="wall_layout">Bố cục bức tường</Label>
-            <select id="wall_layout" name="wall_layout" value={layout} onChange={(event) => setLayout(event.target.value as WallLayout)} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
-              <option value="spotlight">Nổi bật</option>
-              <option value="grid">Dạng lưới</option>
-              <option value="photo-focus">Ưu tiên ảnh</option>
-            </select>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="animation_speed">Tốc độ hoạt ảnh</Label>
-            <select id="animation_speed" name="animation_speed" value={animationSpeed} onChange={(event) => setAnimationSpeed(event.target.value as AnimationSpeed)} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
-              <option value="slow">chậm</option>
-              <option value="normal">bình thường</option>
-              <option value="fast">nhanh</option>
-            </select>
-          </div>
-        </div>
 
-        <div className="grid gap-3 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-end">
-          <label className="flex min-h-11 items-center gap-2 text-sm font-medium">
-            <input type="hidden" name="qr_visible" value="false" />
-            <input type="checkbox" name="qr_visible" value="true" checked={qrVisible} onChange={(event) => setQrVisible(event.target.checked)} className="size-4 rounded border-border accent-primary" />
-            Hiển thị mã QR
-          </label>
-          <div className="grid gap-2">
-            <Label htmlFor="qr_cta">Nội dung nút gọi hành động QR</Label>
-            <input id="qr_cta" name="qr_cta" value={qrCta} onChange={(event) => setQrCta(event.target.value)} maxLength={80} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40" />
+          <div className="flex flex-col gap-4 rounded-2xl border border-border/80 p-4 bg-muted/10">
+            <label className="flex cursor-pointer items-center gap-3 text-sm font-medium">
+              <input type="hidden" name="qr_visible" value="false" />
+              <input type="checkbox" name="qr_visible" value="true" checked={qrVisible} onChange={(event) => setQrVisible(event.target.checked)} className="size-4 rounded border-border accent-primary" />
+              Hiển thị mã QR
+            </label>
+            <div className={`grid gap-2 min-w-0 transition-opacity ${!qrVisible ? "opacity-50 pointer-events-none" : ""}`}>
+              <Label htmlFor="qr_cta">Nội dung kêu gọi ở mã QR</Label>
+              <input id="qr_cta" name="qr_cta" value={qrCta} onChange={(event) => setQrCta(event.target.value)} maxLength={80} className="w-full min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40" placeholder="Ví dụ: Quét mã để gửi lời chúc!" />
+            </div>
           </div>
-        </div>
+        </section>
 
-        <div className="grid gap-2">
-          <CloudinaryCoverUpload value={cover} onChange={(value) => { setCover(value); setIsDirty(true) }} />
-          <Label htmlFor="cover_path">Đường dẫn ảnh bìa (URL Cloudinary)</Label>
-          <input id="cover_path" name="cover_path" value={cover} onChange={(event) => setCover(event.target.value)} placeholder="https://res.cloudinary.com/..." className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40" aria-describedby="cover-help" />
-          <p id="cover-help" className="text-xs leading-5 text-muted-foreground">Chỉ dùng đường dẫn phân phối từ Cloudinary.</p>
-          {cover && !coverIsCloudinary ? <p className="rounded-lg bg-status-danger/10 px-3 py-2 text-sm text-status-danger" role="alert">Đường dẫn chưa hợp lệ; bản xem trước sẽ dùng ảnh mặc định cho đến khi nhập URL Cloudinary.</p> : null}
-        </div>
+        {/* Section 5: Ảnh bìa */}
+        <section className="space-y-4 pt-2">
+          <header>
+            <h3 className="text-base font-semibold">5. Ảnh bìa sự kiện</h3>
+            <p className="text-sm text-muted-foreground mt-1">Hình ảnh đại diện sẽ hiển thị trên poster và các giao diện.</p>
+          </header>
+          
+          <div className="grid gap-3 rounded-2xl border border-border/80 p-4 sm:p-5 bg-card shadow-sm">
+            <CloudinaryCoverUpload value={cover} onChange={(value) => { setCover(value); setIsDirty(true) }} />
+            <div className="mt-2 grid gap-2 min-w-0">
+              <Label htmlFor="cover_path" className="truncate">Hoặc dán đường dẫn ảnh bìa (URL Cloudinary)</Label>
+              <input id="cover_path" name="cover_path" value={cover} onChange={(event) => setCover(event.target.value)} placeholder="https://res.cloudinary.com/..." className="w-full min-w-0 min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40" aria-describedby="cover-help" />
+              <p id="cover-help" className="text-xs leading-5 text-muted-foreground">Bạn có thể tự nhập URL ảnh từ Cloudinary nếu đã có sẵn.</p>
+              {cover && !coverIsCloudinary ? <p className="mt-1 rounded-lg bg-status-danger/10 px-3 py-2 text-sm text-status-danger" role="alert">Đường dẫn chưa hợp lệ; vui lòng sử dụng URL phân phối của Cloudinary.</p> : null}
+            </div>
+          </div>
+        </section>
 
         <div className="flex flex-col gap-3 border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground" role="status" aria-live="polite">{state.message ? "Đã lưu" : isDirty ? "Có thay đổi chưa lưu" : "Đã lưu"}</p>
@@ -374,42 +415,21 @@ export function ThemeEditor({
 
         <div className="mt-4 overflow-hidden rounded-2xl border bg-background p-2 sm:p-3">
           <div className="mx-auto min-w-0 transition-[max-width]" style={{ maxWidth: viewportWidths[viewport] }}>
-            <div
-              data-event-theme={previewTheme}
-              data-welcome-layout={welcomeConfig.layout}
-              data-welcome-preview-motion={reducedMotionPreview ? "reduced" : "full"}
-              className={`event-theme overflow-hidden rounded-2xl border ${welcomeConfig.poster.shadow ? "shadow-xl" : "shadow-none"} ${viewport === "tv" ? "aspect-video" : viewport === "mobile" ? "aspect-[9/16] max-h-[60vh]" : viewport === "fullscreen" ? "min-h-[32rem]" : ""}`}
-            >
-              <div className="relative min-h-64 overflow-hidden p-6 sm:p-8" style={{ backgroundColor: "var(--event-background)", color: "var(--event-text)" }}>
-                {coverIsCloudinary ? <Image src={cover} alt="" fill sizes="(max-width: 768px) 100vw, 60vw" className={`${welcomeConfig.poster.fit === "contain" ? "object-contain" : "object-cover"} opacity-25`} /> : null}
-                <div className="relative z-10 max-w-xl">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--event-primary)" }}>Memoria</p>
-                  <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-medium">
-                    <span className="rounded-full border px-2 py-1">{welcomeConfig.layout === "poster-focus" ? "Poster Focus" : welcomeConfig.layout === "split" ? "Cinematic Split" : welcomeConfig.layout}</span>
-                    <span className="rounded-full border px-2 py-1">{reducedMotionPreview ? "Reduced motion" : "Motion preview"}</span>
-                    {!welcomeConfig.enabled ? <span className="rounded-full border border-status-warning/40 bg-status-warning/10 px-2 py-1 text-status-warning">Tắt Welcome</span> : null}
-                  </div>
-                  <h2 className="mt-4 font-heading text-3xl font-semibold">{eventTitle}</h2>
-                  <p className="mt-3 text-sm font-medium" style={{ color: "var(--event-primary)" }}>{welcomeConfig.message || "Lời chào tùy chỉnh sẽ hiển thị tại đây."}</p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="inline-flex rounded-full px-4 py-2 text-sm font-medium" style={{ backgroundColor: "var(--event-primary)", color: "var(--event-on-primary)" }}>{welcomeConfig.primaryLabel}</span>
-                    <span className="inline-flex rounded-full border px-4 py-2 text-sm font-medium">{welcomeConfig.secondaryLabel}</span>
-                  </div>
-                  <p className="mt-3 text-sm leading-6" style={{ color: "var(--event-muted)" }}>{eventDescription || "Mô tả sự kiện sẽ xuất hiện ở đây."}</p>
-                  <div className="mt-6 inline-flex rounded-full px-4 py-3 text-sm font-medium" style={{ backgroundColor: "var(--event-primary)", color: "var(--event-on-primary)" }}>{qrVisible ? qrCta : "Gửi lời chúc"}</div>
-                </div>
-              </div>
-              <div className="grid gap-4 p-4 sm:grid-cols-2" style={{ backgroundColor: "var(--event-surface)" }}>
-                <article className="rounded-2xl border p-4" style={{ borderColor: "var(--event-border)" }}>
-                  <p className="text-sm leading-6">Một lời chúc được duyệt sẽ xuất hiện ở đây.</p>
-                  <p className="mt-3 text-xs" style={{ color: "var(--event-muted)" }}>Chỉ hiển thị nội dung đã duyệt</p>
-                </article>
-                <article className="rounded-2xl border p-4" style={{ borderColor: "var(--event-border)" }}>
-                  <p className="text-sm leading-6">{qrVisible ? "Mã QR sẽ hiển thị theo cấu hình." : "Mã QR đã được ẩn theo cấu hình."}</p>
-                  <p className="mt-3 text-xs" style={{ color: "var(--event-muted)" }}>Giao diện mẫu: {experiencePreset === "minimal" ? "Tối giản" : experiencePreset === "elegant" ? "Thanh lịch" : experiencePreset === "romantic" ? "Lãng mạn" : experiencePreset === "celebration" ? "Chúc mừng" : experiencePreset === "graduation" ? "Tốt nghiệp" : "Ngân hà"} · Chất lượng: {quality === "auto" ? "Tự động" : quality === "low" ? "Thấp" : quality === "medium" ? "Trung bình" : "Cao"}</p>
-                </article>
-              </div>
-            </div>
+            <WelcomeHeroPreview
+              eventTitle={eventTitle}
+              eventDescription={eventDescription}
+              eventDate={eventDate}
+              cover={cover}
+              coverIsCloudinary={coverIsCloudinary}
+              previewTheme={previewTheme}
+              experienceLabel={experiencePreset === "minimal" ? "Tối giản" : experiencePreset === "elegant" ? "Thanh lịch" : experiencePreset === "romantic" ? "Lãng mạn" : experiencePreset === "celebration" ? "Chúc mừng" : experiencePreset === "graduation" ? "Tốt nghiệp" : "Ngân hà"}
+              qualityLabel={quality === "auto" ? "Tự động" : quality === "low" ? "Thấp" : quality === "medium" ? "Trung bình" : "Cao"}
+              viewport={viewport}
+              qrVisible={qrVisible}
+              qrCta={qrCta}
+              reducedMotion={reducedMotionPreview}
+              config={welcomeConfig}
+            />
           </div>
         </div>
       </section>
