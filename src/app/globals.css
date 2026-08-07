@@ -677,6 +677,9 @@
   .clip-path-envelope-flap {
     clip-path: polygon(0 0, 100% 0, 50% 100%);
   }
+  [data-tour-target] {
+    scroll-margin-top: 6rem;
+  }
 }
 
 @layer base {

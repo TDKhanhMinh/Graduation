@@ -1,6 +1,6 @@
 "use client"
 
-import { CalendarDays, ChevronDown, Compass, MailOpen, Send } from "lucide-react"
+import { CalendarDays, ChevronDown, Compass, MailOpen, Send, Map } from "lucide-react"
 import Link from "next/link"
 import type { ReactNode } from "react"
 
@@ -94,6 +94,24 @@ function ReopenButton() {
   )
 }
 
+function ReplayTourButton() {
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("guided-tour:start"))
+        }
+      }}
+      className={buttonVariants({ variant: "event-outline", size: "lg", className: "min-h-(--control-min-size)" })}
+      data-testid="welcome-replay-tour-btn"
+    >
+      <Map aria-hidden="true" />
+      Hướng dẫn
+    </button>
+  )
+}
+
 export function EventWelcome({
   slug,
   title,
@@ -124,6 +142,7 @@ export function EventWelcome({
     <WelcomeAnalytics slug={slug} status={viewModel.status}>
       <section
       id="welcome-hero"
+      data-tour-target="hero"
       aria-labelledby="event-welcome-title"
       data-testid="event-welcome"
       data-welcome-layout={layout}
@@ -151,6 +170,7 @@ export function EventWelcome({
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">Memoria</p>
             <h2
               id="event-welcome-title"
+              data-tour-target="title"
               className="max-w-3xl font-heading text-4xl font-semibold tracking-tight sm:text-5xl lg:text-7xl"
             >
               {title}
@@ -189,6 +209,7 @@ export function EventWelcome({
               {welcomeConfig.secondaryLabel}
             </Link>
             <ReopenButton />
+            <ReplayTourButton />
             {shareAction}
           </div>
           <Link
@@ -201,7 +222,9 @@ export function EventWelcome({
           </Link>
         </div>
         {isEnabled ? (
-          <div className={cn(
+          <div
+            data-tour-target="cover"
+            className={cn(
             "welcome-hero-poster relative min-w-0 overflow-hidden rounded-xl lg:rounded-2xl shadow-xl",
             layout === "split" ? "order-1 w-full lg:order-2 lg:w-2/5 shrink-0" : "order-1 w-full",
             welcomeConfig.poster.aspectRatio === "square" ? "aspect-square" :

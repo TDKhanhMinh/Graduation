@@ -17,6 +17,7 @@ import { WishComposer } from "@/components/wish-composer/WishComposer"
 import { EventWelcome } from "@/components/event-welcome/event-welcome"
 import { WelcomeExperience } from "@/components/event-welcome/WelcomeExperience"
 import { WelcomeSession } from "@/components/event-welcome/welcome-session"
+import { TourExperience } from "@/components/guided-tour/TourExperience"
 import { getPublicEventBySlug } from "@/features/events/dal"
 import { getApprovedWishesPage } from "@/features/wishes/dal"
 import { EffectProvider, type EffectQuality } from "@/components/effects/effect-provider"
@@ -115,32 +116,34 @@ export default async function PublicEventPage({ params }: Props) {
       <main id="main-content">
         <PageShell className="space-y-8 py-6 sm:py-8">
           <WelcomeExperience slug={slug}>
-            <WelcomeSession slug={slug}>
-              <EventWelcome
-                slug={slug}
-                title={event.title}
-                description={event.description}
-                eventDate={event.event_date}
-                submissionMode={event.submission_mode}
-                coverUrl={coverUrl}
-                themeKey={event.theme_key}
-                welcomeConfig={welcomeConfig}
-                decorativeLayers={
-                  <>
-                    <AuroraBackground preset={effectConfig.preset} intensity={effectConfig.intensity} className="z-0" />
-                    {welcomeConfig.effects.particles ? (
-                      <AmbientParticles preset={effectConfig.preset} intensity={effectConfig.intensity} className="z-0" />
-                    ) : null}
-                    <FloatingPhotoMemories featuredImage={coverUrl} />
-                    <FilmGrainOverlay />
-                  </>
-                }
-                shareAction={<CopyEventLinkButton url={canonicalUrl} />}
-              />
-            </WelcomeSession>
+            <TourExperience slug={slug}>
+              <WelcomeSession slug={slug}>
+                <EventWelcome
+                  slug={slug}
+                  title={event.title}
+                  description={event.description}
+                  eventDate={event.event_date}
+                  submissionMode={event.submission_mode}
+                  coverUrl={coverUrl}
+                  themeKey={event.theme_key}
+                  welcomeConfig={welcomeConfig}
+                  decorativeLayers={
+                    <>
+                      <AuroraBackground preset={effectConfig.preset} intensity={effectConfig.intensity} className="z-0" />
+                      {welcomeConfig.effects.particles ? (
+                        <AmbientParticles preset={effectConfig.preset} intensity={effectConfig.intensity} className="z-0" />
+                      ) : null}
+                      <FloatingPhotoMemories featuredImage={coverUrl} />
+                      <FilmGrainOverlay />
+                    </>
+                  }
+                  shareAction={<CopyEventLinkButton url={canonicalUrl} />}
+                />
+              </WelcomeSession>
+            </TourExperience>
           </WelcomeExperience>
 
-          <section id="submit-wish" aria-labelledby="composer-heading" className="space-y-4">
+          <section id="submit-wish" data-tour-target="submit-wish" aria-labelledby="composer-heading" className="space-y-4">
             <SectionHeading
               as="h2"
               title="Gửi một lời chúc"
@@ -162,7 +165,7 @@ export default async function PublicEventPage({ params }: Props) {
             </Card>
           </section>
 
-          <section id="gallery" aria-labelledby="wall-heading" className="space-y-4">
+          <section id="gallery" data-tour-target="gallery" aria-labelledby="wall-heading" className="space-y-4">
             <SectionHeading
               as="h2"
               title="Bức tường lời chúc"

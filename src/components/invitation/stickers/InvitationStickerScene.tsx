@@ -62,6 +62,9 @@ export const InvitationStickerScene = forwardRef<
     pointToElement: (stickerId: string, selector: string) => {
       controller.pointToElement(stickerId, selector)
     },
+    triggerSpeech: (stickerId: string, text: string, duration?: number) => {
+      controller.triggerSpeech(stickerId, text, duration)
+    },
     pause: () => controller.pause(),
     resume: () => controller.resume(),
     reset: () => controller.reset(),

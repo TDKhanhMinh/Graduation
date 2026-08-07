@@ -38,6 +38,7 @@ export function WelcomeCountdown({ target, initialNow }: WelcomeCountdownProps) 
         className="rounded-xl border border-status-success/25 bg-status-success/10 px-3 py-2 text-sm font-medium text-status-success"
         data-countdown-state="live"
         data-testid="welcome-countdown"
+        data-tour-target="countdown"
         role="status"
       >
         Đang diễn ra
@@ -53,6 +54,7 @@ export function WelcomeCountdown({ target, initialNow }: WelcomeCountdownProps) 
       className="grid min-h-16 w-fit grid-cols-4 gap-2 rounded-xl border border-[var(--event-border)] bg-[var(--event-surface)]/75 px-3 py-2"
       data-countdown-state="upcoming"
       data-testid="welcome-countdown"
+      data-tour-target="countdown"
       role="status"
     >
       {[

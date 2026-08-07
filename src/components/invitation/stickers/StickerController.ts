@@ -126,6 +126,12 @@ export class StickerController {
     }
   }
 
+  public triggerSpeech(id: string, text: string, durationInSeconds: number = 3.5) {
+    const char = this.characters.get(id)
+    if (!char) return
+    char.triggerSpeech(text, durationInSeconds)
+  }
+
   public pointToElement(stickerId: string, selector: string) {
     const char = this.characters.get(stickerId)
     if (!char || typeof document === "undefined") return

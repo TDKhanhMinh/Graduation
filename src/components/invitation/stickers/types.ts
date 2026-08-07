@@ -113,6 +113,8 @@ export interface InvitationStickerSceneHandle {
 
   pointToElement(stickerId: string, selector: string): void
 
+  triggerSpeech(stickerId: string, text: string, duration?: number): void
+
   pause(): void
   resume(): void
   reset(): void
