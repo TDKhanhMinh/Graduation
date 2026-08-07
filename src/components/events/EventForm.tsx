@@ -1,9 +1,13 @@
 "use client"
 
-import { LoaderCircle } from "lucide-react"
+import { ImageIcon, LoaderCircle } from "lucide-react"
 import { useActionState, useEffect, useState } from "react"
 import { useFormStatus } from "react-dom"
 import { toast } from "sonner"
+
+import { CloudinaryCoverUpload } from "@/components/events/cloudinary-cover-upload"
+import type { WelcomeHeroConfig } from "@/features/events/welcome-config"
+import { getDefaultWelcomeHeroConfig } from "@/features/events/welcome-config"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -47,6 +51,17 @@ function FieldError({ id, messages }: { id: string; messages?: string[] }) {
 
 export function EventForm({ action, initialData, submitLabel = "Lưu sự kiện" }: EventFormProps) {
   const [isDirty, setIsDirty] = useState(false)
+  const [cover, setCover] = useState<string>("")
+  const [welcomeConfig, setWelcomeConfig] = useState<WelcomeHeroConfig>(getDefaultWelcomeHeroConfig())
+  
+  const updateWelcomePoster = (updates: Partial<WelcomeHeroConfig["poster"]>) => {
+    setWelcomeConfig((prev) => ({
+      ...prev,
+      poster: { ...prev.poster, ...updates },
+    }))
+    setIsDirty(true)
+  }
+
   const [state, formAction] = useActionState(async (prevState: EventActionState, formData: FormData) => {
     const nextState = await action(prevState, formData)
     if (nextState.message) setIsDirty(false)
@@ -129,6 +144,85 @@ export function EventForm({ action, initialData, submitLabel = "Lưu sự kiện
           </div>
         </div>
       </fieldset>
+
+      <fieldset className="space-y-5 border-t pt-6" data-tour-target="event-cover-poster">
+        <legend className="text-base font-semibold flex items-center gap-2">
+          <ImageIcon className="size-5 text-primary" />
+          Ảnh bìa sự kiện & Poster (Tuỳ chọn)
+        </legend>
+        <p className="text-sm text-muted-foreground">Tải lên ảnh bìa sắc nét từ Cloudinary và căn chỉnh các tùy chọn hiển thị.</p>
+        
+        <div className="space-y-4">
+          <CloudinaryCoverUpload
+            value={cover}
+            onChange={(value) => {
+              setCover(value)
+              setIsDirty(true)
+            }}
+          />
+          <div className="grid gap-2 min-w-0">
+            <Label htmlFor="cover_path" className="truncate">Hoặc dán đường dẫn ảnh bìa (URL Cloudinary)</Label>
+            <input
+              id="cover_path"
+              name="cover_path"
+              value={cover}
+              onChange={(event) => {
+                setCover(event.target.value)
+                setIsDirty(true)
+              }}
+              placeholder="https://res.cloudinary.com/..."
+              className="w-full min-w-0 min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-hidden focus-visible:ring-3 focus-visible:ring-focus/40"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-4 pt-2">
+          <h3 className="text-sm font-semibold">Căn chỉnh & Hiệu ứng Poster</h3>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="grid gap-2 min-w-0">
+              <Label htmlFor="welcome_poster_aspect">Tỉ lệ khung hình</Label>
+              <select
+                id="welcome_poster_aspect"
+                value={welcomeConfig.poster.aspectRatio}
+                onChange={(event) => updateWelcomePoster({ aspectRatio: event.target.value as WelcomeHeroConfig["poster"]["aspectRatio"] })}
+                className="w-full min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-hidden focus-visible:ring-3 focus-visible:ring-focus/40"
+              >
+                <option value="portrait">Dọc (3:4) - Poster</option>
+                <option value="square">Vuông (1:1)</option>
+                <option value="landscape">Ngang (16:9)</option>
+                <option value="auto">Tự do (Tùy ảnh)</option>
+              </select>
+            </div>
+            <div className="grid gap-2 min-w-0">
+              <Label htmlFor="welcome_poster_fit">Cách hiển thị</Label>
+              <select
+                id="welcome_poster_fit"
+                value={welcomeConfig.poster.fit}
+                onChange={(event) => updateWelcomePoster({ fit: event.target.value as WelcomeHeroConfig["poster"]["fit"] })}
+                className="w-full min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-hidden focus-visible:ring-3 focus-visible:ring-focus/40"
+              >
+                <option value="contain">Giữ đủ toàn ảnh</option>
+                <option value="cover">Phủ kín (Cover)</option>
+              </select>
+            </div>
+            <div className="grid gap-2 min-w-0">
+              <Label htmlFor="welcome_poster_position">Trọng tâm ảnh</Label>
+              <select
+                id="welcome_poster_position"
+                value={welcomeConfig.poster.position}
+                onChange={(event) => updateWelcomePoster({ position: event.target.value as WelcomeHeroConfig["poster"]["position"] })}
+                className="w-full min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-hidden focus-visible:ring-3 focus-visible:ring-focus/40"
+              >
+                <option value="center">Giữa (Trung tâm)</option>
+                <option value="top">Trên (Ưu tiên khuôn mặt)</option>
+                <option value="bottom">Dưới</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <input type="hidden" name="welcome_hero" value={JSON.stringify(welcomeConfig)} />
 
       <div className="flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-end">
         <FormStatus isDirty={isDirty} />

@@ -39,6 +39,17 @@ export const dashboardTourConfig: GuidedTourConfig = {
       allowInteraction: true,
     },
     {
+      id: "cover",
+      title: "Ảnh bìa & Poster",
+      content: "Bạn có thể thiết lập ngay ảnh bìa và tinh chỉnh tỷ lệ khung hình cho sự kiện từ bước này, hoặc bổ sung sau trong phần Giao diện.",
+      targetSelector: "[data-tour-target='event-cover-poster']",
+      condition: "always",
+      mascotAction: "point-to-content",
+      speech: "Trang trí ảnh bìa cho sự kiện ở đây nha!",
+      placement: "right",
+      allowInteraction: true,
+    },
+    {
       id: "preview",
       title: "Xem trước trực tiếp",
       content: "Bất cứ thay đổi nào của bạn sẽ được cập nhật ngay tại đây để bạn dễ hình dung sự kiện thực tế.",

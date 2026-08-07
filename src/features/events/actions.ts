@@ -56,6 +56,21 @@ export async function createEvent(
     }
   }
 
+  const rawWelcomeHero = formData.get("welcome_hero")
+  let welcomeHero = null
+  if (typeof rawWelcomeHero === "string" && rawWelcomeHero.trim()) {
+    try {
+      const parsedWelcomeHero = welcomeHeroConfigSchema.safeParse(JSON.parse(rawWelcomeHero))
+      if (parsedWelcomeHero.success) {
+        welcomeHero = parsedWelcomeHero.data
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  const coverPath = String(formData.get("cover_path") || "")
+
   const { data, error } = await supabase
     .from("events")
     .insert({
@@ -66,6 +81,8 @@ export async function createEvent(
       event_date: validated.data.date,
       visibility: validated.data.visibility,
       submission_mode: validated.data.submission_mode,
+      cover_path: coverPath || null,
+      welcome_hero: welcomeHero as unknown as Json,
     })
     .select("id")
     .single()
