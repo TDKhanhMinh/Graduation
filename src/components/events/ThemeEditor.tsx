@@ -10,6 +10,7 @@ import { EFFECT_PRESETS, type EffectIntensity, type EffectPreset } from "@/compo
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import type { EventActionState } from "@/features/events/actions"
+import { getDefaultWelcomeHeroConfig, type WelcomeHeroConfig } from "@/features/events/welcome-config"
 import { isCloudinaryDeliveryUrl } from "@/features/media/cloudinary-cover"
 
 import { CloudinaryCoverUpload } from "./cloudinary-cover-upload"
@@ -85,6 +86,7 @@ type ThemeEditorProps = {
   initialQrVisible?: boolean
   initialQrCta?: string
   initialAnimationSpeed?: AnimationSpeed
+  initialWelcomeHeroConfig?: WelcomeHeroConfig
 }
 
 export function ThemeEditor({
@@ -100,6 +102,7 @@ export function ThemeEditor({
   initialQrVisible = true,
   initialQrCta = "Gửi lời chúc",
   initialAnimationSpeed = "normal",
+  initialWelcomeHeroConfig = getDefaultWelcomeHeroConfig(),
 }: ThemeEditorProps) {
   const [state, formAction] = useActionState(action, {})
   const [viewport, setViewport] = useState<PreviewViewport>("desktop")
@@ -116,8 +119,22 @@ export function ThemeEditor({
   const [qrVisible, setQrVisible] = useState(initialQrVisible)
   const [qrCta, setQrCta] = useState(initialQrCta)
   const [animationSpeed, setAnimationSpeed] = useState<AnimationSpeed>(initialAnimationSpeed)
+  const [welcomeConfig, setWelcomeConfig] = useState<WelcomeHeroConfig>(initialWelcomeHeroConfig)
+  const [reducedMotionPreview, setReducedMotionPreview] = useState(false)
   const coverIsCloudinary = isCloudinaryDeliveryUrl(cover)
   const previewTheme = presetThemeMap[experiencePreset]
+
+  const updateWelcomeConfig = (patch: Partial<WelcomeHeroConfig>) => {
+    setWelcomeConfig((current) => ({ ...current, ...patch }))
+  }
+
+  const updateWelcomePoster = (patch: Partial<WelcomeHeroConfig["poster"]>) => {
+    setWelcomeConfig((current) => ({ ...current, poster: { ...current.poster, ...patch } }))
+  }
+
+  const updateWelcomeEffects = (patch: Partial<WelcomeHeroConfig["effects"]>) => {
+    setWelcomeConfig((current) => ({ ...current, effects: { ...current.effects, ...patch } }))
+  }
 
   useEffect(() => {
     if (state.error) toast.error(state.error)
@@ -133,6 +150,7 @@ export function ThemeEditor({
       >
         <input type="hidden" name="theme_key" value={previewTheme} />
         <input type="hidden" name="experience_preset" value={experiencePreset} />
+        <input type="hidden" name="welcome_hero" value={JSON.stringify(welcomeConfig)} />
 
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Cấu hình Giao diện Sự kiện</p>
@@ -157,7 +175,10 @@ export function ThemeEditor({
                     name="preset_choice"
                     value={item.key}
                     checked={selected}
-                    onChange={() => setExperiencePreset(item.key)}
+                    onChange={() => {
+                      setExperiencePreset(item.key)
+                      updateWelcomeEffects({ preset: item.key })
+                    }}
                     className="sr-only"
                   />
                   <span className={`mt-0.5 flex size-12 shrink-0 items-end justify-end rounded-xl p-1.5 ${item.sample}`}>
@@ -177,10 +198,100 @@ export function ThemeEditor({
           </div>
         </fieldset>
 
+        <fieldset className="space-y-4 rounded-2xl border border-primary/15 bg-primary/5 p-4">
+          <legend className="px-1 text-sm font-semibold">Trang chào mừng</legend>
+          <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
+            <input type="checkbox" checked={welcomeConfig.enabled} onChange={(event) => updateWelcomeConfig({ enabled: event.target.checked })} className="size-4 rounded border-border accent-primary" />
+            Hiển thị Poster Welcome Hero
+          </label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-2">
+              <Label htmlFor="welcome_layout">Bố cục trang chào mừng</Label>
+              <select id="welcome_layout" value={welcomeConfig.layout} onChange={(event) => updateWelcomeConfig({ layout: event.target.value as WelcomeHeroConfig["layout"] })} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
+                <option value="poster-focus">Poster Focus</option>
+                <option value="split">Cinematic Split</option>
+                <option value="full-bleed">Full Bleed</option>
+                <option value="minimal">Minimal</option>
+              </select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="welcome_primary_label">CTA chính</Label>
+              <input id="welcome_primary_label" value={welcomeConfig.primaryLabel} onChange={(event) => updateWelcomeConfig({ primaryLabel: event.target.value })} maxLength={80} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="welcome_secondary_label">CTA phụ</Label>
+              <input id="welcome_secondary_label" value={welcomeConfig.secondaryLabel} onChange={(event) => updateWelcomeConfig({ secondaryLabel: event.target.value })} maxLength={80} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40" />
+            </div>
+            <div className="grid gap-2 sm:col-span-2">
+              <Label htmlFor="welcome_message">Lời chào tùy chỉnh</Label>
+              <textarea id="welcome_message" value={welcomeConfig.message ?? ""} onChange={(event) => updateWelcomeConfig({ message: event.target.value || null })} maxLength={500} rows={3} className="min-h-24 resize-y rounded-xl border border-border/80 bg-background/70 px-3 py-2 text-sm leading-6 outline-none focus-visible:ring-3 focus-visible:ring-focus/40" placeholder="Để trống để dùng lời chào theo trạng thái sự kiện." />
+            </div>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {([
+              ["showDate", "Hiển thị ngày"],
+              ["showLocation", "Hiển thị địa điểm"],
+              ["showHost", "Hiển thị host"],
+            ] as const).map(([key, label]) => (
+              <label key={key} className="flex min-h-11 items-center gap-3 rounded-xl border border-border/70 bg-background/60 px-3 text-sm">
+                <input type="checkbox" checked={welcomeConfig[key]} onChange={(event) => updateWelcomeConfig({ [key]: event.target.checked })} className="size-4 rounded border-border accent-primary" />
+                {label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className="space-y-4 rounded-2xl border border-border/80 p-4">
+          <legend className="px-1 text-sm font-semibold">Poster và chuyển động</legend>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-2">
+              <Label htmlFor="welcome_poster_fit">Cách hiển thị poster</Label>
+              <select id="welcome_poster_fit" value={welcomeConfig.poster.fit} onChange={(event) => updateWelcomePoster({ fit: event.target.value as WelcomeHeroConfig["poster"]["fit"] })} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
+                <option value="contain">Giữ đủ poster</option>
+                <option value="cover">Phủ đầy khung</option>
+              </select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="welcome_poster_position">Vị trí poster</Label>
+              <select id="welcome_poster_position" value={welcomeConfig.poster.position} onChange={(event) => updateWelcomePoster({ position: event.target.value as WelcomeHeroConfig["poster"]["position"] })} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
+                <option value="center">Ở giữa</option>
+                <option value="top">Phía trên</option>
+                <option value="bottom">Phía dưới</option>
+              </select>
+            </div>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {([
+              ["border", "Viền poster"],
+              ["shadow", "Đổ bóng"],
+              ["backgroundBlur", "Nền blur"],
+            ] as const).map(([key, label]) => (
+              <label key={key} className="flex min-h-11 items-center gap-3 rounded-xl border border-border/70 px-3 text-sm">
+                <input type="checkbox" checked={welcomeConfig.poster[key]} onChange={(event) => updateWelcomePoster({ [key]: event.target.checked })} className="size-4 rounded border-border accent-primary" />
+                {label}
+              </label>
+            ))}
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <label className="flex min-h-11 items-center gap-3 rounded-xl border border-border/70 px-3 text-sm">
+              <input type="checkbox" checked={welcomeConfig.effects.particles} onChange={(event) => updateWelcomeEffects({ particles: event.target.checked })} className="size-4 rounded border-border accent-primary" />
+              Particle trang trí
+            </label>
+            <label className="flex min-h-11 items-center gap-3 rounded-xl border border-border/70 px-3 text-sm">
+              <input type="checkbox" checked={welcomeConfig.effects.introAnimation} onChange={(event) => updateWelcomeEffects({ introAnimation: event.target.checked })} className="size-4 rounded border-border accent-primary" />
+              Intro animation
+            </label>
+            <label className="flex min-h-11 items-center gap-3 rounded-xl border border-border/70 px-3 text-sm">
+              <input type="checkbox" checked={reducedMotionPreview} onChange={(event) => setReducedMotionPreview(event.target.checked)} className="size-4 rounded border-border accent-primary" />
+              Preview reduced-motion
+            </label>
+          </div>
+        </fieldset>
+
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-2">
             <Label htmlFor="effect_intensity">Cường độ hiệu ứng</Label>
-            <select id="effect_intensity" name="effect_intensity" value={intensity} onChange={(event) => setIntensity(event.target.value as EffectIntensity)} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
+            <select id="effect_intensity" name="effect_intensity" value={intensity} onChange={(event) => { const next = event.target.value as EffectIntensity; setIntensity(next); updateWelcomeEffects({ intensity: next }) }} className="min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
               <option value="off">tắt</option>
               <option value="low">thấp</option>
               <option value="medium">trung bình</option>
@@ -265,13 +376,25 @@ export function ThemeEditor({
           <div className="mx-auto min-w-0 transition-[max-width]" style={{ maxWidth: viewportWidths[viewport] }}>
             <div
               data-event-theme={previewTheme}
-              className={`event-theme overflow-hidden rounded-2xl border shadow-sm ${viewport === "tv" ? "aspect-video" : viewport === "mobile" ? "aspect-[9/16] max-h-[60vh]" : viewport === "fullscreen" ? "min-h-[32rem]" : ""}`}
+              data-welcome-layout={welcomeConfig.layout}
+              data-welcome-preview-motion={reducedMotionPreview ? "reduced" : "full"}
+              className={`event-theme overflow-hidden rounded-2xl border ${welcomeConfig.poster.shadow ? "shadow-xl" : "shadow-none"} ${viewport === "tv" ? "aspect-video" : viewport === "mobile" ? "aspect-[9/16] max-h-[60vh]" : viewport === "fullscreen" ? "min-h-[32rem]" : ""}`}
             >
               <div className="relative min-h-64 overflow-hidden p-6 sm:p-8" style={{ backgroundColor: "var(--event-background)", color: "var(--event-text)" }}>
-                {coverIsCloudinary ? <Image src={cover} alt="" fill sizes="(max-width: 768px) 100vw, 60vw" className="object-cover opacity-25" /> : null}
+                {coverIsCloudinary ? <Image src={cover} alt="" fill sizes="(max-width: 768px) 100vw, 60vw" className={`${welcomeConfig.poster.fit === "contain" ? "object-contain" : "object-cover"} opacity-25`} /> : null}
                 <div className="relative z-10 max-w-xl">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--event-primary)" }}>Memoria</p>
+                  <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-medium">
+                    <span className="rounded-full border px-2 py-1">{welcomeConfig.layout === "poster-focus" ? "Poster Focus" : welcomeConfig.layout === "split" ? "Cinematic Split" : welcomeConfig.layout}</span>
+                    <span className="rounded-full border px-2 py-1">{reducedMotionPreview ? "Reduced motion" : "Motion preview"}</span>
+                    {!welcomeConfig.enabled ? <span className="rounded-full border border-status-warning/40 bg-status-warning/10 px-2 py-1 text-status-warning">Tắt Welcome</span> : null}
+                  </div>
                   <h2 className="mt-4 font-heading text-3xl font-semibold">{eventTitle}</h2>
+                  <p className="mt-3 text-sm font-medium" style={{ color: "var(--event-primary)" }}>{welcomeConfig.message || "Lời chào tùy chỉnh sẽ hiển thị tại đây."}</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="inline-flex rounded-full px-4 py-2 text-sm font-medium" style={{ backgroundColor: "var(--event-primary)", color: "var(--event-on-primary)" }}>{welcomeConfig.primaryLabel}</span>
+                    <span className="inline-flex rounded-full border px-4 py-2 text-sm font-medium">{welcomeConfig.secondaryLabel}</span>
+                  </div>
                   <p className="mt-3 text-sm leading-6" style={{ color: "var(--event-muted)" }}>{eventDescription || "Mô tả sự kiện sẽ xuất hiện ở đây."}</p>
                   <div className="mt-6 inline-flex rounded-full px-4 py-3 text-sm font-medium" style={{ backgroundColor: "var(--event-primary)", color: "var(--event-on-primary)" }}>{qrVisible ? qrCta : "Gửi lời chúc"}</div>
                 </div>

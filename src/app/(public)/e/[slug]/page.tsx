@@ -19,7 +19,7 @@ import { WelcomeSession } from "@/components/event-welcome/welcome-session"
 import { getPublicEventBySlug } from "@/features/events/dal"
 import { getApprovedWishesPage } from "@/features/wishes/dal"
 import { EffectProvider, type EffectQuality } from "@/components/effects/effect-provider"
-import { getEffectConfig, type EffectIntensity } from "@/components/effects/effect-config"
+import { getEffectConfig } from "@/components/effects/effect-config"
 import { getSiteUrl } from "@/lib/supabase/env"
 
 type Props = {
@@ -87,7 +87,8 @@ export default async function PublicEventPage({ params }: Props) {
 
   const coverUrl = getCloudinaryCover(event.cover_path)
   const wishes = await getApprovedWishesPage(event.id, 20)
-  const effectConfig = getEffectConfig(event.experience_preset, event.effect_intensity as EffectIntensity)
+  const welcomeConfig = event.welcome_hero
+  const effectConfig = getEffectConfig(welcomeConfig.effects.preset, welcomeConfig.effects.intensity)
 
   return (
     <EffectProvider preset={effectConfig.preset} intensity={effectConfig.intensity} quality={event.effect_quality as EffectQuality}>
@@ -114,16 +115,20 @@ export default async function PublicEventPage({ params }: Props) {
         <PageShell className="space-y-8 py-6 sm:py-8">
           <WelcomeSession slug={slug}>
             <EventWelcome
+              slug={slug}
               title={event.title}
               description={event.description}
               eventDate={event.event_date}
               submissionMode={event.submission_mode}
               coverUrl={coverUrl}
               themeKey={event.theme_key}
+              welcomeConfig={welcomeConfig}
               decorativeLayers={
                 <>
                   <AuroraBackground preset={effectConfig.preset} intensity={effectConfig.intensity} className="z-0" />
-                  <AmbientParticles preset={effectConfig.preset} intensity={effectConfig.intensity} className="z-0" />
+                  {welcomeConfig.effects.particles ? (
+                    <AmbientParticles preset={effectConfig.preset} intensity={effectConfig.intensity} className="z-0" />
+                  ) : null}
                   <FloatingPhotoMemories featuredImage={coverUrl} />
                   <FilmGrainOverlay />
                 </>

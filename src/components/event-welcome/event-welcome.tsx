@@ -5,33 +5,40 @@ import type { ReactNode } from "react"
 import { buttonVariants } from "@/components/ui/button"
 import { StatusBadge } from "@/components/ui/status-badge"
 import {
+  WELCOME_ANCHORS,
   createWelcomeViewModel,
   formatWelcomeDate,
   getWelcomePresentation,
 } from "@/features/events/welcome"
+import type { WelcomeHeroConfig } from "@/features/events/welcome-config"
 import { cn } from "@/lib/utils"
 
 import { PosterMedia } from "./poster-media"
+import { WelcomeAnalytics } from "./welcome-analytics"
 import { WelcomeCountdown } from "./welcome-countdown"
 
 type EventWelcomeProps = {
+  slug: string
   title: string
   description: string | null
   eventDate: string | null
   submissionMode: string | null
   coverUrl: string | null
   themeKey: string
+  welcomeConfig: WelcomeHeroConfig
   decorativeLayers?: ReactNode
   shareAction?: ReactNode
 }
 
 export function EventWelcome({
+  slug,
   title,
   description,
   eventDate,
   submissionMode,
   coverUrl,
   themeKey,
+  welcomeConfig,
   decorativeLayers,
   shareAction,
 }: EventWelcomeProps) {
@@ -42,23 +49,40 @@ export function EventWelcome({
   )
   const presentation = getWelcomePresentation(viewModel.status)
   const dateLabel = formatWelcomeDate(eventDate)
-  const welcomeMessage = description || presentation.statusCopy
+  const layout = welcomeConfig.layout === "poster-focus" ? "poster-focus" : "split"
+  const isEnabled = welcomeConfig.enabled
+  const primaryTarget = viewModel.canSubmitWish && welcomeConfig.primaryAction === "submit-wish"
+    ? WELCOME_ANCHORS.wish
+    : WELCOME_ANCHORS.gallery
+  const primaryLabel = viewModel.canSubmitWish ? welcomeConfig.primaryLabel : presentation.primaryLabel
+  const welcomeMessage = welcomeConfig.message || description || presentation.statusCopy
 
   return (
-    <section
+    <WelcomeAnalytics slug={slug} status={viewModel.status}>
+      <section
       id="welcome-hero"
       aria-labelledby="event-welcome-title"
       data-testid="event-welcome"
-      data-welcome-layout="poster-focus cinematic-split"
+      data-welcome-layout={layout}
+      data-welcome-enabled={isEnabled}
+      data-welcome-intro={welcomeConfig.effects.introAnimation ? "enabled" : "disabled"}
       data-event-status={viewModel.status}
       data-event-theme={themeKey}
-      className="welcome-hero-surface relative isolate overflow-hidden rounded-[2rem] border border-[var(--event-border)] bg-[var(--event-surface)] shadow-[0_28px_70px_-48px_var(--event-primary)]"
+      className={cn(
+        "welcome-hero-surface relative isolate overflow-hidden rounded-[2rem] border border-[var(--event-border)] bg-[var(--event-surface)] shadow-[0_28px_70px_-48px_var(--event-primary)]",
+        !isEnabled && "border-dashed shadow-none",
+      )}
     >
-      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
-        {decorativeLayers}
-      </div>
-      <div className="relative z-10 grid min-h-[520px] lg:grid-cols-[3fr_2fr]">
-        <div className="welcome-hero-content order-2 flex min-w-0 flex-col justify-center gap-6 p-6 sm:p-10 lg:order-1 lg:p-14">
+      {isEnabled ? <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">{decorativeLayers}</div> : null}
+      <div className={cn(
+        "relative z-10 min-h-[520px]",
+        isEnabled && layout === "split" ? "grid lg:grid-cols-[3fr_2fr]" : "flex flex-col",
+      )}>
+        <div className={cn(
+          "welcome-hero-content flex min-w-0 flex-col justify-center gap-6 p-6 sm:p-10 lg:p-14",
+          isEnabled && layout === "poster-focus" ? "order-2" : "order-2 lg:order-1",
+          !isEnabled && "order-1",
+        )}>
           <StatusBadge tone={presentation.badgeTone} className="welcome-hero-status w-fit">{presentation.badge}</StatusBadge>
           <div className="space-y-4">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">Memoria</p>
@@ -69,35 +93,37 @@ export function EventWelcome({
               {title}
             </h2>
             <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">{welcomeMessage}</p>
-            {description ? (
+            {description && !welcomeConfig.message ? (
               <p className="max-w-2xl text-sm leading-6 text-muted-foreground" data-testid="welcome-status-copy">
                 {presentation.statusCopy}
               </p>
             ) : null}
-            {dateLabel ? (
+            {welcomeConfig.showDate && dateLabel ? (
               <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <CalendarDays aria-hidden="true" className="size-4" />
                 {dateLabel}
               </p>
             ) : null}
-            {viewModel.countdownTarget ? (
+            {welcomeConfig.showDate && viewModel.countdownTarget ? (
               <WelcomeCountdown target={viewModel.countdownTarget} initialNow={initialNow.toISOString()} />
             ) : null}
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <Link
-              href={`#${presentation.primaryTarget}`}
+              href={"#" + primaryTarget}
+              data-welcome-action={primaryTarget === WELCOME_ANCHORS.wish ? "submit-wish" : "explore"}
               className={buttonVariants({ variant: "event", size: "lg", className: "min-h-(--control-min-size)" })}
             >
               <Send aria-hidden="true" />
-              {presentation.primaryLabel}
+              {primaryLabel}
             </Link>
             <Link
               href="#wall-heading"
+              data-welcome-action="explore"
               className={buttonVariants({ variant: "event-outline", size: "lg", className: "min-h-(--control-min-size)" })}
             >
               <Compass aria-hidden="true" />
-              {presentation.canSubmitWish ? "Khám phá sự kiện" : "Xem lại sự kiện"}
+              {welcomeConfig.secondaryLabel}
             </Link>
             {shareAction}
           </div>
@@ -110,10 +136,24 @@ export function EventWelcome({
             <ChevronDown aria-hidden="true" className="size-4" />
           </Link>
         </div>
-        <div className="welcome-hero-poster order-1 min-w-0 overflow-hidden lg:order-2">
-          <PosterMedia src={coverUrl} alt={`${title} cover`} />
-        </div>
+        {isEnabled ? (
+          <div className={cn(
+            "welcome-hero-poster min-w-0 overflow-hidden",
+            layout === "poster-focus" ? "order-1" : "order-1 lg:order-2",
+          )}>
+            <PosterMedia
+              src={coverUrl}
+              alt={title + " cover"}
+              fit={welcomeConfig.poster.fit}
+              position={welcomeConfig.poster.position}
+              border={welcomeConfig.poster.border}
+              shadow={welcomeConfig.poster.shadow}
+              backgroundBlur={welcomeConfig.poster.backgroundBlur}
+            />
+          </div>
+        ) : null}
       </div>
-    </section>
+      </section>
+    </WelcomeAnalytics>
   )
 }

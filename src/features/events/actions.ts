@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/server"
 import { appearanceSchema, eventSchema, normalizeSlug } from "./schema"
 import { createError } from "@/lib/observability/error"
 import { logger } from "@/lib/observability/logger"
+import { Json } from "@/types/database"
+import { getDefaultWelcomeHeroConfig, welcomeHeroConfigSchema } from "./welcome-config"
 
 export type EventActionState = {
   error?: string
@@ -173,6 +175,23 @@ export async function updateEventAppearance(
     }
   }
 
+  const rawWelcomeHero = formData.get("welcome_hero")
+  let welcomeHero = getDefaultWelcomeHeroConfig({
+    experience_preset: validated.data.experience_preset,
+    effect_intensity: validated.data.effect_intensity,
+  })
+  if (typeof rawWelcomeHero === "string" && rawWelcomeHero.trim()) {
+    try {
+      const parsedWelcomeHero = welcomeHeroConfigSchema.safeParse(JSON.parse(rawWelcomeHero))
+      if (!parsedWelcomeHero.success) {
+        return { error: "Cấu hình Trang chào mừng không hợp lệ.", fieldErrors: { welcome_hero: ["Cấu hình không hợp lệ."] } }
+      }
+      welcomeHero = parsedWelcomeHero.data
+    } catch {
+      return { error: "Cấu hình Trang chào mừng không hợp lệ.", fieldErrors: { welcome_hero: ["Cấu hình không hợp lệ."] } }
+    }
+  }
+
   const supabase = await createClient()
   const { error } = await supabase
     .from("events")
@@ -186,6 +205,7 @@ export async function updateEventAppearance(
       qr_cta: validated.data.qr_cta,
       animation_speed: validated.data.animation_speed,
       cover_path: validated.data.cover_path || null,
+      welcome_hero: welcomeHero as unknown as Json,
       updated_at: new Date().toISOString(),
     })
     .eq("id", eventId)

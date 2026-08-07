@@ -3,34 +3,49 @@
 import Image from "next/image"
 import { useState } from "react"
 
+import { cn } from "@/lib/utils"
+
 type PosterMediaProps = {
   src: string | null
   alt: string
+  fit: "contain" | "cover"
+  position: "center" | "top" | "bottom"
+  border: boolean
+  shadow: boolean
+  backgroundBlur: boolean
 }
 
-export function PosterMedia({ src, alt }: PosterMediaProps) {
+export function PosterMedia({ src, alt, fit, position, border, shadow, backgroundBlur }: PosterMediaProps) {
   const [failed, setFailed] = useState(false)
   const imageSrc = src && !failed ? src : ""
+  const objectPosition = position === "top" ? "center top" : position === "bottom" ? "center bottom" : "center"
 
   return (
     <div
-      className="relative min-h-72 overflow-hidden bg-[radial-gradient(circle_at_20%_20%,var(--event-secondary),transparent_45%),linear-gradient(135deg,var(--event-primary),var(--event-secondary))] sm:min-h-96 lg:min-h-full"
+      className={cn(
+        "relative min-h-72 overflow-hidden bg-[radial-gradient(circle_at_20%_20%,var(--event-secondary),transparent_45%),linear-gradient(135deg,var(--event-primary),var(--event-secondary))] sm:min-h-96 lg:min-h-full",
+        border && "border border-[var(--event-border)]",
+        shadow && "shadow-2xl",
+      )}
       data-poster-state={imageSrc ? "ready" : src ? "error" : "fallback"}
     >
       {imageSrc ? (
         <>
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 scale-110 bg-cover bg-center opacity-45 blur-2xl"
-            style={{ backgroundImage: `url(${imageSrc})` }}
-          />
+          {backgroundBlur ? (
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 scale-110 bg-cover bg-center opacity-45 blur-2xl"
+              style={{ backgroundImage: "url(" + imageSrc + ")" }}
+            />
+          ) : null}
           <Image
             src={imageSrc}
             alt={alt}
             fill
             priority
             sizes="(max-width: 1024px) 100vw, 40vw"
-            className="relative object-contain sm:object-cover"
+            className={cn("relative", fit === "contain" ? "object-contain" : "object-cover")}
+            style={{ objectPosition }}
             onError={() => setFailed(true)}
           />
         </>

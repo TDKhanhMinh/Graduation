@@ -4,6 +4,7 @@ import { ThemeEditor } from "@/components/events/ThemeEditor"
 import { SectionHeading } from "@/components/ui/section-heading"
 import { getOwnedEventById } from "@/features/events/dal"
 import { updateEventAppearance } from "@/features/events/actions"
+import { normalizeWelcomeHeroConfig } from "@/features/events/welcome-config"
 
 export const metadata = {
   title: "Giao diện",
@@ -40,6 +41,7 @@ export default async function EventAppearancePage({
         initialQrVisible={event.qr_visible}
         initialQrCta={event.qr_cta}
         initialAnimationSpeed={event.animation_speed as "slow" | "normal" | "fast"}
+        initialWelcomeHeroConfig={normalizeWelcomeHeroConfig(event.welcome_hero, event)}
       />
     </div>
   )

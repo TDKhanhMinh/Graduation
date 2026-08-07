@@ -79,6 +79,7 @@ export type Database = {
           title: string
           updated_at: string
           visibility: string
+          welcome_hero: Json
         }
         Insert: {
           allow_ai?: boolean
@@ -113,6 +114,7 @@ export type Database = {
           title: string
           updated_at?: string
           visibility?: string
+          welcome_hero?: Json
         }
         Update: {
           allow_ai?: boolean
@@ -147,6 +149,7 @@ export type Database = {
           title?: string
           updated_at?: string
           visibility?: string
+          welcome_hero?: Json
         }
         Relationships: []
       }
