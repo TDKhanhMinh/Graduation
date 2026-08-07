@@ -22,7 +22,7 @@ export function TourStickerBridge({ step, sceneRef, mascotId = "anime-party" }: 
 
     if (step.mascotAction) {
       if (step.mascotAction === "point-to-content" && step.targetSelector) {
-        sceneRef.current.pointToElement(mascotId, step.targetSelector)
+        sceneRef.current.pointToElement(mascotId, step.targetSelector, step.placement)
       } else {
         sceneRef.current.triggerAction(mascotId, step.mascotAction as StickerAction)
       }

@@ -112,7 +112,7 @@ export interface InvitationStickerSceneHandle {
 
   triggerAction(stickerId: string, action: StickerAction): void
 
-  pointToElement(stickerId: string, selector: string): void
+  pointToElement(stickerId: string, selector: string, placement?: string): void
 
   teleportToElement(stickerId: string, selector: string, placement?: "center" | "top-left" | "top" | "left"): void
 

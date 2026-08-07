@@ -134,7 +134,7 @@ export class StickerController {
     char.triggerSpeech(text, durationInSeconds)
   }
 
-  public pointToElement(stickerId: string, selector: string) {
+  public pointToElement(stickerId: string, selector: string, placement?: string) {
     const char = this.characters.get(stickerId)
     if (!char || typeof document === "undefined") return
 
@@ -148,8 +148,21 @@ export class StickerController {
     if (rect) {
       const containerWidth = window.innerWidth
       const containerHeight = window.innerHeight
-      char.targetNormalizedX = Math.min(Math.max((rect.left + rect.width / 2) / containerWidth, 0.1), 0.9)
-      char.targetNormalizedY = Math.min(Math.max((rect.top + rect.height / 2) / containerHeight, 0.1), 0.9)
+      
+      let targetPixelX = rect.left + rect.width / 2
+      let targetPixelY = rect.top + rect.height / 2
+      
+      // If placement is provided, shift the sticker so it points AT the element instead of covering it
+      if (placement) {
+        const offset = 60
+        if (placement.includes("top")) targetPixelY = rect.top - offset
+        if (placement.includes("bottom")) targetPixelY = rect.bottom + offset
+        if (placement.includes("left")) targetPixelX = rect.left - offset
+        if (placement.includes("right")) targetPixelX = rect.right + offset
+      }
+
+      char.targetNormalizedX = Math.min(Math.max(targetPixelX / containerWidth, 0.1), 0.9)
+      char.targetNormalizedY = Math.min(Math.max(targetPixelY / containerHeight, 0.1), 0.9)
       char.setState("reacting", "point-to-cta")
 
       const rsvpMsgs = getSpeechCategory(char.def.speechMessages, "rsvp")
