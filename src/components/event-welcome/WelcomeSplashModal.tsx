@@ -127,13 +127,13 @@ export function WelcomeSplashModal({
   // Trigger onOpeningComplete after transition delay if opening
   useEffect(() => {
     if (stage === "opening") {
-      stickerSceneRef.current?.celebrate({ intensity: "high", duration: 3000 })
+      stickerSceneRef.current?.celebrate({ intensity: "high", duration: 3500 })
       if (onOpeningComplete) {
         const timer = window.setTimeout(
           () => {
             onOpeningComplete()
           },
-          reducedMotion ? 50 : 600,
+          reducedMotion ? 50 : 1400,
         )
         return () => window.clearTimeout(timer)
       }
@@ -322,7 +322,7 @@ export function WelcomeSplashModal({
               {/* 3D Envelope Triangular Flap (Flips 180° Open when clicked) */}
               <div
                 className={cn(
-                  "absolute inset-x-0 top-0 h-32 origin-top transition-transform duration-700 ease-in-out transform-gpu z-20 pointer-events-none",
+                  "absolute inset-x-0 top-0 h-32 origin-top transition-transform duration-1000 ease-in-out transform-gpu z-20 pointer-events-none",
                   stage === "opening" ? "-rotate-x-180 opacity-40 scale-y-90" : "rotate-x-0",
                 )}
                 style={{ transformStyle: "preserve-3d" }}
