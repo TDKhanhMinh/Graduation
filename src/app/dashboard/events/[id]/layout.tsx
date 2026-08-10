@@ -18,7 +18,10 @@ function formatDate(value: string | null) {
 
 export default async function EventLayout({ children, params }: { children: ReactNode; params: Promise<{ id: string }> }) {
   const { id } = await params
-  const event = await getOwnedEventById(id)
+  const [event, notificationSnapshot] = await Promise.all([
+    getOwnedEventById(id),
+    getEventNotificationSnapshot(id),
+  ])
   if (!event) notFound()
 
   const publicUrl = `/e/${event.slug}`
@@ -41,8 +44,11 @@ export default async function EventLayout({ children, params }: { children: Reac
         </div>
       </div>
 
-      <EventNav eventId={event.id} />
+      <EventNav eventId={event.id} notificationUnreadCount={notificationSnapshot.unreadCount} />
+      <EventNotificationCenter eventId={event.id} {...notificationSnapshot} />
       <div>{children}</div>
     </div>
   )
 }
+import { EventNotificationCenter } from '@/components/notifications/EventNotificationCenter'
+import { getEventNotificationSnapshot } from '@/features/notifications/dal'

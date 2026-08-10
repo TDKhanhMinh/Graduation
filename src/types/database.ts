@@ -510,6 +510,319 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_events: {
+        Row: {
+          created_at: string
+          dedupe_key: string
+          event_id: string
+          expires_at: string
+          id: string
+          kind: string
+          payload: Json
+          read_at: string | null
+          recipient_id: string
+          wish_id: string
+        }
+        Insert: {
+          created_at?: string
+          dedupe_key: string
+          event_id: string
+          expires_at?: string
+          id?: string
+          kind: string
+          payload?: Json
+          read_at?: string | null
+          recipient_id: string
+          wish_id: string
+        }
+        Update: {
+          created_at?: string
+          dedupe_key?: string
+          event_id?: string
+          expires_at?: string
+          id?: string
+          kind?: string
+          payload?: Json
+          read_at?: string | null
+          recipient_id?: string
+          wish_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'notification_events_event_id_fkey'
+            columns: ['event_id']
+            isOneToOne: false
+            referencedRelation: 'events'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'notification_events_wish_id_fkey'
+            columns: ['wish_id']
+            isOneToOne: false
+            referencedRelation: 'wishes'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          event_id: string
+          owner_id: string
+          pending_wish_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          owner_id: string
+          pending_wish_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          owner_id?: string
+          pending_wish_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'notification_preferences_event_id_fkey'
+            columns: ['event_id']
+            isOneToOne: false
+            referencedRelation: 'events'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      export_jobs: {
+        Row: {
+          artifact_path: string | null
+          artifact_sha256: string | null
+          artifact_size_bytes: number | null
+          attempt_count: number
+          cancelled_at: string | null
+          completed_at: string | null
+          created_at: string
+          event_id: string
+          id: string
+          idempotency_key: string
+          last_error_code: string | null
+          last_error_message: string | null
+          lease_expires_at: string | null
+          lease_owner: string | null
+          max_attempts: number
+          next_attempt_at: string
+          owner_id: string
+          print_token_consumed_at: string | null
+          print_token_expires_at: string
+          print_token_hash: string
+          snapshot: Json
+          snapshot_hash: string
+          started_at: string | null
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          artifact_path?: string | null
+          artifact_sha256?: string | null
+          artifact_size_bytes?: number | null
+          attempt_count?: number
+          cancelled_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          event_id: string
+          id: string
+          idempotency_key: string
+          last_error_code?: string | null
+          last_error_message?: string | null
+          lease_expires_at?: string | null
+          lease_owner?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          owner_id: string
+          print_token_consumed_at?: string | null
+          print_token_expires_at: string
+          print_token_hash: string
+          snapshot: Json
+          snapshot_hash: string
+          started_at?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          artifact_path?: string | null
+          artifact_sha256?: string | null
+          artifact_size_bytes?: number | null
+          attempt_count?: number
+          cancelled_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          event_id?: string
+          id?: string
+          idempotency_key?: string
+          last_error_code?: string | null
+          last_error_message?: string | null
+          lease_expires_at?: string | null
+          lease_owner?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          owner_id?: string
+          print_token_consumed_at?: string | null
+          print_token_expires_at?: string
+          print_token_hash?: string
+          snapshot?: Json
+          snapshot_hash?: string
+          started_at?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'export_jobs_event_id_fkey'
+            columns: ['event_id']
+            isOneToOne: false
+            referencedRelation: 'events'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      director_sessions: {
+        Row: {
+          created_at: string
+          display_token_expires_at: string
+          display_token_hash: string
+          event_id: string
+          id: string
+          last_command_sequence: number
+          owner_id: string
+          snapshot: Json
+          status: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          display_token_expires_at: string
+          display_token_hash: string
+          event_id: string
+          id: string
+          last_command_sequence?: number
+          owner_id: string
+          snapshot: Json
+          status?: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          display_token_expires_at?: string
+          display_token_hash?: string
+          event_id?: string
+          id?: string
+          last_command_sequence?: number
+          owner_id?: string
+          snapshot?: Json
+          status?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'director_sessions_event_id_fkey'
+            columns: ['event_id']
+            isOneToOne: false
+            referencedRelation: 'events'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      event_collaborators: {
+        Row: {
+          created_at: string
+          event_id: string
+          invited_by: string
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          invited_by: string
+          role: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          invited_by?: string
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'event_collaborators_event_id_fkey'
+            columns: ['event_id']
+            isOneToOne: false
+            referencedRelation: 'events'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      event_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          email: string
+          event_id: string
+          id: string
+          invited_by: string
+          revoked_at: string | null
+          role: string
+          token_expires_at: string
+          token_hash: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email: string
+          event_id: string
+          id: string
+          invited_by: string
+          revoked_at?: string | null
+          role: string
+          token_expires_at: string
+          token_hash: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email?: string
+          event_id?: string
+          id?: string
+          invited_by?: string
+          revoked_at?: string | null
+          role?: string
+          token_expires_at?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'event_invitations_event_id_fkey'
+            columns: ['event_id']
+            isOneToOne: false
+            referencedRelation: 'events'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       realtime_wall_events: {
         Row: {
           action: string
@@ -737,6 +1050,198 @@ export type Database = {
       }
     }
     Functions: {
+      cancel_export_job: {
+        Args: {
+          p_job_id: string
+        }
+        Returns: boolean
+      }
+      claim_export_job: {
+        Args: {
+          p_lease_seconds?: number
+          p_worker_id: string
+        }
+        Returns: {
+          attempt_count: number
+          created_at: string
+          event_id: string
+          id: string
+          lease_expires_at: string
+          max_attempts: number
+          owner_id: string
+          print_token_expires_at: string
+          snapshot: Json
+        }[]
+      }
+      complete_export_job: {
+        Args: {
+          p_artifact_path: string
+          p_artifact_sha256: string
+          p_artifact_size_bytes: number
+          p_job_id: string
+          p_worker_id: string
+        }
+        Returns: boolean
+      }
+      heartbeat_export_job: {
+        Args: {
+          p_job_id: string
+          p_lease_seconds?: number
+          p_worker_id: string
+        }
+        Returns: string
+      }
+      consume_export_print_token: {
+        Args: {
+          p_job_id: string
+          p_print_token_hash: string
+        }
+        Returns: {
+          event_id: string
+          job_id: string
+          owner_id: string
+          snapshot: Json
+        }[]
+      }
+      create_export_job: {
+        Args: {
+          p_event_id: string
+          p_idempotency_key: string
+          p_job_id: string
+          p_owner_id: string
+          p_print_token_expires_at: string
+          p_print_token_hash: string
+          p_snapshot: Json
+          p_snapshot_hash: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          state: string
+        }[]
+      }
+      create_director_session: {
+        Args: {
+          p_display_token_expires_at: string
+          p_display_token_hash: string
+          p_event_id: string
+          p_owner_id: string
+          p_session_id: string
+          p_snapshot: Json
+        }
+        Returns: {
+          created_at: string
+          id: string
+          snapshot: Json
+          version: number
+        }[]
+      }
+      get_director_display_session: {
+        Args: {
+          p_display_token_hash: string
+          p_session_id: string
+        }
+        Returns: {
+          event_id: string
+          snapshot: Json
+          updated_at: string
+          version: number
+        }[]
+      }
+      apply_director_snapshot: {
+        Args: {
+          p_expected_version: number
+          p_owner_id: string
+          p_sequence: number
+          p_session_id: string
+          p_snapshot: Json
+        }
+        Returns: {
+          applied: boolean
+          snapshot: Json
+          version: number
+        }[]
+      }
+      close_director_session: {
+        Args: {
+          p_owner_id: string
+          p_session_id: string
+        }
+        Returns: boolean
+      }
+      create_event_invitation: {
+        Args: {
+          p_email: string
+          p_event_id: string
+          p_invitation_id: string
+          p_owner_id: string
+          p_role: string
+          p_token_expires_at: string
+          p_token_hash: string
+        }
+        Returns: {
+          email: string
+          event_id: string
+          id: string
+          role: string
+          token_expires_at: string
+        }[]
+      }
+      accept_event_invitation: {
+        Args: {
+          p_invitation_id: string
+          p_token_hash: string
+          p_user_id: string
+        }
+        Returns: {
+          event_id: string
+          role: string
+          user_id: string
+        }[]
+      }
+      set_event_collaborator_role: {
+        Args: {
+          p_event_id: string
+          p_owner_id: string
+          p_role: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
+      remove_event_collaborator: {
+        Args: {
+          p_event_id: string
+          p_owner_id: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
+      revoke_event_invitation: {
+        Args: {
+          p_invitation_id: string
+          p_owner_id: string
+        }
+        Returns: boolean
+      }
+      fail_export_job: {
+        Args: {
+          p_error_code: string
+          p_error_message: string
+          p_job_id: string
+          p_retry_after_seconds?: number
+          p_worker_id: string
+        }
+        Returns: string
+      }
+      prepare_export_print_token: {
+        Args: {
+          p_job_id: string
+          p_print_token_expires_at: string
+          p_print_token_hash: string
+          p_worker_id: string
+        }
+        Returns: boolean
+      }
       create_media_upload_session: {
         Args: {
           p_asset_role: string
@@ -778,6 +1283,35 @@ export type Database = {
           size_bytes: number
           storage_path: string
         }[]
+      }
+      cleanup_notification_events: {
+        Args: never
+        Returns: number
+      }
+      mark_all_notifications_read: {
+        Args: {
+          p_event_id: string
+        }
+        Returns: number
+      }
+      mark_notification_read: {
+        Args: {
+          p_notification_id: string
+        }
+        Returns: boolean
+      }
+      set_notification_preferences: {
+        Args: {
+          p_event_id: string
+          p_pending_wish_enabled: boolean
+        }
+        Returns: {
+          created_at: string
+          event_id: string
+          owner_id: string
+          pending_wish_enabled: boolean
+          updated_at: string
+        }
       }
       moderate_wishes: {
         Args: {
