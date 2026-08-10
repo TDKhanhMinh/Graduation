@@ -14,12 +14,7 @@
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:reset": "supabase db reset --local",
-    "supabase:types": "supabase gen types typescript --local --schema public > src/types/database.ts",
-    "test:unit": "vitest run",
-    "test:db": "supabase test db --local supabase/tests/database",
-    "test:e2e": "playwright test",
-    "test:e2e:qr": "playwright test e2e/qr-sharing.spec.ts",
-    "test:e2e:ui": "playwright test e2e/ui-refresh.spec.ts"
+    "supabase:types": "supabase gen types typescript --local --schema public > src/types/database.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -42,23 +37,16 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@playwright/test": "1.62.0",
     "@tailwindcss/postcss": "^4",
-    "@testing-library/dom": "10.4.1",
-    "@testing-library/jest-dom": "7.0.0",
-    "@testing-library/react": "16.3.2",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitejs/plugin-react": "6.0.4",
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
-    "jsdom": "29.1.1",
     "supabase": "2.110.0",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "vitest": "4.1.10"
+    "typescript": "^5"
   },
   "overrides": {
     "postcss": "8.5.25",
