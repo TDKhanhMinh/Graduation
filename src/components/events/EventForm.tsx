@@ -6,6 +6,8 @@ import { useFormStatus } from "react-dom"
 import { toast } from "sonner"
 
 import { CloudinaryCoverUpload } from "@/components/events/cloudinary-cover-upload"
+import { formatDateTimeLocal } from "@/features/events/schedule"
+import { POSTER_DRAFT_HANDOFF_KEY, parsePosterDraft } from "@/features/posters/handoff"
 import type { WelcomeHeroConfig } from "@/features/events/welcome-config"
 import { getDefaultWelcomeHeroConfig } from "@/features/events/welcome-config"
 
@@ -21,6 +23,14 @@ interface EventFormProps {
     title?: string
     slug?: string
     description?: string
+    event_date?: string | null
+    starts_at?: string | null
+    ends_at?: string | null
+    timezone?: string | null
+    location_name?: string | null
+    location_address?: string | null
+    host_name?: string | null
+    host_title?: string | null
     visibility?: string
     submission_mode?: string
   }
@@ -61,6 +71,22 @@ export function EventForm({ action, initialData, submitLabel = "Lưu sự kiện
     }))
     setIsDirty(true)
   }
+
+  useEffect(() => {
+    if (initialData?.title) return
+    try {
+      const raw = window.localStorage.getItem(POSTER_DRAFT_HANDOFF_KEY)
+      const draft = parsePosterDraft(raw)
+      const titleInput = document.getElementById('title')
+      if (draft && titleInput instanceof HTMLInputElement && !titleInput.value) {
+        titleInput.value = draft.title
+        titleInput.dispatchEvent(new Event('input', { bubbles: true }))
+      }
+      window.localStorage.removeItem(POSTER_DRAFT_HANDOFF_KEY)
+    } catch {
+      // Ignore unavailable or malformed browser storage.
+    }
+  }, [initialData?.title])
 
   const [state, formAction] = useActionState(async (prevState: EventActionState, formData: FormData) => {
     const nextState = await action(prevState, formData)
@@ -143,6 +169,82 @@ export function EventForm({ action, initialData, submitLabel = "Lưu sự kiện
             <FieldError id="submission-mode-error" messages={state.fieldErrors?.submission_mode} />
           </div>
         </div>
+      </fieldset>
+
+      <fieldset className='space-y-5 border-t pt-6'>
+        <legend className='text-base font-semibold'>Lịch, địa điểm và host</legend>
+        <p className='text-sm text-muted-foreground'>
+          Lưu thời điểm theo múi giờ đã chọn; các mục để trống là tùy chọn.
+        </p>
+        <div className='grid gap-5 sm:grid-cols-2'>
+          <div className='grid gap-2'>
+            <Label htmlFor='starts_at'>Bắt đầu</Label>
+            <Input
+              id='starts_at'
+              name='starts_at'
+              type='datetime-local'
+              defaultValue={formatDateTimeLocal(initialData?.starts_at ?? initialData?.event_date, initialData?.timezone ?? 'UTC')}
+              className='h-11 rounded-xl border-border/80 bg-background/70'
+              aria-describedby='schedule-help'
+            />
+            <FieldError id='starts_at-error' messages={state.fieldErrors?.starts_at} />
+          </div>
+          <div className='grid gap-2'>
+            <Label htmlFor='ends_at'>Kết thúc (tùy chọn)</Label>
+            <Input
+              id='ends_at'
+              name='ends_at'
+              type='datetime-local'
+              defaultValue={formatDateTimeLocal(initialData?.ends_at, initialData?.timezone ?? 'UTC')}
+              className='h-11 rounded-xl border-border/80 bg-background/70'
+            />
+            <FieldError id='ends_at-error' messages={state.fieldErrors?.ends_at} />
+          </div>
+          <div className='grid gap-2 sm:col-span-2'>
+            <Label htmlFor='timezone'>Múi giờ</Label>
+            <select
+              id='timezone'
+              name='timezone'
+              defaultValue={initialData?.timezone ?? 'UTC'}
+              className='min-h-11 w-full rounded-xl border border-border/80 bg-background/70 px-3 text-sm outline-hidden focus-visible:ring-3 focus-visible:ring-focus/40'
+            >
+              <option value='UTC'>UTC</option>
+              <option value='Asia/Ho_Chi_Minh'>Asia/Ho_Chi_Minh (Việt Nam)</option>
+              <option value='Asia/Tokyo'>Asia/Tokyo</option>
+              <option value='Europe/London'>Europe/London</option>
+              <option value='Europe/Paris'>Europe/Paris</option>
+              <option value='America/New_York'>America/New_York</option>
+              <option value='America/Los_Angeles'>America/Los_Angeles</option>
+            </select>
+            <p id='schedule-help' className='text-xs leading-5 text-muted-foreground'>
+              Thời gian sẽ được đổi sang UTC khi lưu và hiển thị lại theo múi giờ này.
+            </p>
+            <FieldError id='timezone-error' messages={state.fieldErrors?.timezone} />
+          </div>
+          <div className='grid gap-2'>
+            <Label htmlFor='location_name'>Địa điểm</Label>
+            <Input id='location_name' name='location_name' defaultValue={initialData?.location_name ?? ''} maxLength={160} className='h-11 rounded-xl border-border/80 bg-background/70' />
+          </div>
+          <div className='grid gap-2'>
+            <Label htmlFor='location_address'>Địa chỉ (tùy chọn)</Label>
+            <Input id='location_address' name='location_address' defaultValue={initialData?.location_address ?? ''} maxLength={500} className='h-11 rounded-xl border-border/80 bg-background/70' />
+          </div>
+          <div className='grid gap-2'>
+            <Label htmlFor='host_name'>Host</Label>
+            <Input id='host_name' name='host_name' defaultValue={initialData?.host_name ?? ''} maxLength={160} className='h-11 rounded-xl border-border/80 bg-background/70' />
+          </div>
+          <div className='grid gap-2'>
+            <Label htmlFor='host_title'>Vai trò host (tùy chọn)</Label>
+            <Input id='host_title' name='host_title' defaultValue={initialData?.host_title ?? ''} maxLength={160} className='h-11 rounded-xl border-border/80 bg-background/70' />
+          </div>
+        </div>
+        <label className='flex items-start gap-3 rounded-xl border border-status-warning/30 bg-status-warning/5 p-3 text-sm'>
+          <input type='checkbox' name='clear_schedule' value='true' className='mt-1 size-4 accent-primary' />
+          <span>
+            <span className='font-medium'>Xóa toàn bộ thông tin lịch</span>
+            <span className='mt-1 block text-xs text-muted-foreground'>Chỉ chọn khi muốn xóa rõ ràng ngày, địa điểm và host.</span>
+          </span>
+        </label>
       </fieldset>
 
       <fieldset className="space-y-5 border-t pt-6" data-tour-target="event-cover-poster">

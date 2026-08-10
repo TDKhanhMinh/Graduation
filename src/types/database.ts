@@ -56,6 +56,13 @@ export type Database = {
           deleted_at: string | null
           description: string | null
           event_date: string | null
+          starts_at: string | null
+          ends_at: string | null
+          timezone: string
+          location_name: string | null
+          location_address: string | null
+          host_name: string | null
+          host_title: string | null
           experience_preset: string
           effect_intensity: string
           effect_quality: string
@@ -91,6 +98,13 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           event_date?: string | null
+          starts_at?: string | null
+          ends_at?: string | null
+          timezone?: string
+          location_name?: string | null
+          location_address?: string | null
+          host_name?: string | null
+          host_title?: string | null
           experience_preset?: string
           effect_intensity?: string
           effect_quality?: string
@@ -126,6 +140,13 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           event_date?: string | null
+          starts_at?: string | null
+          ends_at?: string | null
+          timezone?: string
+          location_name?: string | null
+          location_address?: string | null
+          host_name?: string | null
+          host_title?: string | null
           experience_preset?: string
           effect_intensity?: string
           effect_quality?: string
@@ -428,6 +449,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      account_deletion_requests: {
+        Row: {
+          id: string
+          user_id: string | null
+          status: string
+          requested_at: string
+          scheduled_for: string
+          cancelled_at: string | null
+          purged_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          status?: string
+          requested_at?: string
+          scheduled_for: string
+          cancelled_at?: string | null
+          purged_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          status?: string
+          requested_at?: string
+          scheduled_for?: string
+          cancelled_at?: string | null
+          purged_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {

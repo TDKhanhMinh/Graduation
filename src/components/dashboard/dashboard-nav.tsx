@@ -1,6 +1,6 @@
 "use client"
 
-import { CalendarPlus, LayoutDashboard } from "lucide-react"
+import { CalendarPlus, LayoutDashboard, ShieldCheck } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -16,6 +16,11 @@ const items = [
     href: "/dashboard/events/new",
     label: "Tạo sự kiện",
     Icon: CalendarPlus,
+  },
+  {
+    href: '/dashboard/privacy',
+    label: 'Quyền riêng tư',
+    Icon: ShieldCheck,
   },
 ] as const
 

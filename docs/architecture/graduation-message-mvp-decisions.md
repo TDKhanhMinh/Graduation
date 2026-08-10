@@ -166,13 +166,27 @@ Không copy file sang public bucket trong MVP.
 
 ---
 
+### 5.7. Event schedule contract (RM26 P1-T02)
+
+**MUST:**
+
+- events.event_date remains a compatibility field and is never rewritten by the additive migration.
+- New schedule instants use starts_at and optional ends_at as timestamptz (UTC instants). Existing rows with event_date are backfilled with starts_at = event_date and timezone = 'UTC'.
+- events.timezone is a supported PostgreSQL/IANA timezone identifier and is the authoritative display timezone; the server or browser timezone must not be inferred when it is present.
+- location_name, location_address, host_name, and host_title are optional public-safe display fields with database length constraints. Credentials, contact secrets, and private host metadata remain out of scope.
+- Lifecycle is derived from the start/end instants as upcoming, live, ended, or unscheduled; submission_mode remains an independent write-control.
+- Public event data is an explicit server-only DAL allowlist. Adding schedule fields to events does not grant anon/authenticated table access or make unlisted events enumerable.
+
+**Trade-off:** Keeping event_date avoids a destructive cutover, while the explicit timezone default makes legacy UTC semantics deterministic.
+**Rollback:** The migration is forward-only; application reads can continue using event_date while schedule fields are ignored. Dropping the new columns is intentionally deferred to a separately reviewed destructive migration.
+
 ## 6. Dependency Validation
 
 P1-T01 là contract dependency trực tiếp hoặc bắc cầu của 29 task còn lại. Bảng dưới đối chiếu dependency trong Task Contract với mục ADR bắt buộc phải được dùng khi triển khai/review.
 
 | Task | Direct dependencies | ADR contract consumed |
 |---|---|---|
-| P1-T02 | P1-T01 | 1, 2, 3, 4 |
+| P1-T02 | P0-T05, P0-T06 | 1, 2, 3, 4, 5.7 |
 | P1-T03 | P1-T02 | 1–5: fixtures và negative security tests |
 | P1-T04 | P1-T01, P1-T03 | 3; 5.1–5.2: server-only secret/logging |
 | P1-T05 | P1-T02, P1-T03, P1-T04 | 1–3: event lookup/auth DTO |

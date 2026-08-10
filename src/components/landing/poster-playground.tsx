@@ -2,9 +2,10 @@
 
 import { Check, QrCode } from "lucide-react"
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import type { PosterTemplate, PosterRatio } from "@/features/posters/schema"
+import { POSTER_DRAFT_HANDOFF_KEY, serializePosterDraft } from "@/features/posters/handoff"
 
 const ratios: PosterRatio[] = ["4:5", "9:16"]
 
@@ -15,5 +16,30 @@ export function PosterPlayground({ template }: { template: PosterTemplate }) {
   const [showQr, setShowQr] = useState(true)
   const [ratio, setRatio] = useState<PosterRatio>("4:5")
   const palette = template.palette
+  const continueWithDraft = () => {
+    const serialized = serializePosterDraft({
+      templateId: template.id,
+      category: category as 'wedding' | 'birthday' | 'graduation' | 'corporate',
+      title,
+      paletteIndex,
+      showQr,
+      ratio: ratio as '4:5' | '9:16',
+    })
+    if (!serialized) return
+    try {
+      window.localStorage.setItem(POSTER_DRAFT_HANDOFF_KEY, serialized)
+    } catch {
+      // Continue without a draft if browser storage is unavailable.
+    }
+  }
+  useEffect(() => {
+    const link = Array.from(document.querySelectorAll<HTMLAnchorElement>(
+      'a[href=' + JSON.stringify('/auth/sign-up') + '],a[href^=' + JSON.stringify('/auth/sign-up?next=') + ']',
+    )).at(-1)
+    if (!link) return
+    link.href = '/auth/sign-up?next=%2Fdashboard%2Fevents%2Fnew%3FposterDraft%3D1'
+    link.addEventListener('click', continueWithDraft)
+    return () => link.removeEventListener('click', continueWithDraft)
+  })
   return <div className="grid gap-6 lg:grid-cols-[minmax(0,0.8fr)_minmax(18rem,0.55fr)]"><div className={`relative mx-auto w-full max-w-sm overflow-hidden rounded-3xl p-6 text-white shadow-xl transition-[aspect-ratio] ${ratio === "9:16" ? "aspect-[9/16]" : "aspect-[4/5]"}`} style={{ background: `linear-gradient(145deg, ${palette[paletteIndex % palette.length]}, ${palette[(paletteIndex + 1) % palette.length]})` }}><p className="text-xs uppercase tracking-[0.25em] text-white/70">{template.name}</p><h3 className="mt-16 break-words font-heading text-4xl font-bold">{title || "Tên sự kiện"}</h3><p className="absolute bottom-8 left-6 text-sm text-white/80">{category === "wedding" ? "Một ngày để nhớ" : "Cùng tạo một kỷ niệm"}</p>{showQr ? <div className="absolute bottom-6 right-6 rounded-xl bg-white p-2 text-foreground"><QrCode className="size-12" aria-label="Mã QR minh họa" /></div> : null}</div><div className="space-y-5 rounded-2xl border bg-card p-5"><div><label htmlFor="poster-demo-title" className="text-sm font-medium">Tên sự kiện</label><input id="poster-demo-title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={60} className="mt-2 h-11 w-full rounded-lg border bg-background px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-focus/50" /></div><div><span className="text-sm font-medium">Nhóm sự kiện</span><div className="mt-2 grid grid-cols-2 gap-2">{[["wedding", "Đám cưới"], ["birthday", "Sinh nhật"], ["graduation", "Tốt nghiệp"], ["corporate", "Doanh nghiệp"]].map(([value, label]) => <button key={value} type="button" onClick={() => setCategory(value)} aria-pressed={category === value} className="min-h-11 rounded-lg border px-3 text-left text-sm aria-pressed:border-primary aria-pressed:bg-primary/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/50">{label}</button>)}</div></div><div><span className="text-sm font-medium">Bảng màu</span><div className="mt-2 flex gap-2">{palette.map((color, index) => <button key={color} type="button" aria-label={`Chọn màu ${index + 1}`} aria-pressed={paletteIndex === index} onClick={() => setPaletteIndex(index)} className="size-9 rounded-full border-2 border-background outline outline-1 outline-border aria-pressed:outline-2 aria-pressed:outline-primary focus-visible:ring-3 focus-visible:ring-focus/50" style={{ backgroundColor: color }} />)}</div></div><div><span className="text-sm font-medium">Tỷ lệ</span><div className="mt-2 flex gap-2">{ratios.map((value) => <button key={value} type="button" aria-pressed={ratio === value} onClick={() => setRatio(value)} className="min-h-11 rounded-lg border px-4 text-sm aria-pressed:border-primary aria-pressed:bg-primary/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/50">{value}</button>)}</div></div><label className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked={showQr} onChange={(event) => setShowQr(event.target.checked)} className="size-4 accent-primary" />Hiển thị mã QR trên áp phích</label><Link href="/auth/sign-up" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/80 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/50">Tiếp tục với thiết kế này <Check aria-hidden="true" className="size-4" /></Link><p className="text-xs leading-5 text-muted-foreground">Bản minh họa giữ các lựa chọn trong xem trước. Luồng đăng ký hiện chưa nhận mẫu/bảng màu qua trạng thái chuyển tiếp.</p></div></div>
 }

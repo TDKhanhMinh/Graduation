@@ -27,6 +27,13 @@ type EventWelcomeProps = {
   title: string
   description: string | null
   eventDate: string | null
+  startsAt: string | null
+  endsAt: string | null
+  timezone: string | null
+  locationName: string | null
+  locationAddress: string | null
+  hostName: string | null
+  hostTitle: string | null
   submissionMode: string | null
   coverUrl: string | null
   themeKey: string
@@ -117,6 +124,13 @@ export function EventWelcome({
   title,
   description,
   eventDate,
+  startsAt,
+  endsAt,
+  timezone,
+  locationName,
+  locationAddress,
+  hostName,
+  hostTitle,
   submissionMode,
   coverUrl,
   themeKey,
@@ -126,7 +140,13 @@ export function EventWelcome({
 }: EventWelcomeProps) {
   const initialNow = new Date()
   const viewModel = createWelcomeViewModel(
-    { event_date: eventDate, submission_mode: submissionMode },
+    {
+      event_date: eventDate,
+      starts_at: startsAt,
+      ends_at: endsAt,
+      timezone,
+      submission_mode: submissionMode,
+    },
     initialNow,
   )
   const presentation = getWelcomePresentation(viewModel.status)
@@ -181,14 +201,26 @@ export function EventWelcome({
                 {presentation.statusCopy}
               </p>
             ) : null}
-            {welcomeConfig.showDate && formatWelcomeDate(eventDate) ? (
+            {welcomeConfig.showDate && formatWelcomeDate(startsAt ?? eventDate, timezone ?? undefined) ? (
               <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <CalendarDays aria-hidden="true" className="size-4" />
-                {formatWelcomeDate(eventDate)}
+                {formatWelcomeDate(startsAt ?? eventDate, timezone ?? undefined)}
               </p>
             ) : null}
             {welcomeConfig.showDate && viewModel.countdownTarget ? (
               <WelcomeCountdown target={viewModel.countdownTarget} initialNow={initialNow.toISOString()} />
+            ) : null}
+            {welcomeConfig.showLocation && (locationName || locationAddress) ? (
+              <p className='flex items-start gap-2 text-sm text-muted-foreground' data-testid='welcome-location'>
+                <Map aria-hidden='true' className='mt-0.5 size-4 shrink-0' />
+                <span>{[locationName, locationAddress].filter(Boolean).join(' · ')}</span>
+              </p>
+            ) : null}
+            {welcomeConfig.showHost && (hostName || hostTitle) ? (
+              <p className='flex items-start gap-2 text-sm text-muted-foreground' data-testid='welcome-host'>
+                <span aria-hidden='true' className='mt-0.5 size-4 shrink-0 text-center'>✦</span>
+                <span>{[hostName, hostTitle].filter(Boolean).join(' · ')}</span>
+              </p>
             ) : null}
           </div>
           <div className="flex flex-wrap items-center gap-3">

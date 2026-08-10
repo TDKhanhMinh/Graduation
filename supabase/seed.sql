@@ -7,6 +7,18 @@ VALUES
 ('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'nonowner@example.com', crypt('password123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', '', '', '')
 ON CONFLICT (id) DO NOTHING;
 
+INSERT INTO public.events (id, owner_id, slug, title, description, visibility, submission_mode)
+VALUES (
+  'e5eebc99-9c0b-4ef8-bb6d-6bb9bd380e05',
+  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+  'pagination-event-1',
+  'Pagination Event',
+  'Public wall fixture with deterministic pagination',
+  'public',
+  'open'
+)
+ON CONFLICT (id) DO NOTHING;
+
 INSERT INTO auth.identities (id, provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
 VALUES
 ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', '{"sub":"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11","email":"owner@example.com","email_verified":true,"phone_verified":false}', 'email', now(), now(), now()),
@@ -14,12 +26,36 @@ VALUES
 ON CONFLICT (provider_id, provider) DO NOTHING;
 
 -- Insert events
-INSERT INTO public.events (id, owner_id, slug, title, description, visibility, submission_mode)
+INSERT INTO public.events (id, owner_id, slug, title, description, event_date, visibility, submission_mode)
 VALUES
-('e1eebc99-9c0b-4ef8-bb6d-6bb9bd380e01', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'public-event-1', 'Public Event', 'Test public event', 'public', 'approval_required'),
-('e2eebc99-9c0b-4ef8-bb6d-6bb9bd380e02', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'unlisted-event-1', 'Unlisted Event', 'Test unlisted event', 'unlisted', 'open'),
-('e3eebc99-9c0b-4ef8-bb6d-6bb9bd380e03', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'private-event-1', 'Private Event', 'Test private event', 'private', 'closed'),
-('e4eebc99-9c0b-4ef8-bb6d-6bb9bd380e04', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'closed-event-1', 'Closed Public Event', 'Test closed public event', 'public', 'closed')
+('e1eebc99-9c0b-4ef8-bb6d-6bb9bd380e01', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'public-event-1', 'Public Event', 'Test public event', '2026-08-10T10:00:00.000Z', 'public', 'approval_required'),
+('e2eebc99-9c0b-4ef8-bb6d-6bb9bd380e02', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'unlisted-event-1', 'Unlisted Event', 'Test unlisted event', NULL, 'unlisted', 'open'),
+('e3eebc99-9c0b-4ef8-bb6d-6bb9bd380e03', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'private-event-1', 'Private Event', 'Test private event', NULL, 'private', 'closed'),
+('e4eebc99-9c0b-4ef8-bb6d-6bb9bd380e04', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'closed-event-1', 'Closed Public Event', 'Test closed public event', NULL, 'public', 'closed')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO public.wishes (
+  id,
+  event_id,
+  client_request_id,
+  sender_name,
+  content,
+  moderation_status,
+  is_pinned,
+  created_at,
+  updated_at
+)
+SELECT
+  format('51000000-0000-4000-8000-%s', lpad(page_number::text, 12, '0'))::uuid,
+  'e5eebc99-9c0b-4ef8-bb6d-6bb9bd380e05'::uuid,
+  format('52000000-0000-4000-8000-%s', lpad(page_number::text, 12, '0'))::uuid,
+  format('Pagination Sender %s', page_number),
+  format('Pagination wish %s', page_number),
+  'approved',
+  page_number > 20,
+  '2026-01-15T12:00:00.000Z'::timestamptz,
+  '2026-01-15T12:00:00.000Z'::timestamptz
+FROM generate_series(1, 22) AS page_number
 ON CONFLICT (id) DO NOTHING;
 
 -- Insert wishes

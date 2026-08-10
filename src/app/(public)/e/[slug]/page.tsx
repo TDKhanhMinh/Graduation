@@ -19,7 +19,11 @@ import { WelcomeExperience } from "@/components/event-welcome/WelcomeExperience"
 import { WelcomeSession } from "@/components/event-welcome/welcome-session"
 import { TourExperience } from "@/components/guided-tour/TourExperience"
 import { getPublicEventBySlug } from "@/features/events/dal"
-import { getApprovedWishesPage } from "@/features/wishes/dal"
+import {
+  getApprovedWishesByIds,
+  getApprovedWishesPage,
+  PUBLIC_WISHES_PAGE_SIZE,
+} from '@/features/wishes/dal'
 import { EffectProvider, type EffectQuality } from "@/components/effects/effect-provider"
 import { getEffectConfig } from "@/components/effects/effect-config"
 import { getSiteUrl } from "@/lib/supabase/env"
@@ -88,7 +92,16 @@ export default async function PublicEventPage({ params }: Props) {
   }
 
   const coverUrl = getCloudinaryCover(event.cover_path)
-  const wishes = await getApprovedWishesPage(event.id, 20)
+  const publicEventId = event.id
+  const wishesPage = await getApprovedWishesPage(publicEventId, PUBLIC_WISHES_PAGE_SIZE)
+  const fetchWishesAction = async (cursor: string | null) => {
+    'use server'
+    return getApprovedWishesPage(publicEventId, PUBLIC_WISHES_PAGE_SIZE, cursor)
+  }
+  const reconcileWishesAction = async (wishIds: string[]) => {
+    'use server'
+    return getApprovedWishesByIds(publicEventId, wishIds)
+  }
   const welcomeConfig = event.welcome_hero
   const effectConfig = getEffectConfig(welcomeConfig.effects.preset, welcomeConfig.effects.intensity)
 
@@ -123,6 +136,13 @@ export default async function PublicEventPage({ params }: Props) {
                   title={event.title}
                   description={event.description}
                   eventDate={event.event_date}
+                  startsAt={event.starts_at}
+                  endsAt={event.ends_at}
+                  timezone={event.timezone}
+                  locationName={event.location_name}
+                  locationAddress={event.location_address}
+                  hostName={event.host_name}
+                  hostTitle={event.host_title}
                   submissionMode={event.submission_mode}
                   coverUrl={coverUrl}
                   themeKey={event.theme_key}
@@ -174,11 +194,11 @@ export default async function PublicEventPage({ params }: Props) {
             <h2 id="wall-heading" className="sr-only">Bức tường lời chúc</h2>
             <RealtimeWall
               eventId={event.id}
-              initialWishes={wishes}
-              fetchWishesAction={async (eventId: string, limit: number) => {
-                "use server"
-                return getApprovedWishesPage(eventId, limit)
-              }}
+              initialWishes={wishesPage.items}
+              initialNextCursor={wishesPage.nextCursor}
+              initialHasMore={wishesPage.hasMore}
+              fetchWishesAction={fetchWishesAction}
+              reconcileWishesAction={reconcileWishesAction}
             />
           </section>
         </PageShell>

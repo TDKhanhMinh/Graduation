@@ -15,6 +15,13 @@ export type PublicEvent = Pick<
   | 'title'
   | 'description'
   | 'event_date'
+  | 'starts_at'
+  | 'ends_at'
+  | 'timezone'
+  | 'location_name'
+  | 'location_address'
+  | 'host_name'
+  | 'host_title'
   | 'cover_path'
   | 'theme_key'
   | 'experience_preset'
@@ -32,7 +39,7 @@ export type PublicEvent = Pick<
 > & { welcome_hero: WelcomeHeroConfig }
 
 const PUBLIC_EVENT_SELECT =
-  'id,slug,title,description,event_date,cover_path,theme_key,experience_preset,effect_intensity,effect_quality,wall_layout,qr_visible,qr_cta,animation_speed,welcome_hero,visibility,submission_mode,max_wish_length,archived_at,allow_ai'
+  'id,slug,title,description,event_date,starts_at,ends_at,timezone,location_name,location_address,host_name,host_title,cover_path,theme_key,experience_preset,effect_intensity,effect_quality,wall_layout,qr_visible,qr_cta,animation_speed,welcome_hero,visibility,submission_mode,max_wish_length,archived_at,allow_ai'
 
 export const getOwnedEvents = cache(async (): Promise<Event[]> => {
   const session = await verifySession()

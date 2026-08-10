@@ -41,7 +41,10 @@ RESET ROLE;
 SET ROLE service_role;
 
 SELECT results_eq(
-  $$ SELECT sender_name FROM public.public_wishes_view ORDER BY sender_name $$,
+  $$ SELECT sender_name
+     FROM public.public_wishes_view
+     WHERE event_id = 'e1eebc99-9c0b-4ef8-bb6d-6bb9bd380e01'
+     ORDER BY sender_name $$,
   $$ VALUES ('Alice') $$,
   'Public projection returns approved wishes'
 );

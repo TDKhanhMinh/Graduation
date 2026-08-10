@@ -1,3 +1,5 @@
+import { getEventLifecycle } from '@/features/events/schedule'
+
 export const WELCOME_ANCHORS = {
   wish: "submit-wish",
   gallery: "gallery",
@@ -9,7 +11,7 @@ export const WELCOME_SPLASH_SESSION_PREFIX = "event-welcome:"
 
 export type WelcomeAnchor = (typeof WELCOME_ANCHORS)[keyof typeof WELCOME_ANCHORS]
 export type WelcomeAction = "wish" | "gallery"
-export type WelcomeEventStatus = "archived" | "upcoming" | "live" | "closed"
+export type WelcomeEventStatus = "archived" | "upcoming" | "live" | "ended" | "closed"
 
 export type WelcomeStage = "checking" | "idle" | "intro" | "opening" | "open" | "closing" | "closed" | "dismissed"
 export type AudioStatus = "idle" | "playing" | "paused" | "blocked" | "error" | "disabled" | "muted" | "unsupported"
@@ -52,6 +54,9 @@ export type WelcomePresentation = {
 
 export type WelcomeEventSource = {
   event_date?: string | null
+  starts_at?: string | null
+  ends_at?: string | null
+  timezone?: string | null
   submission_mode?: string | null
   archived_at?: string | null
 }
@@ -81,12 +86,13 @@ function isValidDate(value: string | null | undefined): value is string {
   return Boolean(value && Number.isFinite(new Date(value).getTime()))
 }
 
-export function formatWelcomeDate(value: string | null | undefined): string | null {
+export function formatWelcomeDate(value: string | null | undefined, timezone = WELCOME_TIME_ZONE): string | null {
   if (!isValidDate(value)) return null
 
   return new Intl.DateTimeFormat("en-US", {
     dateStyle: "long",
-    timeZone: WELCOME_TIME_ZONE,
+    timeStyle: "short",
+    timeZone: timezone,
   }).format(new Date(value))
 }
 
@@ -112,9 +118,10 @@ export function resolveWelcomeStatus(
   if (event.archived_at) return "archived"
   if (event.submission_mode === "closed") return "closed"
 
-  if (!isValidDate(event.event_date)) return "live"
-
-  return new Date(event.event_date).getTime() > now.getTime() ? "upcoming" : "live"
+  const lifecycle = getEventLifecycle(event, now)
+  if (lifecycle === "upcoming") return "upcoming"
+  if (lifecycle === "ended") return "ended"
+  return "live"
 }
 
 export function createWelcomeViewModel(
@@ -122,11 +129,12 @@ export function createWelcomeViewModel(
   now: Date = new Date(),
 ): WelcomeViewModel {
   const status = resolveWelcomeStatus(event, now)
+  const countdownTarget = event.starts_at ?? event.event_date ?? null
 
   return {
     status,
     anchors: WELCOME_ANCHORS,
-    countdownTarget: status === "upcoming" && isValidDate(event.event_date) ? event.event_date : null,
+    countdownTarget: status === "upcoming" && isValidDate(countdownTarget) ? countdownTarget : null,
     canSubmitWish: status !== "closed" && status !== "archived",
   }
 }
@@ -142,6 +150,7 @@ export function getWelcomePresentation(status: WelcomeEventStatus): WelcomePrese
         primaryTarget: WELCOME_ANCHORS.wish,
         canSubmitWish: true,
       }
+    case "ended":
     case "closed":
       return {
         badge: "Đã kết thúc",

@@ -8,6 +8,7 @@ import { Json } from "@/types/database";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { appearanceSchema, eventSchema, normalizeSlug } from "./schema";
+import { eventScheduleSchema, normalizeLocalDateTime } from "./schedule";
 import {
   getDefaultWelcomeHeroConfig,
   welcomeHeroConfigSchema,
@@ -19,6 +20,77 @@ export type EventActionState = {
   fieldErrors?: Record<string, string[]>;
 };
 
+type EventScheduleWrite = {
+  starts_at: string | null;
+  ends_at: string | null;
+  timezone: string;
+  location_name: string | null;
+  location_address: string | null;
+  host_name: string | null;
+  host_title: string | null;
+  clear: boolean;
+};
+
+function readScheduleWrite(formData: FormData): {
+  data?: EventScheduleWrite;
+  fieldErrors?: Record<string, string[]>;
+} {
+  const timezone = String(formData.get('timezone') || 'UTC').trim();
+  const startsRaw = String(formData.get('starts_at') || '').trim();
+  const endsRaw = String(formData.get('ends_at') || '').trim();
+  const clear = formData.get('clear_schedule') === 'true';
+
+  if (clear) {
+    return {
+      data: {
+        starts_at: null,
+        ends_at: null,
+        timezone: 'UTC',
+        location_name: null,
+        location_address: null,
+        host_name: null,
+        host_title: null,
+        clear: true,
+      },
+    };
+  }
+
+  const starts_at = normalizeLocalDateTime(startsRaw, timezone);
+  const ends_at = normalizeLocalDateTime(endsRaw, timezone);
+  const fieldErrors: Record<string, string[]> = {};
+  if (startsRaw && !starts_at) fieldErrors.starts_at = ['Thời điểm bắt đầu không hợp lệ hoặc không tồn tại trong múi giờ đã chọn.'];
+  if (endsRaw && !ends_at) fieldErrors.ends_at = ['Thời điểm kết thúc không hợp lệ hoặc không tồn tại trong múi giờ đã chọn.'];
+
+  const parsed = eventScheduleSchema.safeParse({
+    starts_at,
+    ends_at,
+    timezone,
+    location_name: String(formData.get('location_name') || '').trim() || null,
+    location_address: String(formData.get('location_address') || '').trim() || null,
+    host_name: String(formData.get('host_name') || '').trim() || null,
+    host_title: String(formData.get('host_title') || '').trim() || null,
+  });
+  if (!parsed.success) {
+    Object.assign(fieldErrors, parsed.error.flatten().fieldErrors);
+    return { fieldErrors };
+  }
+  if (Object.keys(fieldErrors).length) return { fieldErrors };
+
+  const parsedData = parsed.data;
+  return {
+    data: {
+      starts_at: parsedData.starts_at ?? null,
+      ends_at: parsedData.ends_at ?? null,
+      timezone: parsedData.timezone,
+      location_name: parsedData.location_name ?? null,
+      location_address: parsedData.location_address ?? null,
+      host_name: parsedData.host_name ?? null,
+      host_title: parsedData.host_title ?? null,
+      clear: false,
+    },
+  };
+}
+
 export async function createEvent(
   prevState: EventActionState,
   formData: FormData,
@@ -28,11 +100,16 @@ export async function createEvent(
     redirect("/auth/login");
   }
 
+  const schedule = readScheduleWrite(formData);
+  if (!schedule.data) {
+    return { error: 'Lịch sự kiện không hợp lệ.', fieldErrors: schedule.fieldErrors };
+  }
+
   const rawData = {
     title: formData.get("title"),
     slug: normalizeSlug(String(formData.get("slug") || "")),
     description: formData.get("description"),
-    date: formData.get("date") || null,
+    date: schedule.data.starts_at,
     visibility: formData.get("visibility"),
     submission_mode: formData.get("submission_mode"),
   };
@@ -85,6 +162,13 @@ export async function createEvent(
       slug: validated.data.slug,
       description: validated.data.description,
       event_date: validated.data.date,
+      starts_at: schedule.data.starts_at,
+      ends_at: schedule.data.ends_at,
+      timezone: schedule.data.timezone,
+      location_name: schedule.data.location_name,
+      location_address: schedule.data.location_address,
+      host_name: schedule.data.host_name,
+      host_title: schedule.data.host_title,
       visibility: validated.data.visibility,
       submission_mode: validated.data.submission_mode,
       cover_path: coverPath || null,
@@ -121,11 +205,16 @@ export async function updateEvent(
     redirect("/auth/login");
   }
 
+  const schedule = readScheduleWrite(formData);
+  if (!schedule.data) {
+    return { error: 'Lịch sự kiện không hợp lệ.', fieldErrors: schedule.fieldErrors };
+  }
+
   const rawData = {
     title: formData.get("title"),
     slug: normalizeSlug(String(formData.get("slug") || "")),
     description: formData.get("description"),
-    date: formData.get("date") || null,
+    date: schedule.data.starts_at,
     visibility: formData.get("visibility"),
     submission_mode: formData.get("submission_mode"),
   };
@@ -149,6 +238,13 @@ export async function updateEvent(
       slug: validated.data.slug,
       description: validated.data.description,
       event_date: validated.data.date,
+      starts_at: schedule.data.starts_at,
+      ends_at: schedule.data.ends_at,
+      timezone: schedule.data.timezone,
+      location_name: schedule.data.location_name,
+      location_address: schedule.data.location_address,
+      host_name: schedule.data.host_name,
+      host_title: schedule.data.host_title,
       visibility: validated.data.visibility,
       submission_mode: validated.data.submission_mode,
       updated_at: new Date().toISOString(),

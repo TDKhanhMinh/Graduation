@@ -18,12 +18,12 @@ export default async function DirectorPage({
 
   if (!event) notFound()
 
-  const wishes = await getApprovedWishesPage(event.id, 20)
+  const wishesPage = await getApprovedWishesPage(event.id, 20)
 
   return (
     <DirectorMode
       eventId={event.id}
-      initialWishes={wishes.map((wish) => ({
+      initialWishes={wishesPage.items.map((wish) => ({
         id: wish.id,
         senderName: wish.sender_name,
         content: wish.content || "",

@@ -4,9 +4,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { verifySession } from "@/lib/auth/dal";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getSiteUrl } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import { getSafeNextPath } from "@/utils/url";
+import { createDeletionSchedule } from "@/features/account/lifecycle";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const letterPattern = /[A-Za-z]/;
@@ -147,6 +149,51 @@ export async function signOut() {
   await supabase.auth.signOut({ scope: "local" });
   revalidatePath("/", "layout");
   redirect("/auth/login");
+}
+
+export async function signOutAll() {
+  const session = await verifySession();
+  if (!session) redirect('/auth/login?next=/dashboard/privacy');
+
+  const supabase = await createClient();
+  await supabase.auth.signOut({ scope: 'global' });
+  revalidatePath('/', 'layout');
+  redirect('/auth/login?message=signed_out_all');
+}
+
+export async function requestAccountDeletion() {
+  const session = await verifySession();
+  if (!session) redirect('/auth/login?next=/dashboard/privacy');
+
+  const admin = createAdminClient();
+  const existing = await admin
+    .from('account_deletion_requests')
+    .select('id,status,scheduled_for')
+    .eq('user_id', session.userId)
+    .eq('status', 'cooling_off')
+    .maybeSingle();
+
+  if (existing.data) {
+    redirect('/dashboard/privacy?deletion=already-scheduled');
+  }
+
+  const { error } = await admin
+    .from('account_deletion_requests')
+    .insert({
+      user_id: session.userId,
+      scheduled_for: createDeletionSchedule(new Date()),
+    });
+
+  if (error) {
+    redirect('/dashboard/privacy?deletion=failed');
+  }
+
+  // A separate worker transaction must lock/soft-delete owned data before
+  // purge. This request action intentionally does not perform broad mutation.
+  const supabase = await createClient();
+  await supabase.auth.signOut({ scope: 'local' });
+  revalidatePath('/', 'layout');
+  redirect('/auth/login?message=account_deletion_requested');
 }
 
 export async function updateDisplayName(formData: FormData) {

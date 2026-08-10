@@ -6,7 +6,7 @@ import { AlertCircle, CheckCircle2, LayoutGrid, Maximize2, RefreshCcw, Smartphon
 import { Button } from "@/components/ui/button"
 import { FeedbackState } from "@/components/ui/feedback-state"
 import { WallLayer, WallStage } from "@/features/wall/components/wall-stage"
-import { type PublicWish } from "@/features/wishes/dal"
+import { type PublicWish, type PublicWishesPage } from '@/features/wishes/dal'
 import { type RealtimeWallEvent, useRealtimeWallEvents } from "@/features/wishes/realtime"
 import { cn } from "@/lib/utils"
 import { useEffectState } from "@/components/effects/effect-provider"
@@ -21,61 +21,129 @@ type WallSort = "newest" | "oldest"
 type WallLayout = "spotlight" | "grid" | "photo-focus"
 type WallAspect = "wide" | "portrait"
 
+type FetchWishesAction = (cursor: string | null) => Promise<PublicWishesPage>
+type ReconcileWishesAction = (wishIds: string[]) => Promise<PublicWish[]>
+
+export function mergePublicWishes(currentWishes: PublicWish[], incomingWishes: PublicWish[]) {
+  const wishesById = new Map(currentWishes.map((wish) => [wish.id, wish]))
+  for (const wish of incomingWishes) wishesById.set(wish.id, wish)
+
+  return [...wishesById.values()].sort((left, right) => {
+    if (left.is_pinned !== right.is_pinned) return left.is_pinned ? -1 : 1
+
+    const createdAtDifference = new Date(right.created_at).getTime() - new Date(left.created_at).getTime()
+    if (createdAtDifference !== 0) return createdAtDifference
+    return right.id.localeCompare(left.id)
+  })
+}
+
 export function RealtimeWall({
   eventId,
   initialWishes,
+  initialNextCursor,
+  initialHasMore,
   fetchWishesAction,
+  reconcileWishesAction,
 }: {
   eventId: string
   initialWishes: PublicWish[]
-  fetchWishesAction: (eventId: string, limit: number) => Promise<PublicWish[]>
+  initialNextCursor: string | null
+  initialHasMore: boolean
+  fetchWishesAction: FetchWishesAction
+  reconcileWishesAction: ReconcileWishesAction
 }) {
   const [wishes, setWishes] = useState<PublicWish[]>(initialWishes)
   const [isRefetching, setIsRefetching] = useState(false)
   const [refetchError, setRefetchError] = useState(false)
+  const [nextCursor, setNextCursor] = useState(initialNextCursor)
+  const [hasMore, setHasMore] = useState(initialHasMore)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [loadMoreError, setLoadMoreError] = useState(false)
   const [filter, setFilter] = useState<WallFilter>("all")
   const [sort, setSort] = useState<WallSort>("newest")
   const [layout, setLayout] = useState<WallLayout>("spotlight")
   const [aspect, setAspect] = useState<WallAspect>("wide")
   const { config: effectConfig, reducedMotion, setPreset, setIntensity } = useEffectState()
-  const wishesLengthRef = useRef(initialWishes.length)
-  const wishIdsRef = useRef(new Set(initialWishes.map((wish) => wish.id)))
-  const handleReconnectRef = useRef<() => Promise<void>>(async () => {})
+  const wishesRef = useRef(initialWishes)
+  const handleReconnectRef = useRef<(changedWishId?: string) => Promise<void>>(async () => {})
   const [spotlightWishId] = useState<string | null>(null)
 
   useEffect(() => {
-    wishesLengthRef.current = wishes.length
-  }, [wishes.length])
+    wishesRef.current = wishes
+  }, [wishes])
 
   const handleEvent = useCallback((event: RealtimeWallEvent) => {
-    if (event.action === "remove") {
-      wishIdsRef.current.delete(event.wish_id)
-      setWishes((currentWishes) => currentWishes.filter((wish) => wish.id !== event.wish_id))
+    if (event.action === 'remove') {
+      const nextWishes = wishesRef.current.filter((wish) => wish.id !== event.wish_id)
+      wishesRef.current = nextWishes
+      setWishes(nextWishes)
       return
     }
 
-    if (event.action === "upsert") {
-      // The realtime event deliberately carries no wish data. Refetch through
-      // the server-only public projection instead of trusting broadcast rows.
-      void handleReconnectRef.current()
+    if (event.action === 'upsert') {
+      // The realtime event deliberately carries no wish data. Reconcile
+      // allowlisted IDs through the server-only public projection instead.
+      void handleReconnectRef.current(event.wish_id)
     }
   }, [])
 
-  const handleReconnect = useCallback(async () => {
+  const handleReconnect = useCallback(async (changedWishId?: string) => {
     setIsRefetching(true)
     setRefetchError(false)
 
     try {
-      const freshWishes = await fetchWishesAction(eventId, Math.max(20, wishesLengthRef.current))
-      wishIdsRef.current = new Set(freshWishes.map((wish) => wish.id))
-      setWishes(freshWishes)
+      const knownWishIds = [...new Set([
+        ...wishesRef.current.map((wish) => wish.id),
+        ...(changedWishId ? [changedWishId] : []),
+      ])]
+      const reconciledWishes: PublicWish[] = []
+
+      for (let index = 0; index < knownWishIds.length; index += 100) {
+        reconciledWishes.push(...await reconcileWishesAction(knownWishIds.slice(index, index + 100)))
+      }
+
+      const refreshedHead = await fetchWishesAction(null)
+      const knownWishIdSet = new Set(knownWishIds)
+      setWishes((currentWishes) => {
+        const nextWishes = mergePublicWishes(
+          currentWishes.filter((wish) => !knownWishIdSet.has(wish.id)),
+          [...reconciledWishes, ...refreshedHead.items],
+        )
+        wishesRef.current = nextWishes
+        return nextWishes
+      })
+      setNextCursor(refreshedHead.nextCursor)
+      setHasMore(refreshedHead.hasMore)
     } catch (error) {
-      console.error("Failed to refetch wishes on reconnect", error)
+      console.error('Failed to reconcile wishes on reconnect', error)
       setRefetchError(true)
     } finally {
       setIsRefetching(false)
     }
-  }, [eventId, fetchWishesAction])
+  }, [fetchWishesAction, reconcileWishesAction])
+
+  const handleLoadMore = useCallback(async () => {
+    if (!nextCursor || isLoadingMore || isRefetching) return
+
+    setIsLoadingMore(true)
+    setLoadMoreError(false)
+
+    try {
+      const nextPage = await fetchWishesAction(nextCursor)
+      setWishes((currentWishes) => {
+        const nextWishes = mergePublicWishes(currentWishes, nextPage.items)
+        wishesRef.current = nextWishes
+        return nextWishes
+      })
+      setNextCursor(nextPage.nextCursor)
+      setHasMore(nextPage.hasMore)
+    } catch (error) {
+      console.error('Failed to load more wishes', error)
+      setLoadMoreError(true)
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }, [fetchWishesAction, isLoadingMore, isRefetching, nextCursor])
 
   useEffect(() => {
     handleReconnectRef.current = handleReconnect
@@ -89,9 +157,14 @@ export function RealtimeWall({
     })
 
     return [...filtered].sort((a, b) => {
-      if (sort === "oldest") return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      const createdAtDifference = sort === 'oldest'
+        ? new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        : new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      if (createdAtDifference !== 0) return createdAtDifference
+
+      if (sort === 'oldest') return a.id.localeCompare(b.id)
       if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      return b.id.localeCompare(a.id)
     })
   }, [filter, sort, wishes])
 
@@ -101,7 +174,7 @@ export function RealtimeWall({
   return (
     <div
       className="min-w-0"
-      aria-busy={isRefetching}
+      aria-busy={isRefetching || isLoadingMore}
       data-testid="realtime-wall"
       data-connection-status={status}
     >
@@ -228,6 +301,43 @@ export function RealtimeWall({
           </WallLayer>
         </WallStage>
       )}
+
+      {wishes.length > 0 ? (
+        <div className='mt-5 flex flex-col items-center gap-3' aria-live='polite' aria-atomic='true'>
+          {loadMoreError ? (
+            <div className='flex flex-col items-center gap-3 rounded-xl border border-status-danger/30 bg-status-danger/10 px-4 py-3 text-sm text-status-danger sm:flex-row'>
+              <p role='alert'>{'Kh\u00f4ng th\u1ec3 t\u1ea3i th\u00eam l\u1eddi ch\u00fac.'}</p>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={() => void handleLoadMore()}
+                disabled={isLoadingMore || isRefetching}
+                aria-busy={isLoadingMore}
+              >
+                <RefreshCcw aria-hidden='true' />
+                {'Th\u1eed l\u1ea1i'}
+              </Button>
+            </div>
+          ) : hasMore ? (
+            <Button
+              type='button'
+              variant='outline'
+              onClick={() => void handleLoadMore()}
+              disabled={isLoadingMore || isRefetching}
+              aria-busy={isLoadingMore}
+            >
+              {isLoadingMore ? <RefreshCcw aria-hidden='true' className='animate-spin' /> : null}
+              {isLoadingMore
+                ? '\u0110ang t\u1ea3i th\u00eam l\u1eddi ch\u00fac\u2026'
+                : 'T\u1ea3i th\u00eam l\u1eddi ch\u00fac'}
+            </Button>
+          ) : (
+            <p className='text-sm text-muted-foreground' role='status'>
+              {'\u0110\u00e3 t\u1ea3i t\u1ea5t c\u1ea3 l\u1eddi ch\u00fac.'}
+            </p>
+          )}
+        </div>
+      ) : null}
 
       {status === "connected" && !isRefetching && !refetchError ? (
         <p className="sr-only" role="status" aria-live="polite">

@@ -4,7 +4,14 @@ import { signInWithGoogle, signUp } from "@/app/auth/actions"
 import { AuthPageShell } from "@/components/auth/auth-page-shell"
 import { AuthForm } from "@/components/auth/auth-form"
 
-export default function SignUpPage() {
+import { getSafeNextPath } from '@/utils/url'
+
+type SignUpPageProps = {
+  searchParams: Promise<{ next?: string }>
+}
+
+export default async function SignUpPage({ searchParams }: SignUpPageProps) {
+  const { next } = await searchParams
   return (
     <AuthPageShell
       title="Tạo tài khoản"
@@ -25,6 +32,7 @@ export default function SignUpPage() {
         action={signUp}
         googleAction={signInWithGoogle}
         mode="sign-up"
+        nextPath={getSafeNextPath(next ?? null)}
       />
     </AuthPageShell>
   )

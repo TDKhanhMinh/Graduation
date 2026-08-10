@@ -6,7 +6,7 @@ export const ANALYTICS_ENDPOINT = process.env.NEXT_PUBLIC_ANALYTICS_ENDPOINT
 export type AnalyticsEventName = "landing_visit" | "cta_click" | "sample_event_clicked" | "poster_demo_interaction" | "template_selected" | "template_previewed" | "template_continue" | "section_reached" | "faq_opened" | "first_poster_completed" | "first_event_published" | "event_welcome_viewed" | "event_welcome_submit_clicked" | "event_welcome_explore_clicked" | "event_welcome_scrolled" | "event_welcome_deep_link_skipped"
 export type AnalyticsPayload = Record<string, string | number | boolean | null>
 export type WelcomeVisit = "first" | "repeat" | "storage-unavailable"
-export type WelcomeStatus = "upcoming" | "live" | "closed" | "archived"
+export type WelcomeStatus = "upcoming" | "live" | "ended" | "closed" | "archived"
 
 export const WELCOME_ANALYTICS_EVENTS = [
   "event_welcome_viewed",
