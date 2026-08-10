@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import type { GuidedTourStep } from "./types"
+import { TOUR_CARD_SELECTOR, type GuidedTourStep } from "./types"
 import type { InvitationStickerSceneHandle } from "@/components/invitation/stickers/InvitationStickerScene"
 import type { StickerAction } from "@/components/invitation/stickers/types"
 
@@ -19,23 +19,50 @@ export function TourStickerBridge({ step, sceneRef, mascotId = "anime-party" }: 
     
     let frameId: number | null = null
     const isNewStep = prevStepId.current !== step.id
+    const placement = step.mascotPlacement || "top-left"
+    const mascotTargetSelector =
+      step.mascotAnchor === "tour-card"
+        ? TOUR_CARD_SELECTOR
+        : step.targetSelector
 
     if (step.mascotAction) {
-      if (step.mascotAction === "point-to-content" && step.targetSelector) {
-        const placement = step.mascotPlacement || "top-left"
+      if (step.mascotAction === "point-to-content" && mascotTargetSelector) {
         // Initial point with speech (if new step)
         if (isNewStep) {
-          sceneRef.current.pointToElement(mascotId, step.targetSelector, placement, true)
+          sceneRef.current.pointToElement(mascotId, mascotTargetSelector, placement, true)
         }
         
         // Continuously track position (handles smooth scrolling) without re-triggering speech
         const trackPosition = () => {
-          sceneRef.current?.pointToElement(mascotId, step.targetSelector!, placement, false)
+          sceneRef.current?.pointToElement(mascotId, mascotTargetSelector, placement, false)
           frameId = requestAnimationFrame(trackPosition)
         }
         frameId = requestAnimationFrame(trackPosition)
       } else {
-        if (isNewStep) sceneRef.current.triggerAction(mascotId, step.mascotAction as StickerAction)
+        if (isNewStep) {
+          if (mascotTargetSelector) {
+            sceneRef.current.moveToElement(
+              mascotId,
+              mascotTargetSelector,
+              placement,
+              step.mascotOffset,
+            )
+          }
+          sceneRef.current.triggerAction(mascotId, step.mascotAction as StickerAction)
+        }
+
+        if (mascotTargetSelector) {
+          const trackPosition = () => {
+            sceneRef.current?.moveToElement(
+              mascotId,
+              mascotTargetSelector,
+              placement,
+              step.mascotOffset,
+            )
+            frameId = requestAnimationFrame(trackPosition)
+          }
+          frameId = requestAnimationFrame(trackPosition)
+        }
       }
     } else {
       if (isNewStep) sceneRef.current.triggerAction(mascotId, "idle")

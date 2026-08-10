@@ -46,6 +46,16 @@ export interface GuidedTourStep {
   mascotPlacement?: "top" | "bottom" | "left" | "right" | "top-left" | "auto";
 
   /**
+   * Element used to position the mascot. Defaults to the step target.
+   * Use "tour-card" when the mascot should accompany the guidance card
+   * without obscuring its content.
+   */
+  mascotAnchor?: "target" | "tour-card";
+
+  /** Additional distance in CSS pixels between the mascot and its anchor. */
+  mascotOffset?: number;
+
+  /**
    * Whether the user can interact with the target element while the step is active.
    * If false, the spotlight overlay will block pointer events.
    */
@@ -58,6 +68,8 @@ export interface GuidedTourConfig {
   mascotId?: string;
   steps: GuidedTourStep[];
 }
+
+export const TOUR_CARD_SELECTOR = "[data-guided-tour-card]" as const;
 
 /**
  * Centralized mapping of tour targets to public event DOM selectors.

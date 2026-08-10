@@ -1,4 +1,4 @@
-import type { GuidedTourConfig } from "./types"
+import type { GuidedTourConfig } from "./types";
 
 export const dashboardTourConfig: GuidedTourConfig = {
   tourId: "dashboard-event-create",
@@ -8,7 +8,8 @@ export const dashboardTourConfig: GuidedTourConfig = {
     {
       id: "title",
       title: "Tên sự kiện",
-      content: "Bắt đầu bằng việc đặt một cái tên thật hay cho sự kiện của bạn nhé!",
+      content:
+        "Bắt đầu bằng việc đặt một cái tên thật hay cho sự kiện của bạn nhé!",
       targetSelector: "[data-tour-target='event-title']",
       condition: "always",
       mascotAction: "point-to-content",
@@ -19,7 +20,8 @@ export const dashboardTourConfig: GuidedTourConfig = {
     {
       id: "slug",
       title: "Đường dẫn (slug)",
-      content: "Đây là đường dẫn duy nhất để khách mời truy cập vào trang sự kiện của bạn. Hãy chọn một đường dẫn dễ nhớ!",
+      content:
+        "Đây là đường dẫn duy nhất để khách mời truy cập vào trang sự kiện của bạn. Hãy chọn một đường dẫn dễ nhớ!",
       targetSelector: "[data-tour-target='event-slug']",
       condition: "always",
       mascotAction: "point-to-content",
@@ -30,7 +32,8 @@ export const dashboardTourConfig: GuidedTourConfig = {
     {
       id: "visibility",
       title: "Chế độ hiển thị",
-      content: "Bạn có thể quyết định ai được phép xem trang sự kiện này. Riêng tư, cần link hoặc công khai hoàn toàn.",
+      content:
+        "Bạn có thể quyết định ai được phép xem trang sự kiện này. Riêng tư, cần link hoặc công khai hoàn toàn.",
       targetSelector: "[data-tour-target='event-visibility']",
       condition: "always",
       mascotAction: "point-to-content",
@@ -41,7 +44,8 @@ export const dashboardTourConfig: GuidedTourConfig = {
     {
       id: "cover",
       title: "Ảnh bìa & Poster",
-      content: "Bạn có thể thiết lập ngay ảnh bìa và tinh chỉnh tỷ lệ khung hình cho sự kiện từ bước này, hoặc bổ sung sau trong phần Giao diện.",
+      content:
+        "Bạn có thể thiết lập ngay ảnh bìa và tinh chỉnh tỷ lệ khung hình cho sự kiện từ bước này, hoặc bổ sung sau trong phần Giao diện.",
       targetSelector: "[data-tour-target='event-cover-poster']",
       condition: "always",
       mascotAction: "point-to-content",
@@ -52,24 +56,32 @@ export const dashboardTourConfig: GuidedTourConfig = {
     {
       id: "preview",
       title: "Xem trước trực tiếp",
-      content: "Bất cứ thay đổi nào của bạn sẽ được cập nhật ngay tại đây để bạn dễ hình dung sự kiện thực tế.",
+      content:
+        "Bất cứ thay đổi nào của bạn sẽ được cập nhật ngay tại đây để bạn dễ hình dung sự kiện thực tế.",
       targetSelector: "[data-tour-target='event-preview']",
       condition: "always",
       mascotAction: "wave",
       speech: "Mọi thay đổi sẽ hiện ra ở đây!",
       placement: "left",
+      mascotAnchor: "tour-card",
+      mascotPlacement: "left",
+      mascotOffset: 100,
       allowInteraction: false,
     },
     {
       id: "submit",
       title: "Lưu sự kiện",
-      content: "Sau khi đã ưng ý, hãy nhấn nút này để chính thức tạo không gian cho sự kiện của bạn!",
+      content:
+        "Sau khi đã ưng ý, hãy nhấn nút này để chính thức tạo không gian cho sự kiện của bạn!",
       targetSelector: "[data-tour-target='event-submit']",
       condition: "always",
       mascotAction: "celebrate",
       speech: "Xong rồi thì bấm lưu nhé!",
       placement: "top",
+      mascotAnchor: "tour-card",
+      mascotPlacement: "left",
+      mascotOffset: 60,
       allowInteraction: false,
-    }
-  ]
-}
+    },
+  ],
+};

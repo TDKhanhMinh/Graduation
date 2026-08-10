@@ -17,6 +17,15 @@ export type StickerAction =
   | "point-to-cta"
   | "run-across-screen"
 
+export type StickerElementPlacement =
+  | "center"
+  | "top-left"
+  | "top"
+  | "left"
+  | "right"
+  | "bottom"
+  | "auto"
+
 export type StickerState =
   | "hidden"
   | "entering"
@@ -112,7 +121,9 @@ export interface InvitationStickerSceneHandle {
 
   triggerAction(stickerId: string, action: StickerAction): void
 
-  pointToElement: (stickerId: string, selector: string, placement?: "center" | "top-left" | "top" | "left" | "right" | "bottom" | "auto", triggerSpeech?: boolean) => void
+  pointToElement: (stickerId: string, selector: string, placement?: StickerElementPlacement, triggerSpeech?: boolean) => void
+
+  moveToElement(stickerId: string, selector: string, placement?: StickerElementPlacement, additionalOffset?: number): void
 
   teleportToElement(stickerId: string, selector: string, placement?: "center" | "top-left" | "top" | "left"): void
 

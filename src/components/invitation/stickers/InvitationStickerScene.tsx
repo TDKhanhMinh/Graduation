@@ -67,6 +67,9 @@ export const InvitationStickerScene = forwardRef<
     pointToElement: (stickerId, selector, placement = "center", triggerSpeech = true) => {
       controller.pointToElement(stickerId, selector, placement, triggerSpeech)
     },
+    moveToElement: (stickerId, selector, placement = "center", additionalOffset = 0) => {
+      controller.moveToElement(stickerId, selector, placement, additionalOffset)
+    },
     teleportToElement: (id, selector, placement) => {
       controller.teleportToElement(id, selector, placement)
     },

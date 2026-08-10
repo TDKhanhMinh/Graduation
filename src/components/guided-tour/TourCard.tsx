@@ -62,6 +62,7 @@ export function TourCard({
 
   return (
     <motion.div
+      data-guided-tour-card=""
       role="dialog"
       aria-modal="true"
       aria-labelledby="tour-step-title"
@@ -78,7 +79,7 @@ export function TourCard({
           : { opacity: 0 }
       }
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="absolute z-50 flex w-[90vw] max-w-[320px] flex-col gap-4 rounded-2xl bg-[var(--event-surface)] p-5 text-[var(--event-text)] shadow-2xl ring-1 ring-[var(--event-border)] backdrop-blur-xl supports-[backdrop-filter]:bg-[var(--event-surface)]"
+      className="absolute z-[120] flex w-[90vw] max-w-[320px] flex-col gap-4 rounded-2xl bg-[var(--event-surface)] p-5 text-[var(--event-text)] shadow-2xl ring-1 ring-[var(--event-border)] backdrop-blur-xl supports-[backdrop-filter]:bg-[var(--event-surface)]"
       style={{
         backgroundColor: "var(--event-surface, #fff)",
         color: "var(--event-text, #111)",

@@ -233,7 +233,7 @@ export function TourRunner({ config, onComplete, onSkip, reducedMotion = false, 
   }
 
   return createPortal(
-    <div className="tour-root" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 100, pointerEvents: "none" }}>
+    <div className="tour-root" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
       
       {/* Dim overlay */}
       {!targetRect && (

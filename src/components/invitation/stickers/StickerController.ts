@@ -1,6 +1,6 @@
 import { STICKER_MANIFEST } from "./sticker-manifest"
 import { StickerCharacter } from "./StickerCharacter"
-import type { StickerAction, StickerPerformanceOptions } from "./types"
+import type { StickerAction, StickerElementPlacement, StickerPerformanceOptions } from "./types"
 import { getExclusionRects, preloadImage } from "./sticker-utils"
 
 function getSpeechCategory(
@@ -134,7 +134,60 @@ export class StickerController {
     char.triggerSpeech(text, durationInSeconds)
   }
 
-  public pointToElement(stickerId: string, selector: string, placement: "center" | "top-left" | "top" | "left" | "right" | "bottom" | "auto" = "center", triggerSpeech = true) {
+  public moveToElement(
+    stickerId: string,
+    selector: string,
+    placement: StickerElementPlacement = "center",
+    additionalOffset: number = 0,
+  ) {
+    const char = this.characters.get(stickerId)
+    if (!char || typeof document === "undefined") return
+
+    const element = document.querySelector(selector)
+    if (!element) return
+
+    const rect = element.getBoundingClientRect()
+    const containerWidth = window.innerWidth
+    const containerHeight = window.innerHeight
+
+    let pixelX = rect.left + rect.width / 2
+    let pixelY = rect.top + rect.height / 2
+    const sideOffset = placement === "left" || placement === "right" ? 128 : 60
+    const charOffset =
+      Math.max(char.width / 2 + 12, sideOffset) + Math.max(additionalOffset, 0)
+
+    if (placement === "top-left") {
+      pixelX = rect.left - charOffset / 2
+      pixelY = rect.top - charOffset
+    } else if (placement === "top") {
+      pixelY = rect.top - charOffset
+    } else if (placement === "bottom") {
+      pixelY = rect.bottom + charOffset
+    } else if (placement === "left") {
+      pixelX = rect.left - charOffset
+    } else if (placement === "right") {
+      pixelX = rect.right + charOffset
+    } else if (placement === "auto") {
+      if (rect.right + charOffset * 2 < containerWidth) {
+        pixelX = rect.right + charOffset
+      } else {
+        pixelY = rect.bottom + charOffset
+      }
+    }
+
+    const horizontalInset = Math.min(charOffset / containerWidth, 0.25)
+    const verticalInset = Math.min(charOffset / containerHeight, 0.25)
+    char.targetNormalizedX = Math.min(
+      Math.max(pixelX / containerWidth, horizontalInset),
+      1 - horizontalInset,
+    )
+    char.targetNormalizedY = Math.min(
+      Math.max(pixelY / containerHeight, verticalInset),
+      1 - verticalInset,
+    )
+  }
+
+  public pointToElement(stickerId: string, selector: string, placement: StickerElementPlacement = "center", triggerSpeech = true) {
     const char = this.characters.get(stickerId)
     if (!char || typeof document === "undefined") return
 
