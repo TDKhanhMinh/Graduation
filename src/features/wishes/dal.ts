@@ -1,4 +1,5 @@
 import "server-only"
+import { connection } from "next/server"
 import { cache } from "react"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { Database } from "@/types/database"
@@ -36,6 +37,9 @@ export const getApprovedWishesPage = cache(async (
   limit: number = 20, 
   cursor?: PublicWishCursor
 ) => {
+  // Server data may be requested from a public link or a Server Action. Keep
+  // it at request time so unlisted projections never enter a shared prerender.
+  await connection()
   const supabase = createAdminClient()
   
   let query = supabase

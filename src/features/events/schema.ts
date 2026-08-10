@@ -22,6 +22,22 @@ export const eventSchema = z.object({
   is_archived: z.boolean().default(false),
 });
 
+export type EventDatePatch = {
+  provided: boolean
+  value: string | null | undefined
+}
+
+export function readEventDatePatch(formData: FormData): EventDatePatch {
+  if (!formData.has("date")) {
+    return { provided: false, value: undefined }
+  }
+
+  const value = formData.get("date")
+  const normalized = typeof value === "string" ? value.trim() : ""
+
+  return { provided: true, value: normalized || null }
+}
+
 export type EventInput = z.infer<typeof eventSchema>;
 
 export const appearanceSchema = z.object({

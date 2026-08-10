@@ -1,30 +1,59 @@
 import "server-only"
-import { createAdminClient } from "@/lib/supabase/admin"
-import { getReactionActor } from "./actor"
+
 import { cache } from "react"
 
-const ALLOWED_EMOJIS = ["Ã¢ÂÂ¤Ã¯Â¸Â", "Ã°Å¸â€˜Â", "Ã°Å¸Å½â€°", "Ã°Å¸Ëœâ€š", "Ã°Å¸â€Â¥", "Ã°Å¸â€˜Â"]
+import { createAdminClient } from "@/lib/supabase/admin"
 
-export async function toggleReaction(wishId: string, emoji: string): Promise<boolean> {
-  if (!ALLOWED_EMOJIS.includes(emoji)) {
-    throw new Error("Invalid emoji")
-  }
-  
-  const { actorId, actorKeyHash } = await getReactionActor()
+import { getReactionActor } from "./actor"
+import { isAllowedReactionEmoji } from "./emoji"
+
+export type ReactionActor = {
+  actorId: string | null
+  actorKeyHash: string | null
+}
+
+export async function getReactionTargetEventId(wishId: string): Promise<string | null> {
+  // This lookup runs only with the server's service-role client. Its result is
+  // immediately HMACed for rate limiting and never returned to the caller.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase: any = createAdminClient()
-  
+  const { data, error } = await supabase
+    .from("wishes")
+    .select("event_id")
+    .eq("id", wishId)
+    .maybeSingle()
+
+  if (error || !data || typeof data.event_id !== "string") {
+    return null
+  }
+
+  return data.event_id
+}
+
+export async function toggleReaction(
+  wishId: string,
+  emoji: string,
+  actor?: ReactionActor,
+): Promise<boolean> {
+  if (!isAllowedReactionEmoji(emoji)) {
+    throw new Error("Invalid emoji")
+  }
+
+  const { actorId, actorKeyHash } = actor ?? await getReactionActor()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase: any = createAdminClient()
+
   const { data, error } = await supabase.rpc("toggle_wish_reaction", {
     p_wish_id: wishId,
     p_actor_id: actorId,
     p_actor_key_hash: actorKeyHash,
-    p_emoji: emoji
+    p_emoji: emoji,
   })
-  
+
   if (error) {
     throw error
   }
-  
+
   return Boolean(data)
 }
 
@@ -38,26 +67,25 @@ export const getReactionCounts = cache(async (wishId: string): Promise<ReactionC
   const { actorId, actorKeyHash } = await getReactionActor({ persistGuestCookie: false })
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase: any = createAdminClient()
-  
-  // To avoid exposing actors, we just group by emoji
-  // We can do this via standard query using service role, but we filter what we return.
+
+  // To avoid exposing actors, we just group by emoji.
   const { data, error } = await supabase
     .from("wish_reactions")
     .select("emoji, actor_id, actor_key_hash")
     .eq("wish_id", wishId)
-    
+
   if (error) {
     return []
   }
-  
+
   const counts: Record<string, ReactionCount> = {}
-  
+
   data.forEach((row: { emoji: string, actor_id: string | null, actor_key_hash: string | null }) => {
     if (!counts[row.emoji]) {
       counts[row.emoji] = { emoji: row.emoji, count: 0, hasReacted: false }
     }
     counts[row.emoji].count++
-    
+
     if (
       (actorId && row.actor_id === actorId) ||
       (actorKeyHash && row.actor_key_hash === actorKeyHash)
@@ -65,6 +93,6 @@ export const getReactionCounts = cache(async (wishId: string): Promise<ReactionC
       counts[row.emoji].hasReacted = true
     }
   })
-  
+
   return Object.values(counts)
 })

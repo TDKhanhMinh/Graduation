@@ -1,7 +1,14 @@
 import "server-only"
 import { cookies } from "next/headers"
-import crypto from "crypto"
+
 import { verifySession } from "@/lib/auth/dal"
+
+import {
+  REACTION_GUEST_COOKIE_MAX_AGE_SECONDS,
+  REACTION_GUEST_COOKIE_NAME,
+  resolveReactionActor,
+} from "./guest-identity"
+import { getReactionCookieSecrets } from "./reaction-env"
 
 type ReactionActorOptions = {
   persistGuestCookie?: boolean
@@ -11,11 +18,12 @@ const guestCookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: "lax" as const,
-  maxAge: 60 * 60 * 24 * 365,
+  maxAge: REACTION_GUEST_COOKIE_MAX_AGE_SECONDS,
+  path: "/",
 }
 
 export async function getReactionActor(
-  options: ReactionActorOptions = {}
+  options: ReactionActorOptions = {},
 ): Promise<{ actorId: string | null; actorKeyHash: string | null }> {
   const persistGuestCookie = options.persistGuestCookie ?? true
 
@@ -25,31 +33,17 @@ export async function getReactionActor(
   }
 
   const cookieStore = await cookies()
-  let guestId = cookieStore.get("reaction_guest_id")?.value
-  let guestSig = cookieStore.get("reaction_guest_sig")?.value
-  const secret = process.env.REACTION_SECRET_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const actor = resolveReactionActor({
+    cookieValue: cookieStore.get(REACTION_GUEST_COOKIE_NAME)?.value,
+    secrets: getReactionCookieSecrets(),
+    persistGuestCookie,
+  })
 
-  if (!secret) throw new Error("Missing secret key for guest reactions")
-
-  const issueGuestIdentity = () => {
-    guestId = crypto.randomUUID()
-    guestSig = crypto.createHmac("sha256", secret).update(guestId).digest("hex")
-
-    if (persistGuestCookie) {
-      cookieStore.set("reaction_guest_id", guestId, guestCookieOptions)
-      cookieStore.set("reaction_guest_sig", guestSig, guestCookieOptions)
-    }
+  if (persistGuestCookie && actor.cookieValue) {
+    cookieStore.set(REACTION_GUEST_COOKIE_NAME, actor.cookieValue, guestCookieOptions)
+    cookieStore.set("reaction_guest_id", "", { ...guestCookieOptions, maxAge: 0 })
+    cookieStore.set("reaction_guest_sig", "", { ...guestCookieOptions, maxAge: 0 })
   }
 
-  if (!guestId || !guestSig) {
-    issueGuestIdentity()
-  } else {
-    const expectedSig = crypto.createHmac("sha256", secret).update(guestId).digest("hex")
-    if (expectedSig !== guestSig) {
-      issueGuestIdentity()
-    }
-  }
-
-  const actorKeyHash = crypto.createHash("sha256").update(guestId + secret).digest("hex")
-  return { actorId: null, actorKeyHash }
+  return { actorId: actor.actorId, actorKeyHash: actor.actorKeyHash }
 }

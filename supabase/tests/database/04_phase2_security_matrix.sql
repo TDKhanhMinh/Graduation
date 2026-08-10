@@ -54,11 +54,12 @@ SELECT throws_ok(
     'Anon cannot read sensitive fields directly from wishes table'
 );
 
--- 4. Test Anon reading public_wishes_view (only approved)
-SELECT results_eq(
-    $$ SELECT count(*)::integer FROM public.public_wishes_view WHERE event_id = '00000000-0000-0000-0000-000000000001' $$,
-    ARRAY[1],
-    'Anon should only see 1 approved wish through public_wishes_view'
+-- 4. Test Anon cannot enumerate the server-only public projection
+SELECT throws_ok(
+    $$ SELECT id FROM public.public_wishes_view $$,
+    '42501',
+    NULL,
+    'Anon cannot read public_wishes_view'
 );
 
 -- 5. Test public_wishes_view does not expose sensitive columns

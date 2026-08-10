@@ -1,4 +1,5 @@
 import "server-only"
+import { connection } from "next/server"
 import { cache } from "react"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
@@ -72,6 +73,8 @@ export const getOwnedEventById = cache(async (id: string): Promise<Event | null>
 })
 
 export const getPublicEventBySlug = cache(async (slug: string): Promise<PublicEvent | null> => {
+  // Link-only event pages must not be prerendered or shared from a route cache.
+  await connection()
   const supabase = createAdminClient()
   const { data, error } = await supabase
     .from('events')
@@ -79,6 +82,7 @@ export const getPublicEventBySlug = cache(async (slug: string): Promise<PublicEv
     .eq('slug', slug)
     .in('visibility', ['public', 'unlisted'])
     .is('deleted_at', null)
+    .is('archived_at', null)
     .single()
 
   if (error) return null

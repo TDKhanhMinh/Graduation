@@ -3,14 +3,13 @@
 import { SmilePlus } from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"
 
+import { ReactionBurst } from "@/components/effects/reaction-burst"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useOptimisticReactions } from "@/features/reactions/client"
-import { ReactionBurst } from "@/components/effects/reaction-burst"
 import type { ReactionCount } from "@/features/reactions/dal"
+import { ALLOWED_REACTION_EMOJIS } from "@/features/reactions/emoji"
 import { cn } from "@/lib/utils"
-
-const ALLOWED_EMOJIS = ["❤️", "👍", "🎉", "😂", "🔥", "👏"]
 
 export function ReactionBar({
   initialCounts,
@@ -93,7 +92,7 @@ export function ReactionBar({
           </PopoverTrigger>
           <PopoverContent className="w-auto p-2" align="start">
             <div className="flex flex-wrap gap-1" aria-label="Chọn phản ứng">
-              {ALLOWED_EMOJIS.map((emoji) => {
+              {ALLOWED_REACTION_EMOJIS.map((emoji) => {
                 const current = reactions.find((reaction) => reaction.emoji === emoji)
                 const hasReacted = current?.hasReacted ?? false
                 const isPending = inflight.has(emoji)

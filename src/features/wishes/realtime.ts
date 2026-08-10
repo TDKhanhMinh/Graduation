@@ -1,6 +1,5 @@
 "use client";
 
-import { type PublicWish } from "@/features/wishes/dal";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useRef, useState } from "react";
 
@@ -9,7 +8,7 @@ export type RealtimeWallEvent = {
   event_id: string;
   wish_id: string;
   action: "upsert" | "remove";
-  payload: PublicWish | null;
+  payload: null;
   created_at: string;
 };
 

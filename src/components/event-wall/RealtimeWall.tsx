@@ -6,7 +6,6 @@ import { AlertCircle, CheckCircle2, LayoutGrid, Maximize2, RefreshCcw, Smartphon
 import { Button } from "@/components/ui/button"
 import { FeedbackState } from "@/components/ui/feedback-state"
 import { WallLayer, WallStage } from "@/features/wall/components/wall-stage"
-import { createTimelinePlan, useTimelinePlayback } from "@/features/wall/animations/timeline"
 import { type PublicWish } from "@/features/wishes/dal"
 import { type RealtimeWallEvent, useRealtimeWallEvents } from "@/features/wishes/realtime"
 import { cn } from "@/lib/utils"
@@ -41,8 +40,8 @@ export function RealtimeWall({
   const { config: effectConfig, reducedMotion, setPreset, setIntensity } = useEffectState()
   const wishesLengthRef = useRef(initialWishes.length)
   const wishIdsRef = useRef(new Set(initialWishes.map((wish) => wish.id)))
-  const [spotlightWishId, setSpotlightWishId] = useState<string | null>(null)
-  const { play: playTimeline } = useTimelinePlayback(reducedMotion, () => setSpotlightWishId(null))
+  const handleReconnectRef = useRef<() => Promise<void>>(async () => {})
+  const [spotlightWishId] = useState<string | null>(null)
 
   useEffect(() => {
     wishesLengthRef.current = wishes.length
@@ -55,29 +54,12 @@ export function RealtimeWall({
       return
     }
 
-    if (event.action === "upsert" && event.payload) {
-      const nextWish = event.payload as PublicWish
-      const isNewWish = !wishIdsRef.current.has(event.wish_id)
-      wishIdsRef.current.add(event.wish_id)
-
-      if (isNewWish) {
-        setSpotlightWishId(event.wish_id)
-        playTimeline(createTimelinePlan({ contentType: nextWish.media ? "image" : "text", reducedMotion }))
-      }
-
-      setWishes((currentWishes) => {
-        const exists = currentWishes.some((wish) => wish.id === event.wish_id)
-        const updated = exists
-          ? currentWishes.map((wish) => (wish.id === event.wish_id ? nextWish : wish))
-          : [nextWish, ...currentWishes]
-
-        return updated.sort((a, b) => {
-          if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        })
-      })
+    if (event.action === "upsert") {
+      // The realtime event deliberately carries no wish data. Refetch through
+      // the server-only public projection instead of trusting broadcast rows.
+      void handleReconnectRef.current()
     }
-  }, [playTimeline, reducedMotion])
+  }, [])
 
   const handleReconnect = useCallback(async () => {
     setIsRefetching(true)
@@ -94,6 +76,10 @@ export function RealtimeWall({
       setIsRefetching(false)
     }
   }, [eventId, fetchWishesAction])
+
+  useEffect(() => {
+    handleReconnectRef.current = handleReconnect
+  }, [handleReconnect])
 
   const visibleWishes = useMemo(() => {
     const filtered = wishes.filter((wish) => {

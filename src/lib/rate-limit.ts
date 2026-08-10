@@ -1,47 +1,58 @@
-// Basic in-memory rate limiting.
-// In a real application with multiple instances, you should use Redis (e.g. Upstash) or database.
+import "server-only"
 
-type RateLimitRecord = {
-  count: number
-  expiresAt: number
+import { createAdminClient } from "@/lib/supabase/admin"
+
+type RateLimitRpcRow = {
+  allowed: boolean
+  remaining: number
+  reset_at: string
 }
 
-const store = new Map<string, RateLimitRecord>()
+export type RateLimitResult = {
+  success: boolean
+  limit: number
+  remaining: number
+  reset: number
+}
 
+/**
+ * Consumes a durable, opaque reaction scope through the server-only RPC.
+ * scopeHash must already be an HMAC; plaintext IPs and actor identifiers
+ * must never reach this function or the database counter.
+ */
 export async function rateLimit(
-  ip: string,
-  action: string,
+  scopeHash: string,
   limit: number,
   windowSeconds: number
-): Promise<{ success: boolean; limit: number; remaining: number; reset: number }> {
-  const key = `${action}:${ip}`
-  const now = Date.now()
-  
-  // Cleanup expired entries occasionally
-  if (Math.random() < 0.1) {
-    for (const [k, v] of store.entries()) {
-      if (now > v.expiresAt) {
-        store.delete(k)
-      }
-    }
+): Promise<RateLimitResult> {
+  // The generated database types are refreshed after the migration applies.
+  // Keep this explicit server-only boundary while local Supabase is unavailable.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase: any = createAdminClient()
+  const { data, error } = await supabase.rpc("consume_reaction_rate_limit", {
+    p_scope_hash: scopeHash,
+    p_limit: limit,
+    p_window_seconds: windowSeconds,
+  })
+
+  if (error) {
+    throw error
   }
 
-  let record = store.get(key)
-
-  if (!record || now > record.expiresAt) {
-    record = {
-      count: 0,
-      expiresAt: now + windowSeconds * 1000,
-    }
+  const row: RateLimitRpcRow | undefined = Array.isArray(data) ? data[0] : data
+  if (
+    !row ||
+    typeof row.allowed !== "boolean" ||
+    typeof row.remaining !== "number" ||
+    typeof row.reset_at !== "string"
+  ) {
+    throw new Error("Reaction rate limit returned an invalid result")
   }
-
-  record.count++
-  store.set(key, record)
 
   return {
-    success: record.count <= limit,
+    success: row.allowed,
     limit,
-    remaining: Math.max(0, limit - record.count),
-    reset: record.expiresAt,
+    remaining: Math.max(0, row.remaining),
+    reset: Date.parse(row.reset_at),
   }
 }

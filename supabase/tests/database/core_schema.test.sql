@@ -30,12 +30,11 @@ SELECT throws_ok(
   'Anon cannot enumerate event rows'
 );
 
-SELECT results_eq(
-  $$ SELECT count(*)::integer
-     FROM public.public_wishes_view
-     WHERE event_id = 'e1eebc99-9c0b-4ef8-bb6d-6bb9bd380e01' $$,
-  ARRAY[1],
-  'Anon reads only the approved public DTO projection'
+SELECT throws_ok(
+  $$ SELECT id FROM public.public_wishes_view $$,
+  '42501',
+  NULL,
+  'Anon cannot enumerate the server-only public projection'
 );
 
 RESET ROLE;
