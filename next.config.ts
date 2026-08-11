@@ -12,42 +12,50 @@ const cspHeader = `
     frame-ancestors 'none';
     frame-src 'self' https://challenges.cloudflare.com;
     connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.cloudinary.com;
-`
+`;
 
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-      }
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "https",
+        hostname: "okjdsnibxnouzuproivs.supabase.co",
+      },
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+      },
     ],
   },
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: "/(.*)",
         headers: [
           {
-            key: 'Content-Security-Policy',
-            value: cspHeader.replace(/\n/g, ''),
+            key: "Content-Security-Policy",
+            value: cspHeader.replace(/\n/g, ""),
           },
           {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
+            key: "X-Content-Type-Options",
+            value: "nosniff",
           },
           {
-            key: 'X-Frame-Options',
-            value: 'DENY',
+            key: "X-Frame-Options",
+            value: "DENY",
           },
           {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
+            key: "X-XSS-Protection",
+            value: "1; mode=block",
           },
         ],
       },
-    ]
+    ];
   },
 };
 
