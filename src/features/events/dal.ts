@@ -4,6 +4,8 @@ import { cache } from "react"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { verifySession } from "@/lib/auth/dal"
+import { createError } from "@/lib/observability/error"
+import { logger } from "@/lib/observability/logger"
 import { Database } from "@/types/database"
 import { normalizeWelcomeHeroConfig, type WelcomeHeroConfig } from "./welcome-config"
 
@@ -92,7 +94,16 @@ export const getPublicEventBySlug = cache(async (slug: string): Promise<PublicEv
     .is('archived_at', null)
     .single()
 
-  if (error) return null
+  if (error?.code === "PGRST116") return null
+  if (error) {
+    logger.error("Public event query failed", error, {
+      surface: "action",
+      resource: "public-event",
+      route: "/e/[slug]",
+    })
+    throw createError("INTERNAL_SERVER_ERROR", "Không thể tải sự kiện lúc này.")
+  }
+  if (!data) return null
 
   return {
     ...data,

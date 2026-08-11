@@ -82,7 +82,7 @@ declare
   v_request_count integer;
   v_expires_at timestamptz;
 begin
-  if p_scope_hash !~ '^[a-f0-9]{64}$' then
+  if p_scope_hash is null or p_scope_hash !~ '^[a-f0-9]{64}$' then
     raise exception using
       errcode = '22023',
       message = 'INVALID_REACTION_RATE_LIMIT_SCOPE';
@@ -171,7 +171,7 @@ begin
       message = 'INVALID_REACTION_ACTOR';
   end if;
 
-  if p_emoji <> all (array['❤️', '👍', '🎉', '😂', '🔥', '👏']::text[]) then
+  if p_emoji is null or p_emoji <> all (array['❤️', '👍', '🎉', '😂', '🔥', '👏']::text[]) then
     raise exception using
       errcode = '22023',
       message = 'INVALID_REACTION_EMOJI';

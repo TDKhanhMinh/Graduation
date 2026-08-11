@@ -1,4 +1,4 @@
-import { ArrowRight, MessageCircleHeart, Palette, QrCode } from "lucide-react"
+import { MessageCircleHeart, Palette, QrCode } from "lucide-react"
 
 import { LandingSection } from "@/components/landing/landing-section"
 import { PageShell } from "@/components/ui/page-shell"

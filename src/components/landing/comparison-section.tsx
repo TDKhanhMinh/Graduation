@@ -1,10 +1,64 @@
-import { ArrowRight, Check, Minus } from "lucide-react"
+import { Check, X, Sparkles } from "lucide-react"
 
 import { LandingSection } from "@/components/landing/landing-section"
 import { PageShell } from "@/components/ui/page-shell"
 
-const rows = [["Thông tin thường nằm rải rác", "Một điểm vào cho khách mời", true], ["Cần tự gom lại sau sự kiện", "Lời chúc và tệp đa phương tiện cùng câu chuyện", true], ["Phụ thuộc vào cách tổ chức riêng", "Trình chiếu khoảnh khắc chung", true]] as const
+const featureMatrix = [
+  { feature: "Thiết kế áp phích sự kiện chuyên nghiệp", memoria: true, qrAlbum: false, drive: false },
+  { feature: "Quét QR để tham gia, không cần tải app", memoria: true, qrAlbum: true, drive: false },
+  { feature: "Trình chiếu Public Wall trực tiếp tại sự kiện", memoria: true, qrAlbum: false, drive: false },
+  { feature: "Kiểm duyệt nội dung trước khi phát sóng", memoria: true, qrAlbum: false, drive: false },
+  { feature: "Tự động lưu trữ thành Album kỷ niệm", memoria: true, qrAlbum: true, drive: true },
+]
 
 export function ComparisonSection() {
-  return <LandingSection id="before-after" className="bg-surface-sunken"><PageShell><div className="mx-auto max-w-2xl text-center"><p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Trước / Sau</p><h2 className="mt-3 font-heading text-3xl font-bold tracking-tight sm:text-4xl">Một cách kể chuyện tập trung hơn</h2><p className="mt-4 text-base leading-7 text-muted-foreground">Không phán xét cách làm cũ; chỉ cho thấy Memoria đặt áp phích và kỷ niệm vào cùng một quy trình.</p></div><div className="mx-auto mt-10 max-w-3xl overflow-hidden rounded-3xl border bg-card"><div className="grid grid-cols-[1fr_1fr] border-b bg-muted/50 p-4 text-sm font-semibold"><span>Chuẩn bị rời rạc</span><span className="text-primary">Với Memoria</span></div>{rows.map(([before, after, supported]) => <div key={before} className="grid grid-cols-[1fr_1fr] gap-4 border-b p-4 text-sm last:border-b-0"><span className="flex items-start gap-2 text-muted-foreground"><Minus aria-hidden="true" className="mt-0.5 size-4 shrink-0" />{before}</span><span className="flex items-start gap-2"><Check aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-status-success" />{after}</span></div>)}</div></PageShell></LandingSection>
+  return (
+    <LandingSection id="comparison" className="scroll-mt-20 border-t bg-surface-sunken py-16 sm:py-24 lg:py-32">
+      <PageShell>
+        <div className="mx-auto max-w-3xl text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-primary">
+            <Sparkles className="size-3.5" /> Value Proposition
+          </div>
+          <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+            Một QR có thể làm nhiều hơn bạn nghĩ
+          </h2>
+          <p className="mt-4 text-base leading-7 text-muted-foreground sm:text-lg">
+            Memoria kết nối thiết kế áp phích, mã QR tương tác và màn hình trình chiếu trong một hệ sinh thái duy nhất.
+          </p>
+        </div>
+
+        {/* Feature Comparison Matrix Table */}
+        <div className="mx-auto mt-12 max-w-4xl overflow-hidden rounded-3xl border border-primary/20 bg-card shadow-xl">
+          <div className="grid grid-cols-[1.5fr_1fr_1fr_1fr] border-b bg-muted/60 p-4 sm:p-6 text-xs sm:text-sm font-bold text-foreground">
+            <span>Tính năng trải nghiệm</span>
+            <span className="text-primary text-center flex items-center justify-center gap-1">
+              Memoria ✨
+            </span>
+            <span className="text-center text-muted-foreground">Album QR</span>
+            <span className="text-center text-muted-foreground">Google Drive</span>
+          </div>
+
+          <div className="divide-y divide-border">
+            {featureMatrix.map((item) => (
+              <div key={item.feature} className="grid grid-cols-[1.5fr_1fr_1fr_1fr] items-center p-4 sm:p-5 text-xs sm:text-sm font-medium hover:bg-muted/30 transition-colors">
+                <span className="text-foreground">{item.feature}</span>
+
+                <span className="flex justify-center text-status-success font-bold">
+                  {item.memoria ? <Check className="size-5 text-primary stroke-[3]" /> : <X className="size-4 text-muted-foreground/40" />}
+                </span>
+
+                <span className="flex justify-center text-muted-foreground">
+                  {item.qrAlbum ? <Check className="size-4 text-status-success" /> : <X className="size-4 text-muted-foreground/40" />}
+                </span>
+
+                <span className="flex justify-center text-muted-foreground">
+                  {item.drive ? <Check className="size-4 text-status-success" /> : <X className="size-4 text-muted-foreground/40" />}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </PageShell>
+    </LandingSection>
+  )
 }

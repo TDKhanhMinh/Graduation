@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "test:unit": "node --experimental-strip-types --experimental-test-isolation=none --test tests/unit/rm26-reactions-and-event-write.test.mjs tests/unit/rm26-static-contracts.test.mjs tests/unit/rm26-p1-contracts.test.mjs",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:reset": "supabase db reset --local",
@@ -46,7 +47,6 @@
     "eslint-config-next": "16.2.12",
     "supabase": "2.110.0",
     "tailwindcss": "^4",
-    
     "typescript": "^5"
   },
   "overrides": {

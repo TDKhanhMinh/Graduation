@@ -4,11 +4,15 @@ import { verifySession } from "@/lib/auth/dal";
 import { createError } from "@/lib/observability/error";
 import { logger } from "@/lib/observability/logger";
 import { createClient } from "@/lib/supabase/server";
-import { Database, Json } from "@/types/database";
+import { Json } from "@/types/database";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { appearanceSchema, eventSchema, normalizeSlug } from "./schema";
 import { eventScheduleSchema, normalizeLocalDateTime } from "./schedule";
+import {
+  applyEventScheduleWrite,
+  type EventScheduleWrite,
+} from "./write-contract";
 import {
   getDefaultWelcomeHeroConfig,
   welcomeHeroConfigSchema,
@@ -20,25 +24,39 @@ export type EventActionState = {
   fieldErrors?: Record<string, string[]>;
 };
 
-type EventScheduleWrite = {
-  starts_at: string | null;
-  ends_at: string | null;
-  timezone: string;
-  location_name: string | null;
-  location_address: string | null;
-  host_name: string | null;
-  host_title: string | null;
-  clear: boolean;
-};
-
-function readScheduleWrite(formData: FormData): {
+function readScheduleWrite(formData: FormData, mode: "create" | "update"): {
   data?: EventScheduleWrite;
   fieldErrors?: Record<string, string[]>;
 } {
+  const hasScheduleInput = [
+    "starts_at",
+    "ends_at",
+    "timezone",
+    "location_name",
+    "location_address",
+    "host_name",
+    "host_title",
+  ].some((field) => formData.has(field));
   const timezone = String(formData.get('timezone') || 'UTC').trim();
   const startsRaw = String(formData.get('starts_at') || '').trim();
   const endsRaw = String(formData.get('ends_at') || '').trim();
   const clear = formData.get('clear_schedule') === 'true';
+
+  if (mode === "update" && !hasScheduleInput && !clear) {
+    return {
+      data: {
+        starts_at: null,
+        ends_at: null,
+        timezone: "UTC",
+        location_name: null,
+        location_address: null,
+        host_name: null,
+        host_title: null,
+        clear: false,
+        provided: false,
+      },
+    };
+  }
 
   if (clear) {
     return {
@@ -51,6 +69,7 @@ function readScheduleWrite(formData: FormData): {
         host_name: null,
         host_title: null,
         clear: true,
+        provided: true,
       },
     };
   }
@@ -87,6 +106,7 @@ function readScheduleWrite(formData: FormData): {
       host_name: parsedData.host_name ?? null,
       host_title: parsedData.host_title ?? null,
       clear: false,
+      provided: true,
     },
   };
 }
@@ -100,7 +120,7 @@ export async function createEvent(
     redirect("/auth/login");
   }
 
-  const schedule = readScheduleWrite(formData);
+  const schedule = readScheduleWrite(formData, "create");
   if (!schedule.data) {
     return { error: 'Lịch sự kiện không hợp lệ.', fieldErrors: schedule.fieldErrors };
   }
@@ -205,7 +225,7 @@ export async function updateEvent(
     redirect("/auth/login");
   }
 
-  const schedule = readScheduleWrite(formData);
+  const schedule = readScheduleWrite(formData, "update");
   if (!schedule.data) {
     return { error: 'Lịch sự kiện không hợp lệ.', fieldErrors: schedule.fieldErrors };
   }
@@ -231,27 +251,14 @@ export async function updateEvent(
 
   // The RLS policy requires owner_id = current user's id.
   // We can just update and check if a row was affected.
-  const eventUpdate: Database["public"]["Tables"]["events"]["Update"] = {
+  const eventUpdate = applyEventScheduleWrite({
     title: validated.data.title,
     slug: validated.data.slug,
     description: validated.data.description,
-    starts_at: schedule.data.starts_at,
-    ends_at: schedule.data.ends_at,
-    timezone: schedule.data.timezone,
-    location_name: schedule.data.location_name,
-    location_address: schedule.data.location_address,
-    host_name: schedule.data.host_name,
-    host_title: schedule.data.host_title,
     visibility: validated.data.visibility,
     submission_mode: validated.data.submission_mode,
     updated_at: new Date().toISOString(),
-  };
-
-  // event_date is a legacy compatibility field. Preserve it during normal
-  // schedule edits; only the explicit clear action may remove it.
-  if (schedule.data.clear) {
-    eventUpdate.event_date = null;
-  }
+  }, schedule.data);
 
   const { error } = await supabase
     .from("events")
