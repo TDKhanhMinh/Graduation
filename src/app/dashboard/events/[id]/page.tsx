@@ -1,4 +1,4 @@
-import { Download, ExternalLink, Palette, QrCode, Settings } from "lucide-react"
+import { BarChart3, Download, ExternalLink, Palette, QrCode, Settings } from "lucide-react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
@@ -87,7 +87,7 @@ export default async function EventOverviewPage({
             Các khu vực mở rộng được hiển thị rõ trạng thái để bạn không đi vào dead-end.
           </p>
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <CapabilityCard
             Icon={Palette}
             title="Giao diện"
@@ -106,8 +106,16 @@ export default async function EventOverviewPage({
             Icon={Download}
             title="Xuất dữ liệu"
             description="Theo dõi và tải xuống dữ liệu lời chúc theo quyền của owner."
-            detail="Chưa có route export khả dụng cho sự kiện này; không hiển thị thao tác tải giả."
-          />
+             href={"/dashboard/events/" + event.id + "/export"}
+             actionLabel="Mở Export Center"
+           />
+           <CapabilityCard
+             Icon={BarChart3}
+             title="Dashboard Insights"
+             description="Theo dõi xu hướng lời chúc, trạng thái duyệt, media và reaction theo khoảng thời gian."
+             href={"/dashboard/events/" + event.id + "/insights"}
+             actionLabel="Mở Dashboard Insights"
+           />
         </div>
       </section>
     </div>

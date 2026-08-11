@@ -1,4 +1,4 @@
-import { posterDocumentSchema, type PosterDocument, type PosterElement } from "./schema"
+import { posterDocumentSchema, type PosterAsset, type PosterDocument, type PosterElement } from "./schema"
 
 const MIN_VISIBLE_PIXELS = 24
 const MIN_ELEMENT_SIZE = 24
@@ -21,6 +21,7 @@ export type PosterEditorCommand =
   | { type: "ungroup"; id: string }
   | { type: "set-lock"; ids: string[]; locked: boolean }
   | { type: "set-z-index"; id: string; zIndex: number }
+  | { type: "insert-asset"; asset: PosterAsset }
   | { type: "select"; ids: string[] }
 
 export function createPosterEditorState(document: PosterDocument): PosterEditorState {
@@ -45,8 +46,43 @@ export function clampPosterFrame(
   }
 }
 
+function withDocument(document: PosterDocument, patch: Partial<Pick<PosterDocument, "assets" | "elements">>) {
+  return posterDocumentSchema.parse({
+    ...document,
+    ...patch,
+    metadata: { ...document.metadata, updatedAt: new Date().toISOString() },
+  })
+}
+
 function withElements(document: PosterDocument, elements: PosterElement[]) {
-  return posterDocumentSchema.parse({ ...document, elements, metadata: { ...document.metadata, updatedAt: new Date().toISOString() } })
+  return withDocument(document, { elements })
+}
+
+export function insertPosterAsset(document: PosterDocument, asset: PosterAsset) {
+  if (document.assets.some((candidate) => candidate.id === asset.id)) return document
+  const elementId = "asset-" + asset.id
+  const isBackground = asset.kind === "background"
+  const width = isBackground ? document.dimensions.width : Math.round(document.dimensions.width * 0.62)
+  const height = isBackground ? document.dimensions.height : Math.round(document.dimensions.height * 0.42)
+  const x = isBackground ? 0 : Math.round((document.dimensions.width - width) / 2)
+  const y = isBackground ? 0 : Math.round((document.dimensions.height - height) / 2)
+  const zIndex = Math.max(0, ...document.elements.map((element) => element.zIndex)) + 1
+  const imageElement: PosterElement = {
+    id: elementId,
+    type: "image",
+    frame: { x, y, width, height },
+    locked: false,
+    visible: true,
+    zIndex,
+    rotation: 0,
+    assetId: asset.id,
+    fit: isBackground ? "cover" : "contain",
+    crop: { focalX: 0.5, focalY: 0.5, scale: 1 },
+  }
+  return withDocument(document, {
+    assets: [...document.assets, asset],
+    elements: [...document.elements, imageElement],
+  })
 }
 
 function mapSelected(document: PosterDocument, ids: string[], mapper: (element: PosterElement) => PosterElement) {
@@ -147,6 +183,7 @@ export function applyPosterEditorCommand(state: PosterEditorState, command: Post
   if (command.type === "ungroup") nextDocument = ungroupPosterElement(state.document, command.id)
   if (command.type === "set-lock") nextDocument = mapSelected(state.document, command.ids, (element) => ({ ...element, locked: command.locked }))
   if (command.type === "set-z-index") nextDocument = mapSelected(state.document, [command.id], (element) => ({ ...element, zIndex: Math.max(0, Math.round(command.zIndex)) }))
+  if (command.type === "insert-asset") nextDocument = insertPosterAsset(state.document, command.asset)
   if (nextDocument === state.document) return state
   return { document: nextDocument, selectedIds: nextSelection, past: [...state.past, state.document], future: [] }
 }

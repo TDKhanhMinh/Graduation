@@ -7,10 +7,19 @@ export const INSIGHTS_DEFAULT_RANGE_DAYS = 30
 
 const nonNegativeIntegerSchema = z.number().int().nonnegative()
 
+export function isSupportedInsightsTimeZone(value: string): boolean {
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: value }).format()
+    return true
+  } catch {
+    return false
+  }
+}
+
 export const insightsRangeSchema = z.object({
   from: z.iso.datetime({ offset: true }),
   to: z.iso.datetime({ offset: true }),
-  timezone: z.string().min(1),
+  timezone: z.string().trim().min(1).refine(isSupportedInsightsTimeZone, 'Timezone must be a supported IANA identifier'),
   bucket: z.literal(INSIGHTS_BUCKET),
 }).superRefine((range, context) => {
   const from = Date.parse(range.from)

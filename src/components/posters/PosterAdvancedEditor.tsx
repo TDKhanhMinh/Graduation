@@ -5,6 +5,8 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerE
 import { toast } from "sonner"
 
 import { savePosterDocument } from "@/app/dashboard/events/[id]/poster-studio/actions"
+import { PosterAssetLibrary } from "@/components/posters/PosterAssetLibrary"
+import type { PosterAssetLibraryItem } from "@/features/posters/library-contract"
 import { Button } from "@/components/ui/button"
 import {
   applyPosterEditorCommand,
@@ -21,6 +23,7 @@ type PosterAdvancedEditorProps = {
   eventId: string
   initialDocument: PosterDocument
   initialRevision: number
+  initialAssets: PosterAssetLibraryItem[]
 }
 
 type DragState = {
@@ -123,7 +126,7 @@ function renderPosterElement(element: PosterElement, dragPreview: DragPreview | 
   return null
 }
 
-export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision }: PosterAdvancedEditorProps) {
+export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision, initialAssets }: PosterAdvancedEditorProps) {
   const [editorState, setEditorState] = useState<PosterEditorState>(() => createPosterEditorState(initialDocument))
   const [dragPreview, setDragPreview] = useState<DragPreview | null>(null)
   const [saveStatus, setSaveStatus] = useState<"local" | "saving" | "saved" | "conflict">("local")
@@ -447,6 +450,13 @@ export function PosterAdvancedEditor({ eventId, initialDocument, initialRevision
           </div>
         </aside>
       </div>
+      <PosterAssetLibrary
+        eventId={eventId}
+        initialAssets={initialAssets}
+        onSelectAsset={(asset) => {
+          setEditorState((current) => applyPosterEditorCommand(current, { type: "insert-asset", asset }))
+        }}
+      />
     </section>
   )
 }

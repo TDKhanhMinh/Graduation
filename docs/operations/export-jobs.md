@@ -20,7 +20,8 @@ the Next.js server and the PDF worker. The value is never sent to the browser.
 ## Worker boundary
 
 The worker uses only the service-role RPC grants for `claim_export_job`,
-`prepare_export_print_token`, `complete_export_job`, and `fail_export_job`.
+`prepare_export_print_token`, `complete_export_job`, `fail_export_job`,
+`get_export_artifacts_to_cleanup`, and `finalize_export_artifact_cleanup`.
 Claims have a short lease; rendering and upload must happen after the claim
 transaction has released its row lock. An expired lease is reclaimed until the
 bounded attempt count is exhausted, then the job becomes `failed`.
@@ -28,6 +29,12 @@ bounded attempt count is exhausted, then the job becomes `failed`.
 ## Retention and recovery
 
 Artifacts must be stored under `<owner_id>/<job_id>/...pdf` in the private
-bucket. Cleanup should remove expired artifacts before deleting terminal job
-metadata. A worker restart is safe because claim, completion, and failure
-commands are lease- and worker-scoped.
+bucket. The worker periodically asks the service-role cleanup RPC for terminal
+jobs older than `PDF_ARTIFACT_RETENTION_HOURS` (default 24 hours), removes each
+object with the Storage API, and only then finalizes the matching terminal job
+metadata. A failed Storage removal leaves metadata in place for retry. The
+cleanup batch is bounded by `PDF_CLEANUP_BATCH_SIZE` (default 100) and runs on
+startup plus every `PDF_CLEANUP_INTERVAL_MS` (default 15 minutes).
+
+A worker restart is safe because claim, completion, failure, and cleanup
+commands are lease-, worker-, path-, and retention-scoped.

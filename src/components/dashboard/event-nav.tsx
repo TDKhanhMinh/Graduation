@@ -1,6 +1,6 @@
 'use client'
 
-import { Clapperboard, Download, LayoutDashboard, Palette, QrCode, Settings, ShieldCheck, Users } from 'lucide-react'
+import { BarChart3, Clapperboard, Download, LayoutDashboard, Palette, QrCode, Settings, ShieldCheck, Users } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -15,7 +15,8 @@ const items = [
   { segment: '/poster-studio', label: 'X\u01b0\u1edfng \u00e1p ph\u00edch', Icon: Palette, available: true },
   { segment: '/director', label: '\u0110\u1ea1o di\u1ec5n', Icon: Clapperboard, available: true },
   { segment: '/sharing', label: 'Chia s\u1ebb & QR', Icon: QrCode, available: true },
-  { segment: '/export', label: 'Xu\u1ea5t d\u1eef li\u1ec7u', Icon: Download, available: false },
+  { segment: '/insights', label: 'Phân tích', Icon: BarChart3, available: true },
+  { segment: '/export', label: 'Xu\\u1ea5t d\\u1eef li\\u1ec7u', Icon: Download, available: true },
 ] as const
 
 export function EventNav({ eventId, notificationUnreadCount = 0 }: { eventId: string; notificationUnreadCount?: number }) {

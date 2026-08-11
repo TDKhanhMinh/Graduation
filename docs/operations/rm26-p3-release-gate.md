@@ -51,3 +51,14 @@ This document records the implementation gate for RM26 Phase 3 under the explici
 - Commit: none
 - Pull request: none
 - Release decision: implementation gate closed under explicit validation waiver; production release gate remains open.
+
+
+## Continuation verification — 2026-08-11
+
+- Re-fetched P3-T01 through P3-T05 from the Tasks data source; each is `Done` under the explicit implementation-completion override.
+- P3-T01 now includes executable retention cleanup: the worker removes private Storage objects before finalizing terminal export metadata.
+- P3-T02 now uses exact worker dependency pins and the cleanup loop; `workers/pdf npm run typecheck` passes. A worker lockfile could not be generated offline because npm registry metadata was not cached.
+- P3-T05 now consumes the canonical role matrix through server-only event access checks for collaborator management routes; broader migration of every historical owner-only feature surface remains follow-up.
+- Root `npm run test:unit` passes with 23 tests; root `npm run typecheck` passes; `git diff --check` passes.
+- Supabase migration apply/advisors/pgTAP, authenticated browser/E2E, live Realtime, live PDF worker, performance/accessibility and production build evidence remain deferred. The Google Geist/Geist Mono font network limitation remains documented.
+- [USER OVERRIDE] Implementation gate is complete, so this task is being marked `Done`. This is not production-release approval; the production gate remains open until the deferred evidence is collected.

@@ -20,6 +20,11 @@ type ClaimedJob = {
   created_at: string
 }
 
+type CleanupCandidate = {
+  job_id: string
+  artifact_path: string
+}
+
 function log(event: string, fields: Record<string, unknown> = {}) {
   console.log(JSON.stringify({ event, ...fields }))
 }
@@ -35,6 +40,7 @@ function sleep(ms: number): Promise<void> {
 export class PdfExportWorker {
   private readonly supabase: SupabaseClient
   private stopping = false
+  private cleanupTimer: NodeJS.Timeout | undefined
 
   constructor() {
     this.supabase = createClient(workerConfig.supabaseUrl, workerConfig.serviceRoleKey, {
@@ -44,10 +50,16 @@ export class PdfExportWorker {
 
   stop() {
     this.stopping = true
+    if (this.cleanupTimer) clearInterval(this.cleanupTimer)
   }
 
   async start() {
     log('pdf_worker_started', { worker_id: workerConfig.workerId })
+    await this.cleanup()
+    this.cleanupTimer = setInterval(() => {
+      void this.cleanup()
+    }, workerConfig.cleanupIntervalMs)
+
     while (!this.stopping) {
       const job = await this.claim()
       if (job) {
@@ -57,6 +69,54 @@ export class PdfExportWorker {
       }
     }
     log('pdf_worker_stopped', { worker_id: workerConfig.workerId })
+  }
+
+  private async cleanup() {
+    const { data, error } = await this.supabase.rpc('get_export_artifacts_to_cleanup', {
+      p_retention_hours: workerConfig.retentionHours,
+      p_limit: workerConfig.cleanupBatchSize,
+    })
+    if (error) {
+      log('pdf_export_cleanup_error', { phase: 'list', error_code: error.code ?? 'UNKNOWN' })
+      return
+    }
+
+    for (const candidate of (data as CleanupCandidate[] | null) ?? []) {
+      const { error: removeError } = await this.supabase.storage
+        .from('yearbook-exports')
+        .remove([candidate.artifact_path])
+
+      if (removeError) {
+        log('pdf_export_cleanup_error', {
+          phase: 'storage_remove',
+          job_id: candidate.job_id,
+          error_code: removeError.name ?? 'STORAGE_REMOVE_FAILED',
+        })
+        continue
+      }
+
+      const { data: finalized, error: finalizeError } = await this.supabase.rpc(
+        'finalize_export_artifact_cleanup',
+        {
+          p_job_id: candidate.job_id,
+          p_artifact_path: candidate.artifact_path,
+          p_retention_hours: workerConfig.retentionHours,
+        },
+      )
+      if (finalizeError || finalized !== true) {
+        log('pdf_export_cleanup_error', {
+          phase: 'metadata_finalize',
+          job_id: candidate.job_id,
+          error_code: finalizeError?.code ?? 'METADATA_FINALIZE_FAILED',
+        })
+        continue
+      }
+
+      log('pdf_export_cleanup_completed', {
+        job_id: candidate.job_id,
+        artifact_path: candidate.artifact_path,
+      })
+    }
   }
 
   private async claim(): Promise<ClaimedJob | null> {

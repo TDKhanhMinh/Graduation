@@ -3,12 +3,13 @@ import "server-only"
 import { cache } from "react"
 
 import { getOwnedEventById } from "@/features/events/dal"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { createClient } from "@/lib/supabase/server"
 import type { Json, Database } from "@/types/database"
 
-import {
-  posterDocumentSchema,
-} from "./schema"
+import { posterAssetSchema, posterDocumentSchema } from "./schema"
+import type { PosterAssetLibraryItem } from "./library-contract"
+import { POSTER_ASSET_BUCKET } from "./storage"
 
 type PosterDocumentRow = Database["public"]["Tables"]["poster_documents"]["Row"]
 type PosterAssetRow = Database["public"]["Tables"]["poster_assets"]["Row"]
@@ -153,3 +154,51 @@ export const getOwnedPosterAssets = cache(async (eventId: string): Promise<Poste
 
 
 
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+}
+
+export async function getOwnedPosterAssetLibrary(eventId: string): Promise<PosterAssetLibraryItem[]> {
+  const rows = await getOwnedPosterAssets(eventId)
+  if (!rows.length) return []
+
+  let signedUrls = new Map<string, string>()
+  try {
+    const admin = createAdminClient()
+    const result = await admin.storage
+      .from(POSTER_ASSET_BUCKET)
+      .createSignedUrls(rows.map((row) => row.storage_path), 3600)
+    signedUrls = new Map(
+      (result.data ?? []).flatMap((item) => item.path && item.signedUrl ? [[item.path, item.signedUrl] as const] : []),
+    )
+  } catch {
+    // The library remains usable with metadata when signed previews are unavailable.
+  }
+
+  return rows.flatMap((row) => {
+    const metadata = isRecord(row.metadata) ? row.metadata : {}
+    const parsed = posterAssetSchema.safeParse({
+      id: row.asset_id,
+      kind: metadata.kind ?? "photo",
+      mimeType: row.mime_type,
+      width: row.width ?? undefined,
+      height: row.height ?? undefined,
+      path: row.storage_path,
+      external: metadata.external ?? {
+        provider: "local",
+        providerAssetId: row.asset_id,
+        attributionRequired: false,
+      },
+    })
+    if (!parsed.success) return []
+
+    return [{
+      id: row.id,
+      asset: parsed.data,
+      previewUrl: signedUrls.get(row.storage_path) ?? null,
+      createdAt: row.created_at,
+      isFavorite: metadata.favorite === true,
+    }]
+  })
+}

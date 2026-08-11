@@ -4,8 +4,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { createInvitationToken } from '@/features/collaboration/token'
-import { verifySession } from '@/lib/auth/dal'
-import { getOwnedEventById } from '@/features/events/dal'
+import { requireEventCapability } from '@/features/collaboration/access'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
@@ -28,13 +27,10 @@ function response(body: unknown, status = 200) {
 }
 
 export async function GET(request: Request) {
-  const session = await verifySession()
-  if (!session) return response({ error: 'Unauthorized' }, 401)
-
   const eventId = new URL(request.url).searchParams.get('eventId')
   if (!eventId || !z.uuid().safeParse(eventId).success) return response({ error: 'Invalid event' }, 400)
-  const event = await getOwnedEventById(eventId)
-  if (!event) return response({ error: 'Event not found' }, 404)
+  const access = await requireEventCapability(eventId, 'manage_collaborators')
+  if (!access) return response({ error: 'Event not found' }, 404)
 
   const supabase = createAdminClient()
   const [collaborators, invitations] = await Promise.all([
@@ -57,9 +53,6 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const session = await verifySession()
-  if (!session) return response({ error: 'Unauthorized' }, 401)
-
   let body: unknown
   try {
     body = await request.json()
@@ -69,8 +62,8 @@ export async function POST(request: Request) {
 
   const parsed = createInvitationSchema.safeParse(body)
   if (!parsed.success) return response({ error: 'Invalid invitation request' }, 400)
-  const event = await getOwnedEventById(parsed.data.eventId)
-  if (!event) return response({ error: 'Event not found' }, 404)
+  const access = await requireEventCapability(parsed.data.eventId, 'manage_collaborators')
+  if (!access) return response({ error: 'Event not found' }, 404)
 
   const invitationId = randomUUID()
   const { token, tokenHash } = createInvitationToken()
@@ -79,7 +72,7 @@ export async function POST(request: Request) {
   const { data, error } = await supabase.rpc('create_event_invitation', {
     p_invitation_id: invitationId,
     p_event_id: parsed.data.eventId,
-    p_owner_id: session.userId,
+    p_owner_id: access.userId,
     p_email: parsed.data.email,
     p_role: parsed.data.role,
     p_token_hash: tokenHash,

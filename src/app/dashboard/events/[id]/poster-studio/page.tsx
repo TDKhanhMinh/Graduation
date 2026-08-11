@@ -4,7 +4,7 @@ import { PosterStudioAnalytics } from "@/components/analytics/poster-studio-anal
 import { PosterAdvancedEditor } from "@/components/posters/PosterAdvancedEditor"
 import { PosterQuickCreate } from "@/components/posters/PosterQuickCreate"
 import { getOwnedEventById } from "@/features/events/dal"
-import { getOwnedPosterDocument } from "@/features/posters/dal"
+import { getOwnedPosterAssetLibrary, getOwnedPosterDocument } from "@/features/posters/dal"
 import { createPosterDocumentFromQuickCreate } from "@/features/posters/quick-create"
 import { posterDocumentSchema, resolvePosterEventCategory } from "@/features/posters/schema"
 import { buildPublicEventUrl } from "@/features/sharing/public-url"
@@ -21,5 +21,6 @@ export default async function PosterStudioPage({ params }: { params: Promise<{ i
   try { savedDocument = await getOwnedPosterDocument(event.id) } catch { savedDocument = null }
   const savedResult = savedDocument ? posterDocumentSchema.safeParse(savedDocument.document_json) : null
   const initialDocument = savedResult?.success && savedResult.data.metadata.eventId === event.id ? savedResult.data : fallbackDocument
-  return <div className="space-y-6"><div><p className="text-sm font-semibold text-primary">Xưởng áp phích</p><h1 className="mt-1 font-heading text-2xl font-semibold">Tạo áp phích cho {event.title}</h1><p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">Tạo nhanh để bắt đầu nhanh chóng, sau đó dùng Trình biên tập nâng cao trên máy tính bảng và máy tính để bàn để tùy chỉnh chi tiết. Điện thoại di động sử dụng tính năng Tạo nhanh.</p></div><PosterStudioAnalytics><PosterQuickCreate eventId={event.id} eventTitle={event.title} eventDate={event.event_date} publicUrl={publicUrl} initialCategory={category} /></PosterStudioAnalytics><PosterAdvancedEditor eventId={event.id} initialDocument={initialDocument} initialRevision={savedDocument?.revision ?? 0} /></div>
+  const initialAssets = await getOwnedPosterAssetLibrary(event.id)
+  return <div className="space-y-6"><div><p className="text-sm font-semibold text-primary">Xưởng áp phích</p><h1 className="mt-1 font-heading text-2xl font-semibold">Tạo áp phích cho {event.title}</h1><p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">Tạo nhanh để bắt đầu nhanh chóng, sau đó dùng Trình biên tập nâng cao trên máy tính bảng và máy tính để bàn để tùy chỉnh chi tiết. Điện thoại di động sử dụng tính năng Tạo nhanh.</p></div><PosterStudioAnalytics><PosterQuickCreate eventId={event.id} eventTitle={event.title} eventDate={event.event_date} publicUrl={publicUrl} initialCategory={category} /></PosterStudioAnalytics><PosterAdvancedEditor eventId={event.id} initialDocument={initialDocument} initialRevision={savedDocument?.revision ?? 0} initialAssets={initialAssets} /></div>
 }
