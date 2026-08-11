@@ -139,8 +139,9 @@ export function ProductStoryScrollytelling() {
           </div>
 
           {/* Right Column: Sticky Visual Transformation Stage */}
-          <div className="sticky top-28">
-            <GlowingRunningBorder borderRadius="rounded-[2.5rem]" glowTheme="cyan" duration={6} variant="static">
+          <div className="relative min-w-0 lg:self-stretch">
+            <div className="lg:sticky lg:top-28">
+              <GlowingRunningBorder borderRadius="rounded-[2.5rem]" glowTheme="cyan" duration={6} variant="static">
               <div className="p-6 min-h-[28rem] flex flex-col justify-between">
                 <div className="flex items-center justify-between border-b pb-4 text-xs text-muted-foreground">
               <span className="font-semibold text-foreground flex items-center gap-2">
@@ -331,9 +332,10 @@ export function ProductStoryScrollytelling() {
               </div>
             </div>
           </div>
-        </GlowingRunningBorder>
-      </div>
-    </div>
+              </GlowingRunningBorder>
+            </div>
+          </div>
+        </div>
       </PageShell>
     </LandingSection>
   )

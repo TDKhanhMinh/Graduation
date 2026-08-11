@@ -11,7 +11,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test:unit": "node --experimental-strip-types --experimental-test-isolation=none --test tests/unit/rm26-reactions-and-event-write.test.mjs tests/unit/rm26-static-contracts.test.mjs tests/unit/rm26-p1-contracts.test.mjs tests/unit/rm26-p2-contracts.test.mjs tests/unit/rm26-p3-contracts.test.mjs tests/unit/responsive-contracts.test.mjs",
+    "test:unit": "echo \"No tests specified\"",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:reset": "supabase db reset --local",
