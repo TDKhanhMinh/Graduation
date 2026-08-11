@@ -185,22 +185,25 @@ export default async function PublicEventPage({ params }: Props) {
             </Card>
           </section>
 
-          <section id="gallery" data-tour-target="gallery" aria-labelledby="wall-heading" className="space-y-4">
-            <SectionHeading
-              as="h2"
-              title="Bức tường lời chúc"
-              description="Các lời chúc đã được duyệt sẽ xuất hiện ở đây theo thời gian thực."
-            />
-            <h2 id="wall-heading" className="sr-only">Bức tường lời chúc</h2>
-            <RealtimeWall
-              eventId={event.id}
-              initialWishes={wishesPage.items}
-              initialNextCursor={wishesPage.nextCursor}
-              initialHasMore={wishesPage.hasMore}
-              fetchWishesAction={fetchWishesAction}
-              reconcileWishesAction={reconcileWishesAction}
-            />
-          </section>
+          {/* HIDDEN FOR PRIVACY: Bức tường lời chúc được ẩn đi để bảo mật thông tin người gửi */}
+          {false && (
+            <section id="gallery" data-tour-target="gallery" aria-labelledby="wall-heading" className="space-y-4">
+              <SectionHeading
+                as="h2"
+                title="Bức tường lời chúc"
+                description="Các lời chúc đã được duyệt sẽ xuất hiện ở đây theo thời gian thực."
+              />
+              <h2 id="wall-heading" className="sr-only">Bức tường lời chúc</h2>
+              <RealtimeWall
+                eventId={event.id}
+                initialWishes={wishesPage.items}
+                initialNextCursor={wishesPage.nextCursor}
+                initialHasMore={wishesPage.hasMore}
+                fetchWishesAction={fetchWishesAction}
+                reconcileWishesAction={reconcileWishesAction}
+              />
+            </section>
+          )}
         </PageShell>
       </main>      <div className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-20 sm:hidden">
         <Link href="#composer-heading" className={buttonVariants({ size: "lg", className: "w-full rounded-2xl bg-[var(--event-primary)] text-[var(--event-on-primary)] shadow-xl hover:opacity-90" })}>Gửi lời chúc</Link>
