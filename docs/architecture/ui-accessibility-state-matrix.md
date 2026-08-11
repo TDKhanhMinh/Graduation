@@ -1,7 +1,7 @@
 # UI accessibility and state matrix
 
-Audit date: 2026-08-05
-Scope: landing, auth, public event, wish composer, dashboard, event workspace, settings, moderation.
+Audit date: 2026-08-11
+Scope: landing, auth, public event, wish composer, dashboard, event workspace, settings, moderation, insights, export/print, poster studio/asset library.
 
 ## Shared rules
 
@@ -21,16 +21,19 @@ Scope: landing, auth, public event, wish composer, dashboard, event workspace, s
 | Public /e/[slug] | loading.tsx status skeleton | not-found.tsx, archived state, empty wall | Media/realtime error and retry state | Composer, upload, share, reaction live feedback | Public event lookup, submission mode, media URL policy | Header/content min-w-0, wrapping controls, native dialog focus behavior |
 | Wish composer | Step state and upload progress | Media unavailable/removal state | Inline field/submit/media/CAPTCHA errors | Submit pending/success, draft retention | Turnstile and server submit contract remain authoritative | Native modal, focus restore, labels, touch-sized controls |
 | Dashboard /dashboard | Server data boundary | Empty event state | Feedback state | Create CTA and action feedback | verifySession redirect | Sidebar/mobile nav, skip link, responsive cards |
-| Event overview /dashboard/events/[id] | Server boundary | Capability cards explicitly unavailable | Not-found boundary | Public-link/settings actions | getOwnedEventById; no fake export action | Cards wrap; capability state uses text badge/detail |
+| Event overview /dashboard/events/[id] | Server boundary | Empty event/capability state | Not-found boundary | Public-link/settings/export actions | getOwnedEventById; owner-only actions | Cards wrap; capability state uses text badge/detail |
+| Insights /dashboard/events/[id]/insights | Server boundary | Empty metrics state | Route error boundary | Aggregate metrics and trend tables | Owner event lookup | Metric cards stack; dense trend table uses bounded horizontal scroll |
+| Export /dashboard/events/[id]/export | Job/status boundary | No completed export state | Route error boundary | Start, pending, success/download, failure states | Owner export job contract | Controls wrap; status/download remain readable at narrow widths |
+| Poster Studio /dashboard/events/[id]/poster-studio | Editor state and asset search | Empty asset library state | Inline asset/upload error | Save, upload, select, delete feedback | Owner event and asset actions | Quick-create mobile path; advanced editor activates at larger widths |
 | Event settings /settings, /new | Form pending state | N/A | Inline field/action feedback | Save/created state, archive confirmation | Owner DAL/action contract | Labels, URL state, mobile form layout |
 | Moderation /moderation | Loading queue state | Empty queue state | Inline refresh/bulk/media error | Bulk pending/success and pagination | Owner-only moderation RPC and signed media URL | Desktop table + mobile cards, selection labels, destructive confirmation |
 
 ## Manual smoke coverage
 
-- Viewports checked by production route smoke: 320px, 768px, and 1440px for public fake slug and authenticated-route redirect shells; no horizontal overflow was observed.
-- Full authenticated keyboard/screen-reader, media, reaction, moderation conflict, and export-ready flows require local Supabase/owner/public fixtures that are not available in this environment.
-- Export remains explicitly unavailable because no owner export route/status/download contract exists in the current repository; no fabricated action is exposed.
-- Follow-up candidates are limited to environment-backed browser verification and any future export capability once its contract is present.
+- Static responsive contracts cover 320px, 375px, 768px, 1024px, 1280px, and 1440px intent across public, dashboard, moderation, composer, insights, export, and poster surfaces; runtime browser confirmation remains environment-dependent.
+- Full authenticated keyboard/screen-reader, media, reaction, moderation conflict, export job, and asset-library flows require local Supabase/owner/public fixtures that are not available in this environment.
+- Current HEAD exposes owner Insights, Export/Print, and Poster Studio/Asset Library routes; those surfaces must not receive a browser-pass claim until fixture-backed smoke is run.
+- Follow-up candidates are limited to environment-backed browser verification, screenshot comparison, and overflow checks at the release matrix widths.
 ## Memory Bloom UI refresh release matrix (2026-08-05)
 
 | Surface | 320px mobile | 768px tablet | 1440px desktop | Key state/accessibility gate |
@@ -41,10 +44,12 @@ Scope: landing, auth, public event, wish composer, dashboard, event workspace, s
 | Guest event + Wish Composer | event CTA has sticky bottom affordance; composer is full-screen | hero/card content stacks | event hero and composer preview use event tokens | archived/not-found/loading, native dialog focus restore, CAPTCHA/media errors |
 | Public Wall | filter/customizer wraps; 9:16 uses bounded scroll area | readable two-column card option | Spotlight/Grid/Photo Focus and safe-area padding | reconnect/offline/empty/media fallback, text status, reduced-motion |
 | Moderation | queue becomes cards; bulk bar remains reachable | filters wrap without table dependency | split queue/detail workspace | destructive confirmation, selected count, pending/success/error, keyboard row inspection |
+| Insights + export | metric cards stack; status/actions remain reachable | trend table can scroll within its bounded region | cards/table use full workspace width | job status, download/failure feedback, no unbounded page overflow |
+| Poster Studio + asset library | quick-create path; asset controls remain touch-sized | editor and library remain usable without clipped controls | advanced editor and library use workspace columns | upload/search/delete states, attribution/asset metadata, reduced motion |
 
 ### Release evidence and limitations
 
 - Static validation for this refresh: `npm run test:unit`, `npm run lint`, `npm run typecheck`, `npm run build`, and `git diff --check` must be run sequentially and recorded in the task note.
 - Browser smoke is defined at 320/768/1440 for landing/auth and at the same widths for fixture-backed public, dashboard, theme, moderation and composer routes when local Supabase fixtures are available.
 - E2E does not receive a pass claim when Playwright cannot initialize the local Supabase/Docker fixture; record the exact startup error and keep visual/manual coverage explicitly limited.
-- Media Library remains excluded from visual certification until the approved Cloudinary private delivery, metadata, delete/retention, quota and orphan-cleanup contract is implemented.
+- Poster Asset Library remains excluded from visual certification until the approved Cloudinary private delivery, metadata, delete/retention, quota and orphan-cleanup contract is verified with fixtures.

@@ -195,7 +195,7 @@ export function WelcomeSplashModal({
   return (
     <div
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden p-3 sm:p-6 lg:p-8",
+        "fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain overflow-x-hidden p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-6 lg:p-8",
         "bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-500/20 via-black/85 to-black/95 backdrop-blur-md transition-opacity duration-300",
         stage === "closing" && "opacity-0 pointer-events-none",
       )}
@@ -270,9 +270,11 @@ export function WelcomeSplashModal({
                   key={packKey}
                   type="button"
                   onClick={() => setActiveStickerPack(packKey)}
+                  aria-label={STICKER_PACKS[packKey].name}
+                  aria-pressed={activeStickerPack === packKey}
                   title={STICKER_PACKS[packKey].name}
                   className={cn(
-                    "flex size-7 items-center justify-center rounded-full text-xs transition-all",
+                    "flex size-11 items-center justify-center rounded-full text-xs transition-all",
                     activeStickerPack === packKey
                       ? "bg-amber-400 text-black font-bold shadow-sm scale-110"
                       : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
@@ -313,7 +315,7 @@ export function WelcomeSplashModal({
         </div>
 
         {/* 3D Envelope Container with Smooth Internal Scroll & Clean Spacing */}
-        <div className="perspective-[1400px] flex-1 overflow-y-auto overflow-x-hidden w-full min-w-0 px-1 pt-1 scrollbar-thin scrollbar-thumb-amber-400/30">
+        <div className="perspective-[1400px] flex-1 overflow-y-auto overscroll-contain overflow-x-hidden w-full min-w-0 px-1 pt-1 scrollbar-thin scrollbar-thumb-amber-400/30">
           {!isEnvelopeOpen ? (
             /* 3D Sealed Envelope View */
             <div

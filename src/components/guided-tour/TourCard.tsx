@@ -92,7 +92,7 @@ export function TourCard({
         <button
           type="button"
           onClick={onSkip}
-          className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
           aria-label="Đóng hướng dẫn"
         >
           <X size={16} />
@@ -119,7 +119,7 @@ export function TourCard({
           size="sm"
           onClick={onPrev}
           disabled={isFirst}
-          className={isFirst ? "invisible" : ""}
+          className={isFirst ? "invisible min-h-11 min-w-11" : "min-h-11 min-w-11"}
         >
           Trở lại
         </Button>
@@ -129,6 +129,7 @@ export function TourCard({
           variant="default"
           size="sm"
           onClick={isLast ? onComplete : onNext}
+          className="min-h-11 min-w-11"
         >
           {isLast ? "Hoàn tất" : "Tiếp theo"}
         </Button>

@@ -158,8 +158,8 @@ export function ConfirmDialog({
             exit={{ opacity: 0, y: 16, scale: 0.96 }}
             transition={{ type: 'spring', damping: 25, stiffness: 350 }}
             className={cn(
-              'relative z-10 w-full max-w-lg overflow-hidden rounded-t-2xl sm:rounded-2xl',
-              'border border-border/80 bg-background p-6 shadow-2xl transition-all',
+              'relative z-10 w-full max-w-lg overflow-y-auto overscroll-contain rounded-t-2xl sm:rounded-2xl',
+              'border border-border/80 bg-background p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl transition-all',
               'max-h-[90dvh] flex flex-col justify-between'
             )}
           >
@@ -169,13 +169,13 @@ export function ConfirmDialog({
               disabled={isPending}
               onClick={() => onOpenChange(false)}
               aria-label="Đóng thoại xác nhận"
-              className="absolute right-4 top-4 rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none"
+              className="absolute right-4 top-4 flex min-h-11 min-w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none"
             >
               <X className="size-4" aria-hidden="true" />
             </button>
 
             {/* Main content */}
-            <div className="flex flex-col sm:flex-row items-start gap-4 pr-6 sm:pr-0">
+            <div className="flex flex-col sm:flex-row items-start gap-4 pr-12 sm:pr-10">
               {/* Icon badge */}
               <div
                 className={cn(

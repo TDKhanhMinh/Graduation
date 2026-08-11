@@ -20,7 +20,7 @@ export function BulkActionBar({
 
   return (
     <div
-      className="fixed bottom-3 left-3 right-3 z-40 flex flex-col gap-3 rounded-2xl border border-border/80 bg-popover px-4 py-3 text-popover-foreground shadow-lg sm:bottom-6 sm:left-1/2 sm:right-auto sm:w-max sm:-translate-x-1/2 sm:flex-row sm:items-center"
+      className="fixed bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-3 right-3 z-40 flex flex-col gap-3 rounded-2xl border border-border/80 bg-popover px-4 py-3 text-popover-foreground shadow-lg sm:bottom-6 sm:left-1/2 sm:right-auto sm:w-max sm:-translate-x-1/2 sm:flex-row sm:items-center"
       role="region"
       aria-label="Thao tác hàng loạt"
       aria-live="polite"
