@@ -20,6 +20,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ inv
 
   const { data, error } = await createAdminClient().rpc('revoke_event_invitation', {
     p_invitation_id: inviteId,
+    p_event_id: parsed.data.eventId,
     p_owner_id: session.userId,
   })
   if (error) return NextResponse.json({ error: 'Invitation could not be revoked' }, { status: 500 })

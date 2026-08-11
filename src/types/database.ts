@@ -1218,6 +1218,7 @@ export type Database = {
       }
       revoke_event_invitation: {
         Args: {
+          p_event_id: string
           p_invitation_id: string
           p_owner_id: string
         }

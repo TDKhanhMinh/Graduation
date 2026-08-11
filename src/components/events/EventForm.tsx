@@ -82,7 +82,6 @@ export function EventForm({ action, initialData, submitLabel = "Lưu sự kiện
         titleInput.value = draft.title
         titleInput.dispatchEvent(new Event('input', { bubbles: true }))
       }
-      window.localStorage.removeItem(POSTER_DRAFT_HANDOFF_KEY)
     } catch {
       // Ignore unavailable or malformed browser storage.
     }

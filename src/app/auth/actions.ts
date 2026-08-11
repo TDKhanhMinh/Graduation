@@ -196,31 +196,50 @@ export async function requestAccountDeletion() {
   redirect('/auth/login?message=account_deletion_requested');
 }
 
+function readSafeAvatarUrl(value: FormDataEntryValue | null): string | null {
+  const raw = String(value ?? "").trim()
+  if (!raw) return null
+  if (raw.length > 2048) throw new Error("URL avatar không được dài quá 2048 ký tự.")
+
+  try {
+    const url = new URL(raw)
+    if (url.protocol !== "https:" || url.username || url.password) {
+      throw new Error("Avatar chỉ được dùng URL HTTPS an toàn.")
+    }
+    return url.toString()
+  } catch (error) {
+    if (error instanceof Error && error.message === "Avatar chỉ được dùng URL HTTPS an toàn.") throw error
+    throw new Error("Avatar chỉ được dùng URL HTTPS hợp lệ.")
+  }
+}
+
 export async function updateDisplayName(formData: FormData) {
-  const session = await verifySession();
+  const session = await verifySession()
 
   if (!session) {
-    redirect("/auth/login");
+    redirect("/auth/login")
   }
 
-  const displayName = String(formData.get("displayName") ?? "").trim();
+  const displayName = String(formData.get("displayName") ?? "").trim()
+  const avatarUrl = readSafeAvatarUrl(formData.get("avatarUrl"))
 
   if (displayName.length < 2 || displayName.length > 100) {
-    throw new Error("Tên hiển thị phải có từ 2 đến 100 ký tự.");
+    throw new Error("Tên hiển thị phải có từ 2 đến 100 ký tự.")
   }
 
-  const supabase = await createClient();
+  const supabase = await createClient()
   const { error } = await supabase
     .from("profiles")
     .update({
       display_name: displayName,
+      avatar_url: avatarUrl,
       updated_at: new Date().toISOString(),
     })
-    .eq("id", session.userId);
+    .eq("id", session.userId)
 
   if (error) {
-    throw new Error("Không thể cập nhật hồ sơ.");
+    throw new Error("Không thể cập nhật hồ sơ.")
   }
 
-  revalidatePath("/");
+  revalidatePath("/")
 }

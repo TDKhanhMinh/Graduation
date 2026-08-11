@@ -2,6 +2,7 @@ import { LockKeyhole, LogOut, ShieldCheck, UserRound } from 'lucide-react'
 
 import { requestAccountDeletion, signOut, signOutAll, updateDisplayName } from '@/app/auth/actions'
 import { Button } from '@/components/ui/button'
+import { ConfirmActionForm } from '@/components/privacy/ConfirmActionForm'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { SectionHeading } from '@/components/ui/section-heading'
 import { getCurrentProfile } from '@/lib/supabase/queries/profiles'
@@ -42,6 +43,19 @@ export default async function PrivacyPage() {
                   className='min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 font-normal outline-hidden focus-visible:ring-3 focus-visible:ring-focus/40'
                 />
               </label>
+              <label className='grid gap-2 text-sm font-medium' htmlFor='avatarUrl'>
+                URL avatar (HTTPS)
+                <input
+                  id='avatarUrl'
+                  name='avatarUrl'
+                  type='url'
+                  defaultValue={profile?.avatar_url ?? ''}
+                  maxLength={2048}
+                  placeholder='https://...'
+                  autoComplete='url'
+                  className='min-h-11 rounded-xl border border-border/80 bg-background/70 px-3 font-normal outline-hidden focus-visible:ring-3 focus-visible:ring-focus/40'
+                />
+              </label>
               <Button type='submit' className='min-h-(--control-min-size)'>Lưu hồ sơ</Button>
             </form>
           </CardContent>
@@ -70,9 +84,9 @@ export default async function PrivacyPage() {
           <CardDescription>Yêu cầu Supabase kết thúc các phiên toàn cục. JWT đã phát hành có thể còn hiệu lực đến khi hết hạn; ứng dụng không tuyên bố thu hồi tức thì ngoài capability này.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={signOutAll}>
+          <ConfirmActionForm action={signOutAll} message='Bạn có chắc muốn đăng xuất khỏi mọi phiên trên các thiết bị không?'>
             <Button type='submit' variant='outline' className='min-h-(--control-min-size)'>Đăng xuất mọi phiên</Button>
-          </form>
+          </ConfirmActionForm>
         </CardContent>
       </Card>
 
@@ -85,9 +99,9 @@ export default async function PrivacyPage() {
           <p>Export chỉ chứa profile, event và wish thuộc tài khoản hiện tại; không gồm token, secret hoặc signed URL hết hạn.</p>
           <div className='flex flex-wrap gap-3'>
             <a href='/api/account/export' className='inline-flex min-h-(--control-min-size) items-center justify-center rounded-xl border px-4 font-medium text-foreground hover:bg-muted'>Tải export dữ liệu</a>
-            <form action={requestAccountDeletion}>
+            <ConfirmActionForm action={requestAccountDeletion} message='Yêu cầu này sẽ đăng xuất bạn và bắt đầu thời gian khôi phục 30 ngày. Bạn có chắc muốn tiếp tục không?'>
               <Button type='submit' variant='outline' className='min-h-(--control-min-size) border-status-danger/40 text-status-danger'>Yêu cầu xóa tài khoản</Button>
-            </form>
+            </ConfirmActionForm>
           </div>
           <p className='text-xs'>Yêu cầu chỉ tạo cooling-off request; worker được review riêng phải thực hiện soft-delete/khóa mutation trước purge. Không có hard-delete từ UI này.</p>
         </CardContent>

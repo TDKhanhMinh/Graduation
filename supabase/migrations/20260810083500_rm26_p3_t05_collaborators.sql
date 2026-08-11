@@ -230,6 +230,7 @@ GRANT EXECUTE ON FUNCTION public.remove_event_collaborator(uuid, uuid, uuid)
 
 CREATE OR REPLACE FUNCTION public.revoke_event_invitation(
   p_invitation_id uuid,
+  p_event_id uuid,
   p_owner_id uuid
 )
 RETURNS boolean
@@ -241,7 +242,14 @@ AS $function$
     UPDATE public.event_invitations AS invitation
     SET revoked_at = now()
     WHERE invitation.id = p_invitation_id
+      AND invitation.event_id = p_event_id
       AND invitation.invited_by = p_owner_id
+      AND EXISTS (
+        SELECT 1 FROM public.events AS event_row
+        WHERE event_row.id = p_event_id
+          AND event_row.owner_id = p_owner_id
+          AND event_row.deleted_at IS NULL
+      )
       AND invitation.accepted_at IS NULL
       AND invitation.revoked_at IS NULL
     RETURNING 1
@@ -249,7 +257,7 @@ AS $function$
   SELECT EXISTS (SELECT 1 FROM revoked);
 $function$;
 
-REVOKE ALL ON FUNCTION public.revoke_event_invitation(uuid, uuid)
+REVOKE ALL ON FUNCTION public.revoke_event_invitation(uuid, uuid, uuid)
   FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.revoke_event_invitation(uuid, uuid)
+GRANT EXECUTE ON FUNCTION public.revoke_event_invitation(uuid, uuid, uuid)
   TO service_role;

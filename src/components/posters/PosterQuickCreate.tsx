@@ -11,6 +11,7 @@ import { localPosterTemplates } from "@/features/posters/templates"
 import { createPosterDocumentFromQuickCreate } from "@/features/posters/quick-create"
 import { POSTER_CROP_PRESETS, getPosterSvgImageAlignment, preparePosterImage, type PreparedPosterImage, type PosterCropPreset } from "@/features/posters/asset-pipeline"
 import { type PosterEventCategory, type PosterRatio } from "@/features/posters/schema"
+import { POSTER_DRAFT_HANDOFF_KEY, parsePosterDraft } from "@/features/posters/handoff"
 import { formatPosterDate, getPosterDimensions, wrapPosterText } from "@/features/posters/spike"
 import { getPosterQrFrame, posterExportFilename, validatePosterExportQuality } from "@/features/posters/quality"
 
@@ -36,6 +37,7 @@ function PosterPreview({
   imageDataUrl,
   logoDataUrl,
   qrDataUrl,
+  showQr,
   svgRef,
   palette,
   cropPreset,
@@ -46,6 +48,7 @@ function PosterPreview({
   imageDataUrl: string
   logoDataUrl: string
   qrDataUrl: string
+  showQr: boolean
   svgRef: React.RefObject<SVGSVGElement | null>
   palette: readonly string[]
   cropPreset: PosterCropPreset
@@ -119,7 +122,7 @@ function PosterPreview({
         </text>
       </g>
 
-      {qrDataUrl ? (
+      {showQr && qrDataUrl ? (
         <g transform={`translate(${qrX} ${qrY})`}>
           <rect width={qrSize} height={qrSize} rx="18" fill="#fffdf9" />
           <image href={qrDataUrl} x="18" y="18" width={qrSize - 36} height={qrSize - 36} />
@@ -141,6 +144,7 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
   const [date, setDate] = useState(eventDate?.slice(0, 10) ?? "")
   const [location, setLocation] = useState("Sảnh Memoria")
   const [accent, setAccent] = useState("#c85b45")
+  const [showQr, setShowQr] = useState(true)
   const [imageDataUrl, setImageDataUrl] = useState("")
   const [preparedAsset, setPreparedAsset] = useState<PreparedPosterImage | null>(null)
   const [preparedLogo, setPreparedLogo] = useState<PreparedPosterImage | null>(null)
@@ -166,6 +170,7 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
         eventCategory: category,
         templateId: template.id,
         ratio,
+        showQr,
         title,
         tagline,
         date,
@@ -179,7 +184,7 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
     } catch {
       return null
     }
-  }, [accent, category, cropPreset, date, eventId, location, preparedAsset, preparedLogo, publicUrl, ratio, tagline, template, title])
+  }, [accent, category, cropPreset, date, eventId, location, preparedAsset, preparedLogo, publicUrl, ratio, showQr, tagline, template, title])
 
   const titleError = title.trim().length === 0 ? "Tên sự kiện là bắt buộc" : ""
   const qualityGate = useMemo(() => {
@@ -188,12 +193,37 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
       ratio: posterDocument.ratio as "4:5" | "9:16",
       publicUrl: posterDocument.content.publicUrl,
       fontReady,
-      assetsReady: Boolean(qrDataUrl) && !imageFailed && !logoFailed,
+      assetsReady: (!showQr || Boolean(qrDataUrl)) && !imageFailed && !logoFailed,
       safeArea: template.layouts[posterDocument.ratio].safeArea,
       qr: getPosterQrFrame(posterDocument.ratio as "4:5" | "9:16"),
     })
-  }, [fontReady, imageFailed, logoFailed, posterDocument, qrDataUrl, template])
+  }, [fontReady, imageFailed, logoFailed, posterDocument, qrDataUrl, showQr, template])
 
+  useEffect(() => {
+    let timer: number | undefined
+    try {
+      const draft = parsePosterDraft(window.localStorage.getItem(POSTER_DRAFT_HANDOFF_KEY))
+      if (!draft) return
+
+      timer = window.setTimeout(() => {
+        const nextTemplate = localPosterTemplates.find((candidate) => candidate.id === draft.templateId)
+        if (nextTemplate) {
+          setTemplateId(nextTemplate.id)
+          setAccent(nextTemplate.palette[draft.paletteIndex % nextTemplate.palette.length] ?? "#c85b45")
+          if (nextTemplate.supportedRatios.includes(draft.ratio)) setRatio(draft.ratio)
+          if (nextTemplate.categories.includes(draft.category)) setCategory(draft.category)
+        }
+        setTitle(draft.title)
+        setShowQr(draft.showQr)
+        window.localStorage.removeItem(POSTER_DRAFT_HANDOFF_KEY)
+      }, 0)
+    } catch {
+      // Ignore unavailable or malformed browser storage.
+    }
+    return () => {
+      if (timer !== undefined) window.clearTimeout(timer)
+    }
+  }, [])
   useEffect(() => {
     let cancelled = false
     void createQrDataUrl(publicUrl, 256).then((value) => {
@@ -249,6 +279,7 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
     setDate(eventDate?.slice(0, 10) ?? "")
     setLocation("Sảnh Memoria")
     setAccent("#c85b45")
+    setShowQr(true)
     setImageDataUrl("")
     setPreparedAsset(null)
     setPreparedLogo(null)
@@ -359,6 +390,10 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
         <label className="grid gap-2 text-sm font-medium" htmlFor="poster-accent">Màu nhấn
           <input id="poster-accent" type="color" value={accent} onChange={(event) => setAccent(event.target.value)} className="h-11 w-full rounded-xl border border-input bg-background p-1" />
         </label>
+        <label className="flex min-h-11 items-center gap-3 text-sm" htmlFor="poster-show-qr">
+          <input id="poster-show-qr" type="checkbox" checked={showQr} onChange={(event) => setShowQr(event.target.checked)} className="size-4 accent-primary" />
+          Hiển thị mã QR trên áp phích
+        </label>
         {preparedAsset ? <label className="grid gap-2 text-sm font-medium" htmlFor="poster-crop">Vị trí cắt
           <select id="poster-crop" value={cropPreset} onChange={(event) => setCropPreset(event.target.value as PosterCropPreset)} className="min-h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-focus/40">
             <option value="center">Giữa</option>
@@ -404,7 +439,7 @@ export function PosterQuickCreate({ eventId, eventTitle, eventDate, publicUrl, i
         </div>
         <div className="mx-auto max-h-[75vh] w-full max-w-[42rem] overflow-auto rounded-2xl border border-border/80 bg-[#21182b] p-3 shadow-lg sm:p-5">
           <div className="mx-auto max-h-[68vh] w-full" style={{ aspectRatio: ratio === "4:5" ? "4 / 5" : "9 / 16" }}>
-            {posterDocument && template ? <PosterPreview document={posterDocument} imageDataUrl={imageFailed ? "" : imageDataUrl} logoDataUrl={logoFailed ? "" : logoDataUrl} qrDataUrl={qrDataUrl} svgRef={svgRef} palette={template.palette} cropPreset={cropPreset} onImageError={() => { setImageFailed(true); toast.error("Không thể hiển thị ảnh; đang dùng nền mẫu thay thế.") }} onLogoError={() => { setLogoFailed(true); toast.error("Không thể hiển thị logo; đang dùng áp phích không có logo.") }} /> : <div className="flex h-full items-center justify-center rounded-xl bg-muted p-6 text-center text-sm text-muted-foreground">Nhập tên sự kiện để xem trước áp phích.</div>}
+            {posterDocument && template ? <PosterPreview document={posterDocument} imageDataUrl={imageFailed ? "" : imageDataUrl} logoDataUrl={logoFailed ? "" : logoDataUrl} qrDataUrl={qrDataUrl} showQr={showQr} svgRef={svgRef} palette={template.palette} cropPreset={cropPreset} onImageError={() => { setImageFailed(true); toast.error("Không thể hiển thị ảnh; đang dùng nền mẫu thay thế.") }} onLogoError={() => { setLogoFailed(true); toast.error("Không thể hiển thị logo; đang dùng áp phích không có logo.") }} /> : <div className="flex h-full items-center justify-center rounded-xl bg-muted p-6 text-center text-sm text-muted-foreground">Nhập tên sự kiện để xem trước áp phích.</div>}
           </div>
         </div>
       </section>

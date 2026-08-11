@@ -21,11 +21,40 @@ export function WelcomeCountdown({ target, initialNow }: WelcomeCountdownProps) 
   const [countdown, setCountdown] = useState<WelcomeCountdown | null>(() => getCountdown(target, initialNow))
 
   useEffect(() => {
-    const timer = window.setInterval(() => {
-      setCountdown(formatCountdown(target, new Date()))
-    }, 1000)
+    let timer: number | null = null
 
-    return () => window.clearInterval(timer)
+    const stop = () => {
+      if (timer === null) return
+      window.clearInterval(timer)
+      timer = null
+    }
+
+    const tick = () => {
+      const next = formatCountdown(target, new Date())
+      setCountdown(next)
+      if (!next || next.totalMs <= 0) stop()
+      return next
+    }
+
+    const start = () => {
+      if (document.visibilityState !== "visible" || timer !== null) return
+      const next = tick()
+      if (!next || next.totalMs <= 0) return
+      timer = window.setInterval(tick, 1000)
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") start()
+      else stop()
+    }
+
+    start()
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+
+    return () => {
+      stop()
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+    }
   }, [target])
 
   if (!countdown) return null

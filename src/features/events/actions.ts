@@ -4,7 +4,7 @@ import { verifySession } from "@/lib/auth/dal";
 import { createError } from "@/lib/observability/error";
 import { logger } from "@/lib/observability/logger";
 import { createClient } from "@/lib/supabase/server";
-import { Json } from "@/types/database";
+import { Database, Json } from "@/types/database";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { appearanceSchema, eventSchema, normalizeSlug } from "./schema";
@@ -231,24 +231,31 @@ export async function updateEvent(
 
   // The RLS policy requires owner_id = current user's id.
   // We can just update and check if a row was affected.
+  const eventUpdate: Database["public"]["Tables"]["events"]["Update"] = {
+    title: validated.data.title,
+    slug: validated.data.slug,
+    description: validated.data.description,
+    starts_at: schedule.data.starts_at,
+    ends_at: schedule.data.ends_at,
+    timezone: schedule.data.timezone,
+    location_name: schedule.data.location_name,
+    location_address: schedule.data.location_address,
+    host_name: schedule.data.host_name,
+    host_title: schedule.data.host_title,
+    visibility: validated.data.visibility,
+    submission_mode: validated.data.submission_mode,
+    updated_at: new Date().toISOString(),
+  };
+
+  // event_date is a legacy compatibility field. Preserve it during normal
+  // schedule edits; only the explicit clear action may remove it.
+  if (schedule.data.clear) {
+    eventUpdate.event_date = null;
+  }
+
   const { error } = await supabase
     .from("events")
-    .update({
-      title: validated.data.title,
-      slug: validated.data.slug,
-      description: validated.data.description,
-      event_date: validated.data.date,
-      starts_at: schedule.data.starts_at,
-      ends_at: schedule.data.ends_at,
-      timezone: schedule.data.timezone,
-      location_name: schedule.data.location_name,
-      location_address: schedule.data.location_address,
-      host_name: schedule.data.host_name,
-      host_title: schedule.data.host_title,
-      visibility: validated.data.visibility,
-      submission_mode: validated.data.submission_mode,
-      updated_at: new Date().toISOString(),
-    })
+    .update(eventUpdate)
     .eq("id", eventId)
     .eq("owner_id", session.userId)
     .is("deleted_at", null)

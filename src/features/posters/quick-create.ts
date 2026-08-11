@@ -15,6 +15,7 @@ export const quickCreateInputSchema = z.object({
   eventCategory: posterEventCategorySchema,
   templateId: z.string().trim().min(1),
   ratio: posterRatioSchema,
+  showQr: z.boolean().default(true),
   title: z.string().trim().min(1, "Tên sự kiện là bắt buộc").max(100),
   tagline: z.string().trim().max(80),
   date: z.string().trim().max(40),
@@ -46,6 +47,7 @@ export function createPosterDocumentFromQuickCreate(input: QuickCreateInput, now
 
   const timestamp = now.toISOString()
   const elements = layout.elements.map((element) => {
+    if (element.type === "qr") return { ...element, visible: parsed.showQr }
     if (element.type === "shape" && element.id === "background") {
       return { ...element, fill: parsed.accent }
     }
