@@ -106,26 +106,12 @@ export function WelcomeSplashModal({
   const [initialNow] = useState(() => new Date().toISOString())
 
   const [activeStickerPack, setActiveStickerPack] = useState<StickerPackKey>("gold")
-  const [activeReactions, setActiveReactions] = useState<{ id: number; emoji: string; x: number; y: number }[]>([])
   const { floatingStickers, spawnStickerReaction } = useStickerReactions()
 
   const currentPack = STICKER_PACKS[activeStickerPack]
   const isVisible = isOpen && stage !== "closed" && stage !== "dismissed" && stage !== "checking"
   const isEnvelopeOpen = stage === "open"
   const dateLabel = formatWelcomeDate(eventDate)
-
-  const handleAddReaction = (emoji: string, e: React.MouseEvent<HTMLButtonElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = rect.left + rect.width / 2 + (Math.random() * 40 - 20)
-    const y = rect.top - 20
-
-    const newId = Date.now() + Math.random()
-    setActiveReactions((prev) => [...prev, { id: newId, emoji, x, y }])
-
-    setTimeout(() => {
-      setActiveReactions((prev) => prev.filter((r) => r.id !== newId))
-    }, 1200)
-  }
 
   // Trigger onOpeningComplete after transition delay if opening
   useEffect(() => {

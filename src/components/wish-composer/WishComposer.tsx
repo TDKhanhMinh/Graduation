@@ -92,12 +92,10 @@ export function WishComposer({
   const [captchaResetKey, setCaptchaResetKey] = useState(0)
   const [contentError, setContentError] = useState<string | null>(null)
   const [senderError, setSenderError] = useState<string | null>(null)
-  const [submitError, setSubmitError] = useState<string | null>(null)
   const [result, setResult] = useState<ResultState>(null)
 
   const handleCaptchaToken = useCallback((token: string | null) => {
     setCaptchaToken(token)
-    if (token) setSubmitError(null)
   }, [])
 
   if (submissionMode === "closed") {

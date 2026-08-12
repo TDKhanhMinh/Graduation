@@ -81,7 +81,7 @@ export class StickerInteractionManager {
     }
   }
 
-  private handlePointerUp = (e: PointerEvent) => {
+  private handlePointerUp = () => {
     if (!this.isPointerDown) return
 
     const distMoved = Math.hypot(

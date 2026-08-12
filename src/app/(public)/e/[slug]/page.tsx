@@ -1,31 +1,31 @@
 import { Metadata } from "next"
-import { notFound } from "next/navigation"
 import Link from "next/link"
+import { notFound } from "next/navigation"
 
 import { AmbientParticles } from "@/components/effects/ambient-particles"
 import { AuroraBackground } from "@/components/effects/aurora-background"
+import { getEffectConfig } from "@/components/effects/effect-config"
+import { EffectProvider, type EffectQuality } from "@/components/effects/effect-provider"
 import { FilmGrainOverlay } from "@/components/effects/film-grain-overlay"
 import { FloatingPhotoMemories } from "@/components/effects/floating-photo-memories"
+import { CopyEventLinkButton, PublicQrButton, ShareEventButton } from "@/components/event-wall/PublicEventShareButton"
+import { RealtimeWall } from "@/components/event-wall/RealtimeWall"
+import { EventWelcome } from "@/components/event-welcome/event-welcome"
+import { WelcomeSession } from "@/components/event-welcome/welcome-session"
+import { WelcomeExperience } from "@/components/event-welcome/WelcomeExperience"
+import { TourExperience } from "@/components/guided-tour/TourExperience"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { PageShell } from "@/components/ui/page-shell"
 import { SectionHeading } from "@/components/ui/section-heading"
 import { StatusBadge } from "@/components/ui/status-badge"
-import { CopyEventLinkButton, PublicQrButton, ShareEventButton } from "@/components/event-wall/PublicEventShareButton"
-import { RealtimeWall } from "@/components/event-wall/RealtimeWall"
 import { WishComposer } from "@/components/wish-composer/WishComposer"
-import { EventWelcome } from "@/components/event-welcome/event-welcome"
-import { WelcomeExperience } from "@/components/event-welcome/WelcomeExperience"
-import { WelcomeSession } from "@/components/event-welcome/welcome-session"
-import { TourExperience } from "@/components/guided-tour/TourExperience"
 import { getPublicEventBySlug } from "@/features/events/dal"
 import {
   getApprovedWishesByIds,
   getApprovedWishesPage,
   PUBLIC_WISHES_PAGE_SIZE,
 } from '@/features/wishes/dal'
-import { EffectProvider, type EffectQuality } from "@/components/effects/effect-provider"
-import { getEffectConfig } from "@/components/effects/effect-config"
 import { getSiteUrl } from "@/lib/supabase/env"
 
 type Props = {
