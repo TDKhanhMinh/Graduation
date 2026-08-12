@@ -54,7 +54,7 @@ export default async function Home() {
   const authenticated = Boolean(session)
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden bg-surface-sunken text-foreground">
+    <div className="flex min-h-screen flex-col overflow-x-clip bg-surface-sunken text-foreground">
       <LandingAnalytics />
       <LandingHeader authenticated={authenticated} />
       <main id="main-content" className="flex-1">

@@ -88,7 +88,7 @@ export function ProductStoryScrollytelling() {
         </div>
 
         {/* 2-Column Sticky Layout */}
-        <div className="mt-16 grid items-start gap-10 lg:grid-cols-[45%_55%] lg:gap-14">
+        <div className="mt-16 grid items-start lg:items-stretch gap-10 lg:grid-cols-[45%_55%] lg:gap-14">
           {/* Left Column: Interactive Steps List */}
           <div className="space-y-8 lg:py-12">
             {storySteps.map((step, idx) => {
@@ -139,7 +139,7 @@ export function ProductStoryScrollytelling() {
           </div>
 
           {/* Right Column: Sticky Visual Transformation Stage */}
-          <div className="relative min-w-0 lg:self-stretch">
+          <div className="relative min-w-0 lg:self-stretch lg:h-full">
             <div className="lg:sticky lg:top-28">
               <GlowingRunningBorder borderRadius="rounded-[2.5rem]" glowTheme="cyan" duration={6} variant="static">
               <div className="p-6 min-h-[28rem] flex flex-col justify-between">

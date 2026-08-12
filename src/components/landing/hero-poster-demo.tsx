@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { motion, AnimatePresence, useMotionValue, useTransform, useInView } from "framer-motion"
-import { QrCode, Heart, MessageCircle, Image as ImageIcon, Video, ArrowRight } from "lucide-react"
+import { AnimatePresence, motion, useInView, useMotionValue, useTransform } from "framer-motion"
+import { ArrowRight, Heart, Image as ImageIcon, MessageCircle, QrCode, Video } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 
 import { GlowingRunningBorder } from "@/components/effects/running-border"
 import { localPosterTemplates } from "@/features/posters/templates"
@@ -12,10 +12,10 @@ const demoTemplates = localPosterTemplates.slice(0, 3)
 type HeroDemoState = "intro" | "idle" | "exploding" | "settled"
 
 const floatingContributions = [
-  { id: 1, type: "wish", text: "Chúc 2 bạn trăm năm hạnh phúc! 💕", name: "Minh Quân", icon: MessageCircle, accent: "text-pink-500", dest: { x: -150, y: -160, r: -5 } },
-  { id: 2, type: "photo", label: "Ảnh check-in", icon: ImageIcon, accent: "text-cyan-500", dest: { x: 170, y: -120, r: 8 } },
-  { id: 3, type: "reaction", label: "❤️ x 12", icon: Heart, accent: "text-rose-500", dest: { x: -160, y: 120, r: -12 } },
-  { id: 4, type: "video", label: "Video chúc mừng.mp4", icon: Video, accent: "text-amber-500", dest: { x: 160, y: 140, r: 6 } },
+  { id: 1, type: "wish", text: "Chúc 2 bạn trăm năm hạnh phúc! 💕", name: "Minh Quân", icon: MessageCircle, accent: "text-pink-500", dest: { x: -140, y: -190, r: -5 } },
+  { id: 2, type: "photo", label: "Ảnh check-in", icon: ImageIcon, accent: "text-cyan-500", dest: { x: 150, y: -140, r: 8 } },
+  { id: 3, type: "reaction", label: "❤️ x 12", icon: Heart, accent: "text-rose-500", dest: { x: -150, y: -70, r: -12 } },
+  { id: 4, type: "video", label: "Video chúc mừng.mp4", icon: Video, accent: "text-amber-500", dest: { x: 150, y: -50, r: 6 } },
 ]
 
 export function HeroPosterDemo() {
@@ -224,12 +224,14 @@ export function HeroPosterDemo() {
                           }
                     }
                     style={{ zIndex: isHovered ? 50 : 20 }}
-                    className={`absolute flex items-center gap-2.5 rounded-2xl border border-white/60 bg-white/80 px-4 py-2.5 text-xs font-semibold text-foreground shadow-[0_8px_30px_rgb(0,0,0,0.08)] backdrop-blur-xl transition-colors duration-300 pointer-events-auto cursor-pointer ${isHovered ? 'shadow-[0_12px_40px_rgb(0,0,0,0.12)]' : ''}`}
+                    className="absolute"
                   >
-                    <span className={`flex size-6 items-center justify-center rounded-full bg-slate-100 shadow-sm ${item.accent}`}>
-                      <item.icon className="size-3.5" />
-                    </span>
-                    <span className="opacity-90 whitespace-nowrap">{item.text || item.label}</span>
+                    <div className={`flex items-center gap-2.5 rounded-2xl border border-white/60 bg-white/80 px-4 py-2.5 text-xs font-semibold text-foreground shadow-[0_8px_30px_rgb(0,0,0,0.08)] backdrop-blur-xl transition-colors duration-300 pointer-events-auto cursor-pointer ${isHovered ? 'shadow-[0_12px_40px_rgb(0,0,0,0.12)]' : ''} -translate-x-1/2 -translate-y-1/2 whitespace-nowrap w-max max-w-[80vw]`}>
+                      <span className={`flex size-6 shrink-0 items-center justify-center rounded-full bg-slate-100 shadow-sm ${item.accent}`}>
+                        <item.icon className="size-3.5" />
+                      </span>
+                      <span className="opacity-90 truncate">{item.text || item.label}</span>
+                    </div>
                     
                     {/* Light Trail (Only during explosion flight) */}
                     {demoState === "exploding" && !reducedMotion && (
@@ -239,9 +241,8 @@ export function HeroPosterDemo() {
                         transition={{ duration: 0.4, delay: flightDuration * 0.3 }}
                         className={`absolute -z-10 h-6 w-16 bg-white/80 blur-md rounded-full origin-left`}
                         style={{
-                           // Simple trail trick: align roughly to center
-                           left: "50%",
-                           top: "50%",
+                           left: 0,
+                           top: 0,
                            transform: `translate(-50%, -50%) rotate(${Math.atan2(-dest.y, -dest.x)}rad) translateX(-40px)`
                         }}
                       />
