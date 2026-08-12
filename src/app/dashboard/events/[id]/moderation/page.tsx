@@ -1,10 +1,12 @@
 import { Suspense } from "react"
+import { notFound } from "next/navigation"
 
 import { ModerationMediaGallery } from "@/components/media/ModerationMediaGallery"
 import { AuditHistory } from "@/components/moderation/AuditHistory"
 import { ModerationClientWrapper } from "@/components/moderation/ModerationClientWrapper"
 import { FeedbackState } from "@/components/ui/feedback-state"
 import { SectionHeading } from "@/components/ui/section-heading"
+import { getAccessibleEventById } from "@/features/collaboration/access"
 import { getAuditHistory, getModerationQueue } from "@/features/wishes/moderation-dal"
 
 export default async function ModerationPage({
@@ -15,6 +17,7 @@ export default async function ModerationPage({
   searchParams: Promise<{ [key: string]: string | undefined }>
 }) {
   const { id } = await params
+  if (!await getAccessibleEventById(id, 'moderation')) notFound()
   const { status, search, dateFrom, dateTo, page: pageParam } = await searchParams
   const pageSize = 50
   const parsedPage = Number.parseInt(pageParam ?? "1", 10)

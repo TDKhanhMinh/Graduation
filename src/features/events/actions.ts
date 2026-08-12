@@ -1,6 +1,7 @@
 "use server";
 
 import { verifySession } from "@/lib/auth/dal";
+import { requireEventCapability } from "@/features/collaboration/access";
 import { createError } from "@/lib/observability/error";
 import { logger } from "@/lib/observability/logger";
 import { createClient } from "@/lib/supabase/server";
@@ -225,6 +226,10 @@ export async function updateEvent(
     redirect("/auth/login");
   }
 
+  if (!await requireEventCapability(eventId, "event_settings")) {
+    return { error: "Bạn không có quyền cập nhật cài đặt sự kiện này." };
+  }
+
   const schedule = readScheduleWrite(formData, "update");
   if (!schedule.data) {
     return { error: 'Lịch sự kiện không hợp lệ.', fieldErrors: schedule.fieldErrors };
@@ -249,8 +254,8 @@ export async function updateEvent(
 
   const supabase = await createClient();
 
-  // The RLS policy requires owner_id = current user's id.
-  // We can just update and check if a row was affected.
+  // Capability authorization is checked above; RLS and the owner-control
+  // trigger enforce the same boundary for direct client mutations.
   const eventUpdate = applyEventScheduleWrite({
     title: validated.data.title,
     slug: validated.data.slug,
@@ -264,7 +269,6 @@ export async function updateEvent(
     .from("events")
     .update(eventUpdate)
     .eq("id", eventId)
-    .eq("owner_id", session.userId)
     .is("deleted_at", null)
     .select("id")
     .single();
@@ -293,6 +297,9 @@ export async function updateEventAppearance(
 ): Promise<EventActionState> {
   const session = await verifySession();
   if (!session) redirect("/auth/login");
+  if (!await requireEventCapability(eventId, "event_settings")) {
+    return { error: "Bạn không có quyền cập nhật giao diện sự kiện này." };
+  }
   void prevState;
   const validated = appearanceSchema.safeParse({
     theme_key: formData.get("theme_key"),
@@ -355,7 +362,6 @@ export async function updateEventAppearance(
       updated_at: new Date().toISOString(),
     })
     .eq("id", eventId)
-    .eq("owner_id", session.userId)
     .is("deleted_at", null)
     .select("id")
     .single();

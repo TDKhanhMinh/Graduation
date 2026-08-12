@@ -3,7 +3,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Suspense } from "react"
 
-import { getOwnedEvents } from "@/features/events/dal"
+import { getAccessibleEvents } from "@/features/collaboration/access"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { FeedbackState } from "@/components/ui/feedback-state"
@@ -64,7 +64,7 @@ export default function DashboardPage() {
 }
 
 async function EventList() {
-  const events = await getOwnedEvents()
+  const events = await getAccessibleEvents()
 
   if (events.length === 0) {
     return (

@@ -452,33 +452,42 @@ export type Database = {
       }
       account_deletion_requests: {
         Row: {
+          attempts: number
           id: string
+          last_error: string | null
           user_id: string | null
           status: string
           requested_at: string
           scheduled_for: string
+          started_at: string | null
           cancelled_at: string | null
           purged_at: string | null
           created_at: string
           updated_at: string
         }
         Insert: {
+          attempts?: number
           id?: string
+          last_error?: string | null
           user_id?: string | null
           status?: string
           requested_at?: string
           scheduled_for: string
+          started_at?: string | null
           cancelled_at?: string | null
           purged_at?: string | null
           created_at?: string
           updated_at?: string
         }
         Update: {
+          attempts?: number
           id?: string
+          last_error?: string | null
           user_id?: string | null
           status?: string
           requested_at?: string
           scheduled_for?: string
+          started_at?: string | null
           cancelled_at?: string | null
           purged_at?: string | null
           created_at?: string
@@ -1050,6 +1059,22 @@ export type Database = {
       }
     }
     Functions: {
+      cancel_account_deletion: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: boolean
+      }
+      request_account_deletion: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: {
+          id: string
+          scheduled_for: string
+          status: string
+        }[]
+      }
       cancel_export_job: {
         Args: {
           p_job_id: string

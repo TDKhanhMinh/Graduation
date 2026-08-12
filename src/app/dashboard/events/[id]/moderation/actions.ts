@@ -1,11 +1,15 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { requireEventCapability } from "@/features/collaboration/access"
 import { bulkModerateWishes } from "@/features/wishes/moderation"
 import { type BulkModerationInput } from "@/features/wishes/moderation-schema"
 
 export async function submitBulkModeration(eventId: string, input: BulkModerationInput) {
   try {
+    if (!await requireEventCapability(eventId, 'moderation')) {
+      return { success: false, error: "Bạn không có quyền kiểm duyệt sự kiện này." }
+    }
     const result = await bulkModerateWishes(input)
     
     // Revalidate the moderation page

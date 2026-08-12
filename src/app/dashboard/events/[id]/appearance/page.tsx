@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 
 import { ThemeEditor } from "@/components/events/ThemeEditor"
-import { getOwnedEventById } from "@/features/events/dal"
+import { getAccessibleEventById } from "@/features/collaboration/access"
 import { updateEventAppearance } from "@/features/events/actions"
 import { normalizeWelcomeHeroConfig } from "@/features/events/welcome-config"
 
@@ -15,7 +15,7 @@ export default async function EventAppearancePage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const event = await getOwnedEventById(id)
+  const event = await getAccessibleEventById(id, 'event_settings')
 
   if (!event) notFound()
 

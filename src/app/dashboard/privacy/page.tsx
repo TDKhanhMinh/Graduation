@@ -1,11 +1,13 @@
 import { LockKeyhole, LogOut, ShieldCheck, UserRound } from 'lucide-react'
 
-import { requestAccountDeletion, signOut, signOutAll, updateDisplayName } from '@/app/auth/actions'
+import { cancelAccountDeletion, requestAccountDeletion, signOut, signOutAll, updateDisplayName } from '@/app/auth/actions'
 import { Button } from '@/components/ui/button'
 import { ConfirmActionForm } from '@/components/privacy/ConfirmActionForm'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { SectionHeading } from '@/components/ui/section-heading'
 import { getCurrentProfile } from '@/lib/supabase/queries/profiles'
+import { verifySession } from '@/lib/auth/dal'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export const metadata = {
   title: 'Trung tâm quyền riêng tư',
@@ -13,6 +15,16 @@ export const metadata = {
 
 export default async function PrivacyPage() {
   const profile = await getCurrentProfile()
+  const session = await verifySession()
+  const deletion = session
+    ? (await createAdminClient()
+      .from('account_deletion_requests')
+      .select('status,scheduled_for,started_at,attempts')
+      .eq('user_id', session.userId)
+      .in('status', ['cooling_off', 'purging'])
+      .order('requested_at', { ascending: false })
+      .maybeSingle()).data
+    : null
 
   return (
     <div className='space-y-8'>
@@ -100,10 +112,20 @@ export default async function PrivacyPage() {
           <div className='flex flex-wrap gap-3'>
             <a href='/api/account/export' className='inline-flex min-h-(--control-min-size) items-center justify-center rounded-xl border px-4 font-medium text-foreground hover:bg-muted'>Tải export dữ liệu</a>
             <ConfirmActionForm action={requestAccountDeletion} message='Yêu cầu này sẽ đăng xuất bạn và bắt đầu thời gian khôi phục 30 ngày. Bạn có chắc muốn tiếp tục không?'>
-              <Button type='submit' variant='outline' className='min-h-(--control-min-size) border-status-danger/40 text-status-danger'>Yêu cầu xóa tài khoản</Button>
+              <Button type='submit' disabled={Boolean(deletion)} variant='outline' className='min-h-(--control-min-size) border-status-danger/40 text-status-danger'>Yêu cầu xóa tài khoản</Button>
             </ConfirmActionForm>
           </div>
-          <p className='text-xs'>Yêu cầu chỉ tạo cooling-off request; worker được review riêng phải thực hiện soft-delete/khóa mutation trước purge. Không có hard-delete từ UI này.</p>
+          {deletion?.status === 'cooling_off' ? (
+            <div className='rounded-xl border border-status-warning/30 bg-status-warning/10 p-4 text-sm text-foreground'>
+              <p>Yêu cầu xóa đang trong thời gian khôi phục đến {new Date(deletion.scheduled_for).toLocaleString('vi-VN')}.</p>
+              <ConfirmActionForm action={cancelAccountDeletion} message='Khôi phục tài khoản và dữ liệu đã soft-delete?'>
+                <Button type='submit' variant='outline' className='mt-3 min-h-(--control-min-size)'>Hủy yêu cầu và khôi phục</Button>
+              </ConfirmActionForm>
+            </div>
+          ) : deletion?.status === 'purging' ? (
+            <p className='text-xs text-status-warning'>Tài khoản đang được xử lý purge; không thể khôi phục.</p>
+          ) : null}
+          <p className='text-xs'>Dữ liệu được soft-delete ngay khi yêu cầu, có thể khôi phục trong 30 ngày; worker chỉ purge sau khi hết hạn.</p>
         </CardContent>
       </Card>
     </div>

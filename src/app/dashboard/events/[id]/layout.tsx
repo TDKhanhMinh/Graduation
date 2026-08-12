@@ -3,11 +3,11 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import type { ReactNode } from "react"
 
-import { EventNav } from "@/components/dashboard/event-nav"
+import { EventNavAccess as EventNav } from "@/components/dashboard/event-nav-access"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { SectionHeading } from "@/components/ui/section-heading"
 import { StatusBadge } from "@/components/ui/status-badge"
-import { getOwnedEventById } from "@/features/events/dal"
+import { getEventAccess, getAccessibleEventById } from "@/features/collaboration/access"
 import { cn } from "@/lib/utils"
 
 function formatDate(value: string | null) {
@@ -18,11 +18,12 @@ function formatDate(value: string | null) {
 
 export default async function EventLayout({ children, params }: { children: ReactNode; params: Promise<{ id: string }> }) {
   const { id } = await params
-  const [event, notificationSnapshot] = await Promise.all([
-    getOwnedEventById(id),
+  const [event, access, notificationSnapshot] = await Promise.all([
+    getAccessibleEventById(id),
+    getEventAccess(id),
     getEventNotificationSnapshot(id),
   ])
-  if (!event) notFound()
+  if (!event || !access) notFound()
 
   const publicUrl = `/e/${event.slug}`
   const isArchived = Boolean(event.archived_at)
@@ -44,7 +45,7 @@ export default async function EventLayout({ children, params }: { children: Reac
         </div>
       </div>
 
-      <EventNav eventId={event.id} notificationUnreadCount={notificationSnapshot.unreadCount} />
+      <EventNav eventId={event.id} role={access.role} notificationUnreadCount={notificationSnapshot.unreadCount} />
       <EventNotificationCenter eventId={event.id} {...notificationSnapshot} />
       <div>{children}</div>
     </div>

@@ -5,7 +5,7 @@ import { ArchiveEventControl } from "@/components/events/ArchiveEventControl"
 import { EventForm } from "@/components/events/EventForm"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { SectionHeading } from "@/components/ui/section-heading"
-import { getOwnedEventById } from "@/features/events/dal"
+import { getAccessibleEventById, getEventAccess } from "@/features/collaboration/access"
 import { updateEvent } from "@/features/events/actions"
 
 import { DeleteEventControl } from '@/components/events/DeleteEventControl'
@@ -20,9 +20,12 @@ export default async function EventSettingsPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const event = await getOwnedEventById(id)
+  const [event, access] = await Promise.all([
+    getAccessibleEventById(id, 'event_settings'),
+    getEventAccess(id),
+  ])
 
-  if (!event) {
+  if (!event || !access) {
     notFound()
   }
 
@@ -66,7 +69,7 @@ export default async function EventSettingsPage({
         </CardContent>
       </Card>
 
-      <Card className="border-status-danger/30">
+      {access.role === 'owner' ? <Card className="border-status-danger/30">
         <CardHeader>
           <div className="flex items-start gap-3">
             <AlertTriangle aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-status-danger" />
@@ -84,7 +87,7 @@ export default async function EventSettingsPage({
             <DeleteEventControl eventId={event.id} eventTitle={event.title} />
           </div>
         </CardContent>
-      </Card>
+      </Card> : null}
     </div>
   )
 }

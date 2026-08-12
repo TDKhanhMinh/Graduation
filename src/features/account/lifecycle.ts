@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const ACCOUNT_EXPORT_VERSION = 1 as const
 export const ACCOUNT_DELETION_COOLING_OFF_DAYS = 30
 
-export const accountDeletionStatusSchema = z.enum(['cooling_off', 'cancelled', 'purged'])
+export const accountDeletionStatusSchema = z.enum(['cooling_off', 'cancelled', 'purging', 'purged'])
 export type AccountDeletionStatus = z.infer<typeof accountDeletionStatusSchema>
 
 export const accountDeletionRequestSchema = z.object({
@@ -12,6 +12,9 @@ export const accountDeletionRequestSchema = z.object({
   status: accountDeletionStatusSchema,
   requested_at: z.string().datetime({ offset: true }),
   scheduled_for: z.string().datetime({ offset: true }),
+  started_at: z.string().datetime({ offset: true }).nullable(),
+  attempts: z.number().int().nonnegative(),
+  last_error: z.string().nullable(),
   cancelled_at: z.string().datetime({ offset: true }).nullable(),
   purged_at: z.string().datetime({ offset: true }).nullable(),
 })

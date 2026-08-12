@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { ExportCenter } from "@/components/exports/export-center"
-import { getOwnedEventById } from "@/features/events/dal"
+import { getAccessibleEventById } from "@/features/collaboration/access"
 import { getOwnerExportSnapshot } from "@/features/exports/dal"
 
 export const dynamic = "force-dynamic"
@@ -20,7 +20,7 @@ export default async function EventExportPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const event = await getOwnedEventById(id)
+  const event = await getAccessibleEventById(id, 'export')
 
   if (!event) notFound()
 

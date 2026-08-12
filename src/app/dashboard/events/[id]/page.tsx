@@ -8,7 +8,7 @@ import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SectionHeading } from "@/components/ui/section-heading"
 import { StatusBadge } from "@/components/ui/status-badge"
-import { getOwnedEventById } from "@/features/events/dal"
+import { getAccessibleEventById } from "@/features/collaboration/access"
 
 export default async function EventOverviewPage({
   params,
@@ -19,7 +19,7 @@ export default async function EventOverviewPage({
 }) {
   const { id } = await params
   const { created } = await searchParams
-  const event = await getOwnedEventById(id)
+  const event = await getAccessibleEventById(id)
 
   if (!event) {
     notFound()

@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { InsightsDashboard } from "@/components/insights/insights-dashboard"
-import { getOwnedEventById } from "@/features/events/dal"
+import { getAccessibleEventById } from "@/features/collaboration/access"
 import {
   createDefaultInsightsRange,
   INSIGHTS_DEFAULT_RANGE_DAYS,
@@ -59,7 +59,7 @@ export default async function EventInsightsPage({
   searchParams: Promise<{ days?: string; timezone?: string }>
 }) {
   const { id } = await params
-  const event = await getOwnedEventById(id)
+  const event = await getAccessibleEventById(id, 'insights')
   if (!event) notFound()
 
   const query = parseInsightsQuery(await searchParams, event.timezone)
