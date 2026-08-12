@@ -30,7 +30,7 @@ export function PublicWallDemo() {
   )
   const [wishesList, setWishesList] = useState(initialWishes)
   const [userWishText, setUserWishText] = useState("")
-  const [userNameText] = useState("")
+  const [userNameText, setUserNameText] = useState("")
   const [justSubmitted, setJustSubmitted] = useState(false)
   const rootRef = useRef<HTMLElement>(null)
 

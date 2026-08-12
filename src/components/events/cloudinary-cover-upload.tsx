@@ -23,6 +23,7 @@ type UploadState = "idle" | "uploading" | "ready" | "error"
 export function CloudinaryCoverUpload({ value, onChange, disabled = false }: CloudinaryCoverUploadProps) {
   const [state, setState] = useState<UploadState>("idle")
   const [progress, setProgress] = useState(0)
+  const [error, setError] = useState<string | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [canRetry, setCanRetry] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -54,6 +55,7 @@ export function CloudinaryCoverUpload({ value, onChange, disabled = false }: Clo
     }
 
     try {
+      setError(null)
       setState("uploading")
       setProgress(0)
       retryFileRef.current = file
