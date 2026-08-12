@@ -195,7 +195,7 @@ export default async function PublicEventPage({ params }: Props) {
               />
               <h2 id="wall-heading" className="sr-only">Bức tường lời chúc</h2>
               <RealtimeWall
-                eventId={event.id}
+                eventId={publicEventId}
                 initialWishes={wishesPage.items}
                 initialNextCursor={wishesPage.nextCursor}
                 initialHasMore={wishesPage.hasMore}
